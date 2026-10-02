@@ -1,0 +1,48 @@
+# dependencies
+node_modules/
+
+# next.js
+.next/
+out/
+next-env.d.ts
+*.tsbuildinfo
+
+# local data (database, recordings, logs)
+data/
+.pg-local/
+
+# env
+.env
+.env.*
+!.env.example
+
+# tests
+test-results/
+playwright-report/
+blob-report/
+coverage/
+
+# os / editor
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+*.log
+backups/
+tests/fixtures/*.wav
+
+# private exports and authoring files (regenerate with art scripts)
+release/
+*.blend
+*.blend1
+*.pem
+*.key
+*.p12
+*.pfx
+*.dump
+*.sqlite
+*.sqlite3
+*.bak
+*.zip
+.codex/
+.claude/

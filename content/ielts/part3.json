@@ -1,0 +1,1028 @@
+{
+  "questions": [
+    {
+      "id": "P3-PERSON-1-1",
+      "card": "P2-PERSON-1",
+      "q": "What qualities make someone a good teacher?",
+      "zh": "好老师需要具备哪些品质？",
+      "difficulty": 2,
+      "sample": true,
+      "followUps": [
+        { "id": "P3-PERSON-1-1-F1", "q": "Do you think these qualities can be learned, or are people born with them?", "zh": "你认为这些品质可以后天学会，还是天生的？" },
+        { "id": "P3-PERSON-1-1-F2", "q": "Are these qualities different for teachers of adults and children?", "zh": "教成人和教儿童的老师需要的品质不同吗？" }
+      ],
+      "defaultFollowUp": "P3-PERSON-1-1-F1",
+      "keywords": ["patience", "subject knowledge", "communication", "inspire"],
+      "tips": "给出 2 个品质，每个品质配一个原因或例子；可以用\"最重要的是……\"突出观点。",
+      "expressions": ["In my view, the most important quality is ...", "Another key quality is ...", "For instance, ...", "Without this, even ..."],
+      "reference": "In my view, the most important quality is patience. Students learn at different speeds, and a good teacher can explain the same idea in several ways without making anyone feel stupid. Another key quality is the ability to inspire curiosity. For instance, my best teachers connected lessons to real life, so we wanted to find out more on our own. Of course, subject knowledge matters, but without these personal qualities, even a very knowledgeable teacher may struggle to help students learn.",
+      "difficulties": ["只列品质不解释原因", "quality 的单复数"]
+    },
+    {
+      "id": "P3-PERSON-1-2",
+      "card": "P2-PERSON-1",
+      "q": "Do you think people learn more from their family or from school?",
+      "zh": "你认为人们从家庭学到的更多，还是从学校学到的更多？",
+      "difficulty": 2,
+      "followUps": [
+        { "id": "P3-PERSON-1-2-F1", "q": "Has this changed compared with your parents' generation?", "zh": "和你父母那一代相比，这种情况有变化吗？" },
+        { "id": "P3-PERSON-1-2-F2", "q": "What can families teach that schools cannot?", "zh": "有哪些东西是家庭能教而学校教不了的？" }
+      ],
+      "defaultFollowUp": "P3-PERSON-1-2-F2",
+      "keywords": ["values", "academic knowledge", "role model", "complement"],
+      "tips": "区分两种学习的内容（知识 vs 价值观），再给出自己的整体判断。",
+      "expressions": ["It depends on what kind of learning we mean.", "Schools are better at ..., whereas families ...", "On balance, I'd say ..."],
+      "reference": "It depends on what kind of learning we mean. Schools are clearly better at teaching academic knowledge, like maths or history, because teachers are trained and there's a systematic curriculum. Families, on the other hand, teach values and habits, such as honesty or how to treat other people, mostly by example. On balance, I'd say family has a deeper influence, because children spend their earliest and most formative years at home, and those lessons usually last a lifetime.",
+      "difficulties": ["对比结构 whereas / on the other hand 的使用"]
+    },
+    {
+      "id": "P3-PERSON-1-3",
+      "card": "P2-PERSON-1",
+      "q": "How has technology changed the way people learn new skills?",
+      "zh": "科技如何改变了人们学习新技能的方式？",
+      "difficulty": 2,
+      "followUps": [
+        { "id": "P3-PERSON-1-3-F1", "q": "Do you think online learning will replace classrooms?", "zh": "你认为线上学习会取代课堂吗？" },
+        { "id": "P3-PERSON-1-3-F2", "q": "What are the disadvantages of learning skills from videos?", "zh": "通过视频学习技能有哪些缺点？" }
+      ],
+      "defaultFollowUp": "P3-PERSON-1-3-F1",
+      "keywords": ["accessible", "tutorials", "self-paced", "feedback"],
+      "tips": "说明主要变化（更方便、更自主），再补充一个隐患，形成平衡观点。",
+      "expressions": ["The biggest change is that ...", "Nowadays, anyone can ...", "However, one drawback is ..."],
+      "reference": "The biggest change is that learning has become much more accessible. Nowadays, anyone with a phone can watch free tutorials on almost anything, from cooking to coding, and learn at their own pace. My uncle, for example, learned to repair his own bike entirely from online videos. However, one drawback is the lack of feedback. Without a teacher watching you, it's easy to develop bad habits and not even realise it, so for complex skills, I think some face-to-face guidance is still necessary.",
+      "difficulties": ["现在完成时描述变化 has become"]
+    },
+    {
+      "id": "P3-PERSON-2-1",
+      "card": "P2-PERSON-2",
+      "q": "Why do some friendships last longer than others?",
+      "zh": "为什么有些友谊比其他友谊更持久？",
+      "difficulty": 2,
+      "followUps": [
+        { "id": "P3-PERSON-2-1-F1", "q": "Is it harder to keep friends as an adult?", "zh": "成年后维持友谊更难吗？" },
+        { "id": "P3-PERSON-2-1-F2", "q": "What usually causes a friendship to end?", "zh": "通常是什么导致友谊结束？" }
+      ],
+      "defaultFollowUp": "P3-PERSON-2-1-F1",
+      "keywords": ["trust", "shared values", "effort", "drift apart"],
+      "tips": "给出两个原因并举例，可以用对比：持久的友谊 vs 容易疏远的友谊。",
+      "expressions": ["I think the key factor is ...", "Friendships based on ... tend to ...", "In contrast, ..."],
+      "reference": "I think the key factor is shared values rather than shared activities. Friendships based only on convenience, like being in the same class, tend to fade when circumstances change. In contrast, if two people trust each other and see the world in a similar way, they can stay close even when they live in different cities. Effort also matters. Long friendships usually survive because both people keep in touch, even with a short message now and then.",
+      "difficulties": ["tend to 的用法", "last 作动词表示持续"]
+    },
+    {
+      "id": "P3-PERSON-2-2",
+      "card": "P2-PERSON-2",
+      "q": "How has social media affected the way people make friends?",
+      "zh": "社交媒体如何影响了人们交朋友的方式？",
+      "difficulty": 2,
+      "followUps": [
+        { "id": "P3-PERSON-2-2-F1", "q": "Are online friendships as real as offline ones?", "zh": "网上的友谊和现实中的一样真实吗？" },
+        { "id": "P3-PERSON-2-2-F2", "q": "Should parents limit children's use of social media?", "zh": "父母应该限制孩子使用社交媒体吗？" }
+      ],
+      "defaultFollowUp": "P3-PERSON-2-2-F1",
+      "keywords": ["connect", "shared interests", "superficial", "face-to-face"],
+      "tips": "先说积极影响，再说消极影响，最后给出总体判断。",
+      "expressions": ["On the positive side, ...", "On the downside, ...", "Overall, I think social media has made friendships ..."],
+      "reference": "On the positive side, social media makes it much easier to meet people with the same interests, even if they live on the other side of the world. I have a few friends I first met in an online photography group. On the downside, many online connections are quite superficial. People might have hundreds of contacts but very few they could call in a crisis. Overall, I think social media has made friendships wider but not necessarily deeper.",
+      "difficulties": ["affect 与 effect", "总结句缺失"]
+    },
+    {
+      "id": "P3-PERSON-2-3",
+      "card": "P2-PERSON-2",
+      "q": "Is it better to have a few close friends or many friends?",
+      "zh": "拥有几个亲密朋友更好，还是拥有很多朋友更好？",
+      "difficulty": 1,
+      "followUps": [
+        { "id": "P3-PERSON-2-3-F1", "q": "Does this depend on a person's personality?", "zh": "这是否取决于一个人的性格？" },
+        { "id": "P3-PERSON-2-3-F2", "q": "How do people usually make friends in a new city?", "zh": "人们在新城市通常怎样交朋友？" }
+      ],
+      "defaultFollowUp": "P3-PERSON-2-3-F1",
+      "keywords": ["quality over quantity", "support", "network", "acquaintances"],
+      "tips": "明确选择，给出原因，并承认另一方的价值。",
+      "expressions": ["Personally, I believe quality matters more than quantity.", "Close friends are the ones who ...", "That said, having a wide network can ..."],
+      "reference": "Personally, I believe quality matters more than quantity. Close friends are the ones who support you when things go wrong, and you can be completely honest with them. You simply don't have the time or energy to be that close to dozens of people. That said, having a wide network of acquaintances can be useful, especially for finding jobs or information. So ideally, I'd say a few close friends plus a larger circle of casual friends is the best balance.",
+      "difficulties": ["比较结构 more than", "只表态不给理由"]
+    },
+    {
+      "id": "P3-PERSON-3-1",
+      "card": "P2-PERSON-3",
+      "q": "What makes a person successful at work?",
+      "zh": "什么让一个人在工作中取得成功？",
+      "difficulty": 2,
+      "followUps": [
+        { "id": "P3-PERSON-3-1-F1", "q": "Is talent or hard work more important?", "zh": "天赋和努力哪个更重要？" },
+        { "id": "P3-PERSON-3-1-F2", "q": "How can employers help staff become better at their jobs?", "zh": "雇主可以怎样帮助员工把工作做得更好？" }
+      ],
+      "defaultFollowUp": "P3-PERSON-3-1-F1",
+      "keywords": ["reliable", "communication skills", "adapt", "take responsibility"],
+      "tips": "列出 2 个关键因素，各配一个解释或例子。",
+      "expressions": ["I'd say there are two main factors.", "The first is ...", "Equally important is ...", "People who ... tend to ..."],
+      "reference": "I'd say there are two main factors. The first is reliability. Employers value people who meet deadlines and do what they promise, even if they aren't the most brilliant in the team. Equally important is the ability to communicate well. Most jobs now involve teamwork, so someone who can explain their ideas clearly and listen to others will usually progress faster. People who also keep learning and adapt to change tend to be the most successful in the long run.",
+      "difficulties": ["successful / success / succeed 词性混用"]
+    },
+    {
+      "id": "P3-PERSON-3-2",
+      "card": "P2-PERSON-3",
+      "q": "Should people choose a job they love or a job that pays well?",
+      "zh": "人们应该选择自己喜欢的工作，还是收入高的工作？",
+      "difficulty": 2,
+      "followUps": [
+        { "id": "P3-PERSON-3-2-F1", "q": "How do young people in your country usually decide?", "zh": "你们国家的年轻人通常怎样做这个决定？" },
+        { "id": "P3-PERSON-3-2-F2", "q": "Can a person learn to love a job over time?", "zh": "人可以随着时间慢慢爱上一份工作吗？" }
+      ],
+      "defaultFollowUp": "P3-PERSON-3-2-F1",
+      "keywords": ["passion", "financial security", "burn out", "trade-off"],
+      "tips": "承认两者的价值，给出自己的立场及条件（例如\"只要基本收入有保障……\"）。",
+      "expressions": ["Ideally, people should ...", "However, in reality ...", "As long as ..., I think ...", "It's a trade-off between ..."],
+      "reference": "Ideally, people should find a job that combines both, but in reality it's often a trade-off. I think as long as a job pays enough to cover basic needs, it's better to choose something you enjoy. People who hate their work are more likely to burn out, and that affects their health and relationships. On the other hand, for someone supporting a family, a well-paid job might be the responsible choice, at least for a period of time.",
+      "difficulties": ["as long as 条件句", "观点前后矛盾"]
+    },
+    {
+      "id": "P3-PERSON-3-3",
+      "card": "P2-PERSON-3",
+      "q": "Do you think it is important for people to keep learning after they start working?",
+      "zh": "你认为人们工作之后继续学习重要吗？",
+      "difficulty": 2,
+      "followUps": [
+        { "id": "P3-PERSON-3-3-F1", "q": "Who should pay for training, employees or companies?", "zh": "培训费用应由员工还是公司承担？" },
+        { "id": "P3-PERSON-3-3-F2", "q": "What skills do you think will be most important in the future?", "zh": "你认为未来哪些技能最重要？" }
+      ],
+      "defaultFollowUp": "P3-PERSON-3-3-F2",
+      "keywords": ["keep up with", "automation", "career development", "outdated"],
+      "tips": "明确表态，用\"技术变化\"等原因支撑，并给出具体例子。",
+      "expressions": ["Absolutely, especially nowadays.", "Skills can become outdated very quickly.", "Take ... as an example."],
+      "reference": "Absolutely, especially nowadays. Technology is changing so fast that skills can become outdated within a few years. Take accounting as an example. A lot of basic tasks are now automated, so accountants need to learn data analysis to stay useful. Continuous learning is also good for career development, because people who pick up new skills are more likely to be promoted. And personally, I think it keeps work interesting, rather than doing the same thing for thirty years.",
+      "difficulties": ["keep doing 结构", "举例不够具体"]
+    },
+    {
+      "id": "P3-PERSON-4-1",
+      "card": "P2-PERSON-4",
+      "q": "What can young people learn from older people?",
+      "zh": "年轻人能从年长者身上学到什么？",
+      "difficulty": 1,
+      "followUps": [
+        { "id": "P3-PERSON-4-1-F1", "q": "Do young people today respect older generations enough?", "zh": "现在的年轻人足够尊重老一辈吗？" },
+        { "id": "P3-PERSON-4-1-F2", "q": "What can older people learn from young people?", "zh": "年长者能从年轻人身上学到什么？" }
+      ],
+      "defaultFollowUp": "P3-PERSON-4-1-F2",
+      "keywords": ["life experience", "perspective", "patience", "traditional skills"],
+      "tips": "列举 2 点并用例子说明。",
+      "expressions": ["Quite a lot, actually.", "Older people have been through ...", "They can also teach us ..."],
+      "reference": "Quite a lot, actually. Older people have been through many ups and downs, so they often have a calmer perspective on problems that seem huge to young people. My grandmother, for example, always reminds me that most worries disappear with time. They can also teach practical and traditional skills, like cooking family recipes or repairing things, which are slowly being lost. I think spending time with older people helps young people become more patient and grounded.",
+      "difficulties": ["have been through 的时态", "例子与观点衔接"]
+    },
+    {
+      "id": "P3-PERSON-4-2",
+      "card": "P2-PERSON-4",
+      "q": "How has the role of grandparents changed in modern families?",
+      "zh": "在现代家庭中，祖父母的角色发生了怎样的变化？",
+      "difficulty": 3,
+      "followUps": [
+        { "id": "P3-PERSON-4-2-F1", "q": "Is it a good idea for grandparents to help raise children?", "zh": "让祖父母帮忙带孩子是好主意吗？" },
+        { "id": "P3-PERSON-4-2-F2", "q": "Will this role change further in the future?", "zh": "这个角色将来还会进一步变化吗？" }
+      ],
+      "defaultFollowUp": "P3-PERSON-4-2-F1",
+      "keywords": ["childcare", "both parents work", "authority", "independent"],
+      "tips": "对比过去与现在，说明变化的原因（双职工、城市化等）。",
+      "expressions": ["In the past, grandparents were ...", "Nowadays, many of them ...", "This is mainly because ..."],
+      "reference": "In the past, grandparents were mainly seen as the heads of the family, and their opinions on major decisions carried a lot of weight. Nowadays, in many Chinese cities, their role has become much more practical. Because both parents usually work full-time, grandparents often take care of young children every day, cooking and picking them up from school. At the same time, they have less authority than before, since young parents prefer to make their own decisions about things like education.",
+      "difficulties": ["过去与现在对比的时态"]
+    },
+    {
+      "id": "P3-PERSON-4-3",
+      "card": "P2-PERSON-4",
+      "q": "What problems do elderly people face in modern cities?",
+      "zh": "老年人在现代城市中面临哪些问题？",
+      "difficulty": 2,
+      "followUps": [
+        { "id": "P3-PERSON-4-3-F1", "q": "What can governments do to help?", "zh": "政府可以做些什么来帮助他们？" },
+        { "id": "P3-PERSON-4-3-F2", "q": "Should local communities do more than governments?", "zh": "社区是否应该比政府做得更多？" }
+      ],
+      "defaultFollowUp": "P3-PERSON-4-3-F1",
+      "keywords": ["loneliness", "digital services", "transport", "left behind"],
+      "tips": "列出 2 个问题，分别解释原因和影响。",
+      "expressions": ["One major problem is ...", "Another issue is that ...", "As a result, many elderly people ..."],
+      "reference": "One major problem is the rapid shift to digital services. Things like booking a doctor's appointment or paying for parking increasingly require a smartphone, and many elderly people feel left behind. Another issue is loneliness. Their children often work long hours or live in other cities, so they may spend most of the day alone. As a result, many elderly people feel isolated, even though they live surrounded by millions of people.",
+      "difficulties": ["elderly people 作复数", "问题与影响之间缺少连接词"]
+    },
+    {
+      "id": "P3-PLACE-1-1",
+      "card": "P2-PLACE-1",
+      "q": "How can cities provide better spaces for people to relax?",
+      "zh": "城市可以如何为人们提供更好的放松空间？",
+      "difficulty": 2,
+      "sample": true,
+      "followUps": [
+        { "id": "P3-PLACE-1-1-F1", "q": "Who should pay for these spaces, the government or businesses?", "zh": "这些空间应该由政府出资还是企业出资？" },
+        { "id": "P3-PLACE-1-1-F2", "q": "Are parks still important when people can relax at home online?", "zh": "当人们可以在家上网放松时，公园还重要吗？" }
+      ],
+      "defaultFollowUp": "P3-PLACE-1-1-F1",
+      "keywords": ["green space", "pocket parks", "pedestrian", "accessible"],
+      "tips": "提出 2 个具体办法，并说明效果；避免泛泛而谈 \"more parks\"。",
+      "expressions": ["One practical solution would be ...", "Cities could also ...", "This would allow people to ..."],
+      "reference": "One practical solution would be to create more small pocket parks in residential areas, rather than just one huge park on the edge of the city. That way, people could relax for ten minutes without travelling far. Cities could also turn some busy streets into pedestrian areas at weekends, with benches, trees and space for street performers. This would allow people to slow down and enjoy the city, and it could also help local shops.",
+      "difficulties": ["虚拟语气 would / could 的使用", "建议过于笼统"]
+    },
+    {
+      "id": "P3-PLACE-1-2",
+      "card": "P2-PLACE-1",
+      "q": "Why do many people find it hard to relax nowadays?",
+      "zh": "为什么现在很多人觉得难以放松？",
+      "difficulty": 2,
+      "sample": true,
+      "followUps": [
+        { "id": "P3-PLACE-1-2-F1", "q": "Is this problem worse for young people or older people?", "zh": "这个问题在年轻人还是老年人中更严重？" },
+        { "id": "P3-PLACE-1-2-F2", "q": "Can technology help people relax, or does it make things worse?", "zh": "科技能帮助人们放松，还是让情况更糟？" }
+      ],
+      "defaultFollowUp": "P3-PLACE-1-2-F2",
+      "keywords": ["always connected", "pressure", "competition", "switch off"],
+      "tips": "分析 2 个原因（工作压力、手机等），用因果关系连接。",
+      "expressions": ["I think there are a couple of reasons.", "First of all, ...", "On top of that, ...", "This makes it difficult to switch off."],
+      "reference": "I think there are a couple of reasons. First of all, work pressure has increased. In many companies, there's strong competition, and people worry about losing their jobs, so they keep thinking about work even at home. On top of that, smartphones mean we're always connected. Your boss can send you a message at eleven at night, and even in your free time you're scrolling through endless information. This makes it very difficult to switch off completely.",
+      "difficulties": ["find it hard to do 句型", "原因之间缺少连接词"]
+    },
+    {
+      "id": "P3-PLACE-1-3",
+      "card": "P2-PLACE-1",
+      "q": "Do you think people need quiet places more than they did in the past?",
+      "zh": "你认为人们比过去更需要安静的地方吗？",
+      "difficulty": 3,
+      "sample": true,
+      "followUps": [
+        { "id": "P3-PLACE-1-3-F1", "q": "Why might noise be a bigger problem in modern life?", "zh": "为什么噪音在现代生活中可能成为更大的问题？" },
+        { "id": "P3-PLACE-1-3-F2", "q": "How could homes be designed to be more peaceful?", "zh": "住宅可以怎样设计得更安静？" }
+      ],
+      "defaultFollowUp": "P3-PLACE-1-3-F1",
+      "keywords": ["urbanisation", "overstimulated", "concentrate", "mental health"],
+      "tips": "对比过去与现在的生活环境，给出清晰判断。",
+      "expressions": ["Yes, I'd say so.", "Compared with the past, ...", "As a result, ...", "Quiet places give us a chance to ..."],
+      "reference": "Yes, I'd say so. Compared with the past, most people now live in crowded cities with constant traffic, construction and advertising screens. Even at home, we're surrounded by notifications. As a result, our brains are overstimulated almost all day. Quiet places, like libraries, temples or parks, give us a chance to concentrate and recover mentally. In the past, when life was slower and more people lived in the countryside, quiet was simply part of daily life, so people didn't need to look for it.",
+      "difficulties": ["比较过去与现在的时态切换"]
+    },
+    {
+      "id": "P3-PLACE-2-1",
+      "card": "P2-PLACE-2",
+      "q": "What makes a city attractive to tourists?",
+      "zh": "什么让一个城市吸引游客？",
+      "difficulty": 1,
+      "followUps": [
+        { "id": "P3-PLACE-2-1-F1", "q": "Is it better for a city to have old buildings or modern ones?", "zh": "一个城市拥有古建筑好，还是现代建筑好？" },
+        { "id": "P3-PLACE-2-1-F2", "q": "Can a city become too popular with tourists?", "zh": "一个城市会不会变得对游客过于热门？" }
+      ],
+      "defaultFollowUp": "P3-PLACE-2-1-F2",
+      "keywords": ["unique culture", "local food", "transport", "historic sites"],
+      "tips": "列出 2–3 个因素，并以一个城市为例。",
+      "expressions": ["I think the most important thing is ...", "A good example is ...", "Practical things like ... also matter."],
+      "reference": "I think the most important thing is having something unique, whether that's historic sites, special food or a distinctive culture. A good example is Xi'an, which attracts visitors because of the Terracotta Warriors and its famous street food. Practical things also matter, though. A city with convenient public transport, clean streets and clear signs in English is much easier to enjoy. And friendly locals can make a huge difference to a tourist's impression.",
+      "difficulties": ["attractive to 的介词"]
+    },
+    {
+      "id": "P3-PLACE-2-2",
+      "card": "P2-PLACE-2",
+      "q": "How does tourism affect local people?",
+      "zh": "旅游业对当地居民有什么影响？",
+      "difficulty": 2,
+      "followUps": [
+        { "id": "P3-PLACE-2-2-F1", "q": "Should tourists pay an extra tax to help local communities?", "zh": "游客应该缴纳额外税费来帮助当地社区吗？" },
+        { "id": "P3-PLACE-2-2-F2", "q": "How can tourists be more respectful when they travel?", "zh": "游客旅行时怎样可以更尊重当地？" }
+      ],
+      "defaultFollowUp": "P3-PLACE-2-2-F1",
+      "keywords": ["job opportunities", "living costs", "crowded", "preserve culture"],
+      "tips": "分正面与负面影响，最后给出总结。",
+      "expressions": ["It has both positive and negative effects.", "On the one hand, ...", "On the other hand, ...", "The key is ..."],
+      "reference": "It has both positive and negative effects. On the one hand, tourism creates jobs in hotels, restaurants and shops, and it can encourage people to preserve local traditions. On the other hand, it can push up living costs. In some popular old towns, rents have risen so much that local families have moved out, and the streets are full of souvenir shops instead of normal businesses. The key is managing tourist numbers so that local people also benefit.",
+      "difficulties": ["affect 动词用法", "on the one hand 结构的完整性"]
+    },
+    {
+      "id": "P3-PLACE-2-3",
+      "card": "P2-PLACE-2",
+      "q": "Do you think travelling to other cities is a good way to learn?",
+      "zh": "你认为到其他城市旅行是一种好的学习方式吗？",
+      "difficulty": 2,
+      "followUps": [
+        { "id": "P3-PLACE-2-3-F1", "q": "What can people learn from travel that they cannot learn from books?", "zh": "有哪些东西人们能从旅行中学到，却无法从书本中学到？" },
+        { "id": "P3-PLACE-2-3-F2", "q": "Is virtual travel a good substitute for real travel?", "zh": "虚拟旅行能很好地替代真实旅行吗？" }
+      ],
+      "defaultFollowUp": "P3-PLACE-2-3-F1",
+      "keywords": ["first-hand experience", "open-minded", "customs", "dialects"],
+      "tips": "表明观点，并说明旅行带来的独特学习内容。",
+      "expressions": ["Definitely.", "Travel gives you first-hand experience of ...", "For instance, ...", "It also makes people more ..."],
+      "reference": "Definitely. Travel gives you first-hand experience of how other people live, which is very different from reading about it. For instance, when I visited Guangzhou, I learned a lot about Cantonese culture just by eating dim sum with locals and hearing the dialect in the streets. Travel also makes people more open-minded, because you realise your own way of doing things isn't the only way. That said, you need to be curious and talk to people, not just take photos.",
+      "difficulties": ["first-hand 等复合形容词"]
+    },
+    {
+      "id": "P3-PLACE-3-1",
+      "card": "P2-PLACE-3",
+      "q": "Why are public places like libraries and parks important for a community?",
+      "zh": "为什么图书馆、公园等公共场所对社区很重要？",
+      "difficulty": 2,
+      "followUps": [
+        { "id": "P3-PLACE-3-1-F1", "q": "Should public places be free for everyone?", "zh": "公共场所应该对所有人免费吗？" },
+        { "id": "P3-PLACE-3-1-F2", "q": "How could libraries attract more young people?", "zh": "图书馆怎样才能吸引更多年轻人？" }
+      ],
+      "defaultFollowUp": "P3-PLACE-3-1-F1",
+      "keywords": ["equal access", "bring people together", "free of charge", "well-being"],
+      "tips": "从\"公平\"与\"社区联系\"两个角度说明。",
+      "expressions": ["First, they give everyone equal access to ...", "Second, they bring people together.", "Without them, ..."],
+      "reference": "First, they give everyone equal access to resources, regardless of income. A student who can't afford books or a quiet room at home can study in a library for free, and a family without a garden can enjoy a park. Second, they bring people together. In parks, you see neighbours chatting, children playing and older people dancing, which builds a sense of community. Without these places, people would spend more time alone at home, and cities would feel much colder.",
+      "difficulties": ["regardless of 的用法", "虚拟语气 would"]
+    },
+    {
+      "id": "P3-PLACE-3-2",
+      "card": "P2-PLACE-3",
+      "q": "How have public places in cities changed in recent years?",
+      "zh": "近年来城市中的公共场所发生了哪些变化？",
+      "difficulty": 2,
+      "followUps": [
+        { "id": "P3-PLACE-3-2-F1", "q": "Are these changes positive, in your opinion?", "zh": "你认为这些变化是积极的吗？" },
+        { "id": "P3-PLACE-3-2-F2", "q": "What public facility does your city need most?", "zh": "你的城市最需要什么公共设施？" }
+      ],
+      "defaultFollowUp": "P3-PLACE-3-2-F1",
+      "keywords": ["renovate", "multi-functional", "smart technology", "riverside walkways"],
+      "tips": "描述 2 个具体变化，使用现在完成时。",
+      "expressions": ["They've changed quite a lot.", "Many ... have been renovated.", "Another trend is ...", "These days, ..."],
+      "reference": "They've changed quite a lot. In my city, many old parks have been renovated with running tracks, better lighting and fitness equipment, so they're busy until late at night. Another trend is that public places have become more multi-functional. Libraries now host talks, exhibitions and even coding classes for kids, rather than just lending books. Technology has also been added. You can reserve a study seat with your phone, and some parks have smart screens showing air quality.",
+      "difficulties": ["现在完成时被动 have been renovated"]
+    },
+    {
+      "id": "P3-PLACE-3-3",
+      "card": "P2-PLACE-3",
+      "q": "Who should be responsible for keeping public places clean?",
+      "zh": "谁应该负责保持公共场所的清洁？",
+      "difficulty": 2,
+      "followUps": [
+        { "id": "P3-PLACE-3-3-F1", "q": "Should people who drop litter be fined?", "zh": "乱扔垃圾的人应该被罚款吗？" },
+        { "id": "P3-PLACE-3-3-F2", "q": "How can children be taught to respect public places?", "zh": "怎样教孩子尊重公共场所？" }
+      ],
+      "defaultFollowUp": "P3-PLACE-3-3-F1",
+      "keywords": ["shared responsibility", "local government", "individuals", "awareness"],
+      "tips": "说明共同责任，分别说政府与个人的角色。",
+      "expressions": ["I think it's a shared responsibility.", "The government should ...", "At the same time, individuals need to ..."],
+      "reference": "I think it's a shared responsibility. The local government should provide enough bins, employ cleaners and make sure rubbish is collected regularly. However, no matter how many cleaners there are, places will stay dirty if people keep throwing litter on the ground. So at the same time, individuals need to take responsibility for their own rubbish. Education plays a big role here. If children learn from a young age to take their rubbish home, they'll probably keep that habit as adults.",
+      "difficulties": ["responsible for 的介词", "条件句 if ... will"]
+    },
+    {
+      "id": "P3-PLACE-4-1",
+      "card": "P2-PLACE-4",
+      "q": "Should old buildings be protected or replaced with new ones?",
+      "zh": "老建筑应该被保护还是被新建筑取代？",
+      "difficulty": 2,
+      "followUps": [
+        { "id": "P3-PLACE-4-1-F1", "q": "Who should pay to protect historic buildings?", "zh": "谁应该出钱保护历史建筑？" },
+        { "id": "P3-PLACE-4-1-F2", "q": "Can old buildings be used for new purposes?", "zh": "老建筑可以被用作新的用途吗？" }
+      ],
+      "defaultFollowUp": "P3-PLACE-4-1-F2",
+      "keywords": ["heritage", "unsafe", "character", "balance"],
+      "tips": "区分有历史价值的建筑与普通旧建筑，给出平衡观点。",
+      "expressions": ["It depends on the building.", "Buildings with historical value should ...", "However, if a building is unsafe, ..."],
+      "reference": "It depends on the building. Buildings with real historical or cultural value should definitely be protected, because once they're knocked down, they can never be replaced, and they give a city its character. However, not every old building is special. If a building is unsafe or can't meet modern needs, like old apartments without lifts, it might be better to rebuild. So I think cities need clear rules to decide which buildings are worth saving.",
+      "difficulties": ["被动语态 be protected / be replaced"]
+    },
+    {
+      "id": "P3-PLACE-4-2",
+      "card": "P2-PLACE-4",
+      "q": "What makes a building beautiful?",
+      "zh": "什么使一座建筑变得美观？",
+      "difficulty": 3,
+      "followUps": [
+        { "id": "P3-PLACE-4-2-F1", "q": "Do people in your country care about how buildings look?", "zh": "你们国家的人在意建筑的外观吗？" },
+        { "id": "P3-PLACE-4-2-F2", "q": "Are modern buildings less beautiful than older ones?", "zh": "现代建筑没有老建筑美吗？" }
+      ],
+      "defaultFollowUp": "P3-PLACE-4-2-F2",
+      "keywords": ["proportion", "fit in with", "materials", "natural light"],
+      "tips": "给出 2 个标准（与环境协调、材料与光线），并举例。",
+      "expressions": ["For me, a beautiful building is one that ...", "It also depends on ...", "A good example would be ..."],
+      "reference": "For me, a beautiful building is one that fits in with its surroundings. A glass skyscraper might look great in a financial district but completely wrong next to a historic temple. It also depends on materials and light. Buildings that use natural materials like wood and stone, and let in plenty of natural light, feel warm and welcoming. A good example would be some of the new libraries in China, which are modern but designed around courtyards, like traditional houses.",
+      "difficulties": ["定语从句 one that ...", "抽象审美词汇"]
+    },
+    {
+      "id": "P3-PLACE-4-3",
+      "card": "P2-PLACE-4",
+      "q": "How do you think homes will change in the future?",
+      "zh": "你认为未来的住宅会发生哪些变化？",
+      "difficulty": 2,
+      "followUps": [
+        { "id": "P3-PLACE-4-3-F1", "q": "Will people live in smaller homes in the future?", "zh": "未来人们会住在更小的房子里吗？" },
+        { "id": "P3-PLACE-4-3-F2", "q": "How might technology change the way we use our homes?", "zh": "科技会怎样改变我们使用住宅的方式？" }
+      ],
+      "defaultFollowUp": "P3-PLACE-4-3-F1",
+      "keywords": ["smart home", "energy-efficient", "flexible space", "work from home"],
+      "tips": "用将来时做预测，给出 2 个方向并解释原因。",
+      "expressions": ["I think homes will become ...", "It's likely that ...", "Because more people ..., homes might ..."],
+      "reference": "I think homes will become much smarter and more energy-efficient. It's likely that lights, heating and appliances will adjust automatically to save electricity, and solar panels will be common even on apartment buildings. Also, because more people now work from home at least part of the time, homes might be designed with more flexible spaces, for example a room that can be an office during the day and a guest room at night.",
+      "difficulties": ["将来时 will / might 的使用"]
+    },
+    {
+      "id": "P3-OBJECT-1-1",
+      "card": "P2-OBJECT-1",
+      "q": "What everyday objects have changed people's lives the most?",
+      "zh": "哪些日常物品对人们生活的改变最大？",
+      "difficulty": 2,
+      "followUps": [
+        { "id": "P3-OBJECT-1-1-F1", "q": "Which of these objects could people live without?", "zh": "其中哪些物品人们离开也能生活？" },
+        { "id": "P3-OBJECT-1-1-F2", "q": "Are older people slower to accept new objects?", "zh": "老年人接受新物品会更慢吗？" }
+      ],
+      "defaultFollowUp": "P3-OBJECT-1-1-F1",
+      "keywords": ["smartphone", "washing machine", "revolutionise", "save time"],
+      "tips": "选择 1–2 件物品，具体说明改变了生活的哪些方面。",
+      "expressions": ["The obvious answer is ...", "But I'd also mention ...", "It has completely changed the way we ..."],
+      "reference": "The obvious answer is the smartphone. It has completely changed the way we communicate, shop, pay and even find our way around. But I'd also mention the washing machine, which people often forget. Before it became common, washing clothes by hand took hours every week, and this work was mostly done by women. So the washing machine gave many people, especially women, much more time for work, study or rest.",
+      "difficulties": ["最高级 the most 的位置"]
+    },
+    {
+      "id": "P3-OBJECT-1-2",
+      "card": "P2-OBJECT-1",
+      "q": "Why do people buy things they don't really need?",
+      "zh": "人们为什么会买其实并不需要的东西？",
+      "difficulty": 2,
+      "followUps": [
+        { "id": "P3-OBJECT-1-2-F1", "q": "Does advertising play a big role in this?", "zh": "广告在其中起了很大作用吗？" },
+        { "id": "P3-OBJECT-1-2-F2", "q": "How can people avoid buying unnecessary things?", "zh": "人们怎样才能避免购买不必要的东西？" }
+      ],
+      "defaultFollowUp": "P3-OBJECT-1-2-F1",
+      "keywords": ["impulse", "discounts", "social pressure", "retail therapy"],
+      "tips": "分析 2 个原因（促销、情绪/攀比），举生活中的例子。",
+      "expressions": ["There are several reasons.", "One is ...", "Another reason is that ...", "People sometimes shop to ..."],
+      "reference": "There are several reasons. One is clever marketing. Online platforms constantly offer discounts and limited-time deals, which make people feel they'll lose out if they don't buy immediately. Another reason is that shopping can be emotional. Some people shop to cheer themselves up after a stressful day, which is often called retail therapy. Social pressure also plays a part. When everyone around you has the latest gadget, it's tempting to buy one too, even if your old one works perfectly well.",
+      "difficulties": ["lose out 等短语动词"]
+    },
+    {
+      "id": "P3-OBJECT-1-3",
+      "card": "P2-OBJECT-1",
+      "q": "Is it better to buy cheap things or expensive, high-quality things?",
+      "zh": "买便宜的东西好，还是买昂贵但高质量的东西好？",
+      "difficulty": 2,
+      "followUps": [
+        { "id": "P3-OBJECT-1-3-F1", "q": "Do brands matter to young people in your country?", "zh": "品牌对你们国家的年轻人重要吗？" },
+        { "id": "P3-OBJECT-1-3-F2", "q": "Should products be designed to last longer?", "zh": "产品是否应该被设计得更耐用？" }
+      ],
+      "defaultFollowUp": "P3-OBJECT-1-3-F2",
+      "keywords": ["durable", "value for money", "in the long run", "depends on"],
+      "tips": "按物品类型区分，给出\"长期来看\"的判断。",
+      "expressions": ["For things we use every day, ...", "In the long run, ...", "For items we rarely use, ..."],
+      "reference": "For things we use every day, like shoes, a mattress or a laptop, I think it's worth paying more for high quality, because they last longer and are more comfortable. In the long run, buying one good pair of shoes can be cheaper than buying three cheap pairs that fall apart. However, for items we rarely use or that go out of fashion quickly, cheaper options make more sense. So it's really about value for money, not just the price.",
+      "difficulties": ["worth doing 结构", "条件对比表达"]
+    },
+    {
+      "id": "P3-OBJECT-2-1",
+      "card": "P2-OBJECT-2",
+      "q": "Why do people give gifts?",
+      "zh": "人们为什么送礼物？",
+      "difficulty": 1,
+      "followUps": [
+        { "id": "P3-OBJECT-2-1-F1", "q": "Are gifts more important in some cultures than in others?", "zh": "礼物在某些文化中比在其他文化中更重要吗？" },
+        { "id": "P3-OBJECT-2-1-F2", "q": "Is it rude to refuse a gift?", "zh": "拒绝礼物不礼貌吗？" }
+      ],
+      "defaultFollowUp": "P3-OBJECT-2-1-F1",
+      "keywords": ["show appreciation", "celebrate", "tradition", "maintain relationships"],
+      "tips": "说出 2–3 个目的，并联系具体场合。",
+      "expressions": ["People give gifts for many reasons.", "Mainly, it's a way to ...", "In China, for example, ..."],
+      "reference": "People give gifts for many reasons, but mainly it's a way to show that they care about someone. On birthdays or festivals, a gift says, 'I remember you and I value our relationship.' Gifts are also used to say thank you, for example to a teacher or a colleague who helped you. In China, there's also a tradition of bringing a small gift when visiting someone's home, like fruit or tea, as a sign of respect and good manners.",
+      "difficulties": ["give sb sth 双宾语结构"]
+    },
+    {
+      "id": "P3-OBJECT-2-2",
+      "card": "P2-OBJECT-2",
+      "q": "Is the price of a gift important?",
+      "zh": "礼物的价格重要吗？",
+      "difficulty": 2,
+      "followUps": [
+        { "id": "P3-OBJECT-2-2-F1", "q": "Why do some people spend too much money on gifts?", "zh": "为什么有些人在礼物上花太多钱？" },
+        { "id": "P3-OBJECT-2-2-F2", "q": "Are handmade gifts more meaningful than bought ones?", "zh": "手工礼物比买来的礼物更有意义吗？" }
+      ],
+      "defaultFollowUp": "P3-OBJECT-2-2-F2",
+      "keywords": ["thoughtfulness", "face", "business context", "sentimental"],
+      "tips": "表明观点，同时考虑不同场合（私人 vs 商务）。",
+      "expressions": ["Generally speaking, I don't think so.", "What matters more is ...", "In some situations, though, ..."],
+      "reference": "Generally speaking, I don't think so. What matters more is how much thought goes into the gift. A cheap book that matches someone's interests can mean much more than an expensive perfume they'll never use. In some situations, though, price does matter. In business or at weddings in China, for example, the value of a gift can be seen as a sign of respect, and giving something too cheap might cause embarrassment. So it depends on the context.",
+      "difficulties": ["What matters is ... 主语从句"]
+    },
+    {
+      "id": "P3-OBJECT-2-3",
+      "card": "P2-OBJECT-2",
+      "q": "How has online shopping changed the way people give gifts?",
+      "zh": "网购如何改变了人们送礼的方式？",
+      "difficulty": 2,
+      "followUps": [
+        { "id": "P3-OBJECT-2-3-F1", "q": "Is giving money better than giving a gift?", "zh": "送钱比送礼物更好吗？" },
+        { "id": "P3-OBJECT-2-3-F2", "q": "Have companies made festivals too commercial?", "zh": "商家是否让节日变得过于商业化？" }
+      ],
+      "defaultFollowUp": "P3-OBJECT-2-3-F1",
+      "keywords": ["deliver directly", "wider choice", "less personal", "last-minute"],
+      "tips": "说明便利之处和可能的缺点。",
+      "expressions": ["It has made gift-giving much more convenient.", "You can now ...", "The downside is that ..."],
+      "reference": "It has made gift-giving much more convenient. You can now choose from millions of products and have them delivered directly to someone in another city, even on the same day. This is great for people who live far from their families. The downside is that gifts can feel less personal. It only takes a few clicks, so some people choose something at the last minute without much thought, and the recipient might sense that. Personally, I still prefer to add a handwritten card.",
+      "difficulties": ["现在完成时 has made", "the downside is that"]
+    },
+    {
+      "id": "P3-OBJECT-3-1",
+      "card": "P2-OBJECT-3",
+      "q": "Why do people replace things that still work?",
+      "zh": "人们为什么会更换仍然能用的东西？",
+      "difficulty": 2,
+      "followUps": [
+        { "id": "P3-OBJECT-3-1-F1", "q": "Is this a serious problem for the environment?", "zh": "这对环境是个严重的问题吗？" },
+        { "id": "P3-OBJECT-3-1-F2", "q": "Should companies be responsible for recycling old products?", "zh": "企业应该负责回收旧产品吗？" }
+      ],
+      "defaultFollowUp": "P3-OBJECT-3-1-F1",
+      "keywords": ["latest model", "status", "marketing", "software updates"],
+      "tips": "分析 2 个原因：社会/心理因素与技术因素。",
+      "expressions": ["I think it's partly about ...", "Companies also encourage this by ...", "As a result, ..."],
+      "reference": "I think it's partly about image. For many young people, having the latest phone is a kind of status symbol, so they upgrade every year even if their old phone works fine. Companies also encourage this by releasing new models constantly and advertising small improvements as huge changes. In some cases, older devices stop receiving software updates, so apps run slowly. As a result, people feel they have no choice but to replace them.",
+      "difficulties": ["have no choice but to do 句型"]
+    },
+    {
+      "id": "P3-OBJECT-3-2",
+      "card": "P2-OBJECT-3",
+      "q": "Is it better to repair things or to buy new ones?",
+      "zh": "修理东西好，还是买新的好？",
+      "difficulty": 2,
+      "followUps": [
+        { "id": "P3-OBJECT-3-2-F1", "q": "Why do fewer people repair things nowadays?", "zh": "为什么现在修东西的人越来越少？" },
+        { "id": "P3-OBJECT-3-2-F2", "q": "Should repair skills be taught at school?", "zh": "学校应该教授修理技能吗？" }
+      ],
+      "defaultFollowUp": "P3-OBJECT-3-2-F1",
+      "keywords": ["cost-effective", "waste", "spare parts", "sustainable"],
+      "tips": "给出总体倾向，并说明例外情况。",
+      "expressions": ["Where possible, I think repairing is better.", "It reduces waste and ...", "However, sometimes ..."],
+      "reference": "Where possible, I think repairing is better. It reduces waste, and it's often cheaper. Replacing a phone battery, for example, costs much less than a new phone. It also helps small local repair shops stay in business. However, sometimes repairing isn't realistic. Spare parts can be hard to find for older products, or the repair might cost almost as much as a new item. In those cases, buying new and recycling the old one properly may be the sensible choice.",
+      "difficulties": ["比较级 cheaper / more sustainable"]
+    },
+    {
+      "id": "P3-OBJECT-3-3",
+      "card": "P2-OBJECT-3",
+      "q": "How can people be encouraged to produce less waste?",
+      "zh": "怎样鼓励人们减少产生的垃圾？",
+      "difficulty": 2,
+      "followUps": [
+        { "id": "P3-OBJECT-3-3-F1", "q": "Should governments ban single-use plastic?", "zh": "政府应该禁止一次性塑料吗？" },
+        { "id": "P3-OBJECT-3-3-F2", "q": "Can individuals really make a difference?", "zh": "个人真的能带来改变吗？" }
+      ],
+      "defaultFollowUp": "P3-OBJECT-3-3-F1",
+      "keywords": ["incentives", "charge for", "packaging", "recycling"],
+      "tips": "从政府措施与商业做法两方面提出建议。",
+      "expressions": ["One effective way is to ...", "Businesses can also ...", "This has worked well in ..."],
+      "reference": "One effective way is to use money. For example, charging a small fee for plastic bags has greatly reduced their use in many countries, because people start bringing their own bags. Businesses can also help by using less packaging, especially for online deliveries, where a small item often comes in a huge box. Finally, making recycling simple is important. If bins are clearly labelled and collected regularly, people are much more willing to sort their rubbish.",
+      "difficulties": ["被动语态 be encouraged to", "建议缺少例证"]
+    },
+    {
+      "id": "P3-OBJECT-4-1",
+      "card": "P2-OBJECT-4",
+      "q": "Why do people care about what they wear?",
+      "zh": "人们为什么在意自己穿什么？",
+      "difficulty": 1,
+      "followUps": [
+        { "id": "P3-OBJECT-4-1-F1", "q": "Do clothes show a person's personality?", "zh": "衣着能体现一个人的性格吗？" },
+        { "id": "P3-OBJECT-4-1-F2", "q": "Should schools require students to wear uniforms?", "zh": "学校应该要求学生穿校服吗？" }
+      ],
+      "defaultFollowUp": "P3-OBJECT-4-1-F1",
+      "keywords": ["first impression", "confidence", "express themselves", "fit in"],
+      "tips": "给出 2 个原因（给他人的印象、自我感受）并举例。",
+      "expressions": ["Clothes are the first thing people notice.", "They also affect how we feel.", "For example, in a job interview, ..."],
+      "reference": "Clothes are one of the first things people notice about us, so they strongly affect first impressions. For example, in a job interview, dressing smartly shows that you take the opportunity seriously. Clothes also affect how we feel about ourselves. Many people feel more confident when they wear something they like. And for young people especially, clothes are a way to express their identity or to fit in with a group of friends.",
+      "difficulties": ["what they wear 名词性从句"]
+    },
+    {
+      "id": "P3-OBJECT-4-2",
+      "card": "P2-OBJECT-4",
+      "q": "How has fashion changed in your country in recent years?",
+      "zh": "近年来你们国家的时尚发生了哪些变化？",
+      "difficulty": 2,
+      "followUps": [
+        { "id": "P3-OBJECT-4-2-F1", "q": "Who influences young people's fashion choices the most?", "zh": "谁对年轻人的穿衣选择影响最大？" },
+        { "id": "P3-OBJECT-4-2-F2", "q": "Is fast fashion a problem?", "zh": "快时尚是个问题吗？" }
+      ],
+      "defaultFollowUp": "P3-OBJECT-4-2-F2",
+      "keywords": ["traditional elements", "casual", "domestic brands", "influencers"],
+      "tips": "描述 2 个趋势，并说明原因。",
+      "expressions": ["One noticeable trend is ...", "Another change is that ...", "This is partly because ..."],
+      "reference": "One noticeable trend is the return of traditional Chinese elements. Young people now wear clothes inspired by traditional styles, like Hanfu, not only at festivals but sometimes in everyday life. Another change is that domestic brands have become much more popular. In the past, many people preferred foreign brands, but now Chinese brands are seen as stylish and good quality. This is partly because of national pride and partly because of influencers who promote these brands on social media.",
+      "difficulties": ["现在完成时描述趋势"]
+    },
+    {
+      "id": "P3-OBJECT-4-3",
+      "card": "P2-OBJECT-4",
+      "q": "Do you think people judge others by their appearance too much?",
+      "zh": "你认为人们是否过于以貌取人？",
+      "difficulty": 3,
+      "followUps": [
+        { "id": "P3-OBJECT-4-3-F1", "q": "Is this more common in some workplaces than others?", "zh": "这种情况在某些工作场所更常见吗？" },
+        { "id": "P3-OBJECT-4-3-F2", "q": "How might this change in the future?", "zh": "这种情况将来可能会怎样变化？" }
+      ],
+      "defaultFollowUp": "P3-OBJECT-4-3-F1",
+      "keywords": ["stereotypes", "unfair", "social media", "superficial"],
+      "tips": "表明观点，分析原因与后果。",
+      "expressions": ["Unfortunately, I think they do.", "Social media has made this worse because ...", "This can be unfair to ..."],
+      "reference": "Unfortunately, I think they do. It's natural to form a quick impression, but many people then stick to it without getting to know the person. Social media has made this worse, because people see thousands of edited photos and start to believe everyone should look perfect. This can be unfair to people who don't fit those standards, for example in job interviews or dating. I think we need more awareness that appearance tells us very little about someone's ability or character.",
+      "difficulties": ["judge sb by sth 的介词"]
+    },
+    {
+      "id": "P3-EXP-1-1",
+      "card": "P2-EXP-1",
+      "q": "What are the benefits of learning things outside school?",
+      "zh": "在学校之外学习东西有什么好处？",
+      "difficulty": 1,
+      "followUps": [
+        { "id": "P3-EXP-1-1-F1", "q": "Should schools give students more free time to explore their interests?", "zh": "学校应该给学生更多自由时间去探索兴趣吗？" },
+        { "id": "P3-EXP-1-1-F2", "q": "Is it harder for adults to learn new things?", "zh": "成年人学新东西更难吗？" }
+      ],
+      "defaultFollowUp": "P3-EXP-1-1-F1",
+      "keywords": ["practical skills", "motivation", "independence", "real-world"],
+      "tips": "列出 2 个好处，分别举例说明。",
+      "expressions": ["The main benefit is ...", "Another advantage is that ...", "For example, ..."],
+      "reference": "The main benefit is that people learn practical, real-world skills that schools often don't teach, such as cooking, managing money or repairing things. Another advantage is motivation. When you learn something outside school, it's usually because you're genuinely interested, not because of an exam, so you tend to enjoy it more and remember it better. For example, many teenagers who learn video editing for fun end up being very skilled at it, simply because they chose it themselves.",
+      "difficulties": ["benefit of doing 结构"]
+    },
+    {
+      "id": "P3-EXP-1-2",
+      "card": "P2-EXP-1",
+      "q": "Why do some people stop learning after they finish school?",
+      "zh": "为什么有些人毕业后就不再学习了？",
+      "difficulty": 2,
+      "followUps": [
+        { "id": "P3-EXP-1-2-F1", "q": "How could society encourage lifelong learning?", "zh": "社会可以怎样鼓励终身学习？" },
+        { "id": "P3-EXP-1-2-F2", "q": "Are older learners treated differently from younger ones?", "zh": "年长的学习者和年轻学习者受到的对待不同吗？" }
+      ],
+      "defaultFollowUp": "P3-EXP-1-2-F1",
+      "keywords": ["lack of time", "exam-oriented", "burnt out", "family responsibilities"],
+      "tips": "分析 2–3 个原因，如时间、学习经历带来的负面感受。",
+      "expressions": ["One reason is simply ...", "Another reason might be that ...", "For some people, ..."],
+      "reference": "One reason is simply lack of time. Once people start working and have families, their free time is limited, and learning feels like a luxury. Another reason might be the way they experienced school. If education was all about exams and pressure, people may feel burnt out and associate learning with stress, so they avoid it later. For some people, there's also no clear reward. If their job doesn't require new skills, they don't see the point of continuing to study.",
+      "difficulties": ["associate A with B 的用法"]
+    },
+    {
+      "id": "P3-EXP-1-3",
+      "card": "P2-EXP-1",
+      "q": "Is learning from experience better than learning from books?",
+      "zh": "从经验中学习比从书本中学习更好吗？",
+      "difficulty": 3,
+      "followUps": [
+        { "id": "P3-EXP-1-3-F1", "q": "Can mistakes be a good teacher?", "zh": "错误能成为好老师吗？" },
+        { "id": "P3-EXP-1-3-F2", "q": "What kinds of knowledge can only come from books?", "zh": "哪些知识只能从书本中获得？" }
+      ],
+      "defaultFollowUp": "P3-EXP-1-3-F1",
+      "keywords": ["hands-on", "theory", "complement", "memorable"],
+      "tips": "比较两者的优劣，最后说明两者互补。",
+      "expressions": ["Both have their strengths.", "Experience is more memorable because ...", "Books, on the other hand, ...", "Ideally, the two should go together."],
+      "reference": "Both have their strengths. Learning from experience is often more memorable, because you feel the consequences directly. If you get lost in a new city once, you remember the route forever. Books, on the other hand, let you learn from other people's experiences without making every mistake yourself, and they explain the theory behind things. A doctor, for example, needs both years of study and hands-on practice. So ideally, the two should go together rather than compete.",
+      "difficulties": ["比较结构与让步表达"]
+    },
+    {
+      "id": "P3-EXP-2-1",
+      "card": "P2-EXP-2",
+      "q": "Why are people less patient nowadays?",
+      "zh": "为什么如今人们变得不那么有耐心了？",
+      "difficulty": 2,
+      "followUps": [
+        { "id": "P3-EXP-2-1-F1", "q": "Is technology the main reason for this?", "zh": "科技是主要原因吗？" },
+        { "id": "P3-EXP-2-1-F2", "q": "Can patience be taught to children?", "zh": "耐心可以教给孩子吗？" }
+      ],
+      "defaultFollowUp": "P3-EXP-2-1-F1",
+      "keywords": ["instant", "fast-paced", "expectations", "on demand"],
+      "tips": "给出主要原因（即时满足），并用例子说明。",
+      "expressions": ["I think it's mainly because we're used to ...", "These days, ...", "So when something takes longer, ..."],
+      "reference": "I think it's mainly because we're used to getting things instantly. These days, food can be delivered in thirty minutes, films are available on demand, and we get answers to any question in seconds online. So when something takes longer, like waiting in a queue or waiting for a reply, it feels unbearable. The fast pace of city life also plays a role. People have busy schedules, so any delay feels like a waste of their limited time.",
+      "difficulties": ["be used to doing 结构"]
+    },
+    {
+      "id": "P3-EXP-2-2",
+      "card": "P2-EXP-2",
+      "q": "In what situations is it important to be patient?",
+      "zh": "在什么情况下保持耐心很重要？",
+      "difficulty": 1,
+      "followUps": [
+        { "id": "P3-EXP-2-2-F1", "q": "Do some jobs require more patience than others?", "zh": "有些工作比其他工作更需要耐心吗？" },
+        { "id": "P3-EXP-2-2-F2", "q": "Is being patient always a good thing?", "zh": "有耐心总是好事吗？" }
+      ],
+      "defaultFollowUp": "P3-EXP-2-2-F1",
+      "keywords": ["long-term goals", "relationships", "learning a language", "children"],
+      "tips": "列出 2 个情境，并解释为什么需要耐心。",
+      "expressions": ["One obvious situation is ...", "Patience is also essential when ...", "Otherwise, ..."],
+      "reference": "One obvious situation is when you're learning something difficult, like a foreign language or a musical instrument. Progress is slow, and if you're impatient, you'll probably give up too early. Patience is also essential when dealing with people, especially children or elderly relatives. They may need things explained several times, and losing your temper only makes things worse. Otherwise, relationships can be damaged by moments of frustration that we later regret.",
+      "difficulties": ["deal with 的用法"]
+    },
+    {
+      "id": "P3-EXP-2-3",
+      "card": "P2-EXP-2",
+      "q": "How do businesses try to reduce waiting times for customers?",
+      "zh": "企业是如何设法减少顾客等待时间的？",
+      "difficulty": 2,
+      "followUps": [
+        { "id": "P3-EXP-2-3-F1", "q": "Do you think fast service is always good service?", "zh": "你认为快速服务一定是好服务吗？" },
+        { "id": "P3-EXP-2-3-F2", "q": "Will waiting in queues disappear in the future?", "zh": "将来排队等候会消失吗？" }
+      ],
+      "defaultFollowUp": "P3-EXP-2-3-F1",
+      "keywords": ["self-service", "online booking", "queue number", "automation"],
+      "tips": "列出 2–3 个具体做法，并举例。",
+      "expressions": ["Many businesses now use ...", "Another common method is ...", "For instance, in restaurants, ..."],
+      "reference": "Many businesses now use technology. For instance, in restaurants you can scan a code and order from your phone, so you don't have to wait for a waiter. Hospitals and banks let people book appointments online, which reduces crowds. Another common method is self-service machines, like in supermarkets and train stations. Some businesses also try to make waiting feel shorter, for example by giving customers a queue number and free snacks, so they can relax instead of standing in line.",
+      "difficulties": ["列举方法时的并列结构"]
+    },
+    {
+      "id": "P3-EXP-3-1",
+      "card": "P2-EXP-3",
+      "q": "Why do some people enjoy helping others?",
+      "zh": "为什么有些人喜欢帮助别人？",
+      "difficulty": 1,
+      "followUps": [
+        { "id": "P3-EXP-3-1-F1", "q": "Should helping others be taught at school?", "zh": "学校应该教学生帮助他人吗？" },
+        { "id": "P3-EXP-3-1-F2", "q": "Do people help strangers less than they did in the past?", "zh": "现在人们帮助陌生人比过去少了吗？" }
+      ],
+      "defaultFollowUp": "P3-EXP-3-1-F2",
+      "keywords": ["sense of purpose", "empathy", "upbringing", "feel good"],
+      "tips": "从心理感受与成长环境两方面解释。",
+      "expressions": ["For many people, helping others gives them ...", "It also depends on their upbringing.", "Research suggests that ..."],
+      "reference": "For many people, helping others gives them a sense of purpose and makes them feel good about themselves. When you see that you've made someone's day easier, it's very satisfying. It also depends on their upbringing. People who grew up seeing their parents help neighbours are more likely to do the same. And some people simply have strong empathy. They can easily imagine how others feel, so they naturally want to help when they see someone struggling.",
+      "difficulties": ["make someone's day 等习语"]
+    },
+    {
+      "id": "P3-EXP-3-2",
+      "card": "P2-EXP-3",
+      "q": "Is it better to solve problems alone or with other people?",
+      "zh": "独自解决问题好，还是与他人一起解决好？",
+      "difficulty": 2,
+      "followUps": [
+        { "id": "P3-EXP-3-2-F1", "q": "What kinds of problems are best solved in teams?", "zh": "哪些问题最适合团队解决？" },
+        { "id": "P3-EXP-3-2-F2", "q": "How do people usually deal with disagreements in a team?", "zh": "团队中人们通常怎样处理分歧？" }
+      ],
+      "defaultFollowUp": "P3-EXP-3-2-F1",
+      "keywords": ["different perspectives", "efficiency", "responsibility", "complex"],
+      "tips": "按问题类型区分，分别说明原因。",
+      "expressions": ["It depends on the type of problem.", "For complex problems, ...", "But for personal or simple problems, ..."],
+      "reference": "It depends on the type of problem. For complex problems, working with others is usually better, because different people bring different knowledge and perspectives, and they can spot mistakes you might miss. In my group projects at university, the best ideas often came from discussion. But for simple or very personal problems, solving them alone can be faster and more comfortable. Group discussions can take a lot of time, and sometimes too many opinions make it harder to decide.",
+      "difficulties": ["不同情况的对比结构"]
+    },
+    {
+      "id": "P3-EXP-3-3",
+      "card": "P2-EXP-3",
+      "q": "What role should volunteers play in society?",
+      "zh": "志愿者在社会中应该扮演什么角色？",
+      "difficulty": 3,
+      "followUps": [
+        { "id": "P3-EXP-3-3-F1", "q": "Should companies give employees time off to volunteer?", "zh": "公司应该给员工时间去做志愿者吗？" },
+        { "id": "P3-EXP-3-3-F2", "q": "Can volunteering help young people find jobs?", "zh": "做志愿者能帮助年轻人找工作吗？" }
+      ],
+      "defaultFollowUp": "P3-EXP-3-3-F2",
+      "keywords": ["support", "fill gaps", "not replace", "community spirit"],
+      "tips": "说明志愿者的作用，同时指出不应取代政府或专业人员。",
+      "expressions": ["I think volunteers play an important supporting role.", "They can ...", "However, they shouldn't replace ..."],
+      "reference": "I think volunteers play an important supporting role. They can fill gaps where public services don't reach, for example visiting lonely elderly people or helping at community events. During emergencies like floods, volunteers often arrive quickly and provide practical help. Volunteering also builds community spirit, because people from different backgrounds work together. However, they shouldn't replace trained professionals or government responsibility. Important services like healthcare need stable funding and qualified staff, not just goodwill.",
+      "difficulties": ["play a role in 的搭配"]
+    },
+    {
+      "id": "P3-EXP-4-1",
+      "card": "P2-EXP-4",
+      "q": "Why do people sometimes change their opinions?",
+      "zh": "为什么人们有时会改变自己的观点？",
+      "difficulty": 2,
+      "followUps": [
+        { "id": "P3-EXP-4-1-F1", "q": "Is changing your mind a sign of weakness?", "zh": "改变主意是软弱的表现吗？" },
+        { "id": "P3-EXP-4-1-F2", "q": "Who influences young people's opinions the most?", "zh": "谁对年轻人的观点影响最大？" }
+      ],
+      "defaultFollowUp": "P3-EXP-4-1-F1",
+      "keywords": ["new information", "experience", "influence", "grow older"],
+      "tips": "给出 2 个原因，并举例。",
+      "expressions": ["The most common reason is ...", "Personal experience can also ...", "As people get older, ..."],
+      "reference": "The most common reason is new information. When people learn facts they didn't know before, a reasonable person adjusts their view. Personal experience can also change opinions very strongly. Someone might think a job is easy until they actually try it. As people get older, their priorities shift too. For example, many young people don't care much about saving money, but once they have children, they often change their minds completely.",
+      "difficulties": ["change one's mind 的所有格"]
+    },
+    {
+      "id": "P3-EXP-4-2",
+      "card": "P2-EXP-4",
+      "q": "How do people usually make important decisions?",
+      "zh": "人们通常怎样做出重要决定？",
+      "difficulty": 2,
+      "followUps": [
+        { "id": "P3-EXP-4-2-F1", "q": "Should young people follow their parents' advice on important decisions?", "zh": "年轻人在重要决定上应该听从父母的建议吗？" },
+        { "id": "P3-EXP-4-2-F2", "q": "Do people make decisions more quickly now than in the past?", "zh": "现在人们做决定比过去更快吗？" }
+      ],
+      "defaultFollowUp": "P3-EXP-4-2-F1",
+      "keywords": ["weigh up", "pros and cons", "consult", "gut feeling"],
+      "tips": "描述常见做法，并给出自己的看法。",
+      "expressions": ["Most people start by ...", "They also tend to consult ...", "In the end, though, ..."],
+      "reference": "Most people start by collecting information and weighing up the pros and cons. For example, when choosing a university, they compare rankings, locations and costs. They also tend to consult people they trust, like parents, teachers or friends who have been in a similar situation. In the end, though, I think many important decisions come down to gut feeling. Even after all the research, people often choose the option that simply feels right.",
+      "difficulties": ["weigh up / come down to 等短语动词"]
+    },
+    {
+      "id": "P3-EXP-4-3",
+      "card": "P2-EXP-4",
+      "q": "Is it easy to persuade people to change their habits?",
+      "zh": "说服人们改变习惯容易吗？",
+      "difficulty": 3,
+      "followUps": [
+        { "id": "P3-EXP-4-3-F1", "q": "What is the most effective way to persuade someone?", "zh": "说服别人最有效的方法是什么？" },
+        { "id": "P3-EXP-4-3-F2", "q": "Can advertising change people's habits?", "zh": "广告能改变人们的习惯吗？" }
+      ],
+      "defaultFollowUp": "P3-EXP-4-3-F1",
+      "keywords": ["comfort zone", "routine", "small steps", "benefits"],
+      "tips": "表明观点（不容易），解释原因并提出有效方法。",
+      "expressions": ["Not at all, in my experience.", "Habits are hard to break because ...", "What tends to work better is ..."],
+      "reference": "Not at all, in my experience. Habits are hard to break because they're automatic. People don't even think about them, and changing them means leaving their comfort zone. Simply telling someone that a habit is bad, like eating too much sugar, rarely works. What tends to work better is showing clear personal benefits and suggesting small steps. For instance, my father only started exercising when his doctor showed him his test results and suggested a short walk after dinner.",
+      "difficulties": ["persuade sb to do sth 结构"]
+    },
+    {
+      "id": "P3-ACTIVITY-1-1",
+      "card": "P2-ACTIVITY-1",
+      "q": "Why do some people find it difficult to live a healthy lifestyle?",
+      "zh": "为什么有些人难以保持健康的生活方式？",
+      "difficulty": 2,
+      "followUps": [
+        { "id": "P3-ACTIVITY-1-1-F1", "q": "Whose responsibility is it to keep people healthy?", "zh": "保持人们健康是谁的责任？" },
+        { "id": "P3-ACTIVITY-1-1-F2", "q": "Do young people care about their health as much as older people?", "zh": "年轻人和老年人一样关心健康吗？" }
+      ],
+      "defaultFollowUp": "P3-ACTIVITY-1-1-F1",
+      "keywords": ["long working hours", "convenience food", "motivation", "stress"],
+      "tips": "分析 2 个原因，各配一个例子。",
+      "expressions": ["The biggest obstacle is probably ...", "Another problem is that ...", "So even if people know ..., they ..."],
+      "reference": "The biggest obstacle is probably time. Many people work long hours and commute for an hour or more, so by the time they get home, they're too tired to cook or exercise. Another problem is that unhealthy options are cheap and convenient. Fast food can be delivered in minutes, while preparing a healthy meal takes planning. So even if people know what they should do, they often choose the easiest option, especially when they're stressed.",
+      "difficulties": ["find it difficult to do", "by the time 从句"]
+    },
+    {
+      "id": "P3-ACTIVITY-1-2",
+      "card": "P2-ACTIVITY-1",
+      "q": "Should governments do more to encourage people to exercise?",
+      "zh": "政府应该采取更多措施鼓励人们锻炼吗？",
+      "difficulty": 2,
+      "followUps": [
+        { "id": "P3-ACTIVITY-1-2-F1", "q": "Would free sports facilities make a real difference?", "zh": "免费体育设施真的会带来改变吗？" },
+        { "id": "P3-ACTIVITY-1-2-F2", "q": "Should schools have more PE classes?", "zh": "学校应该增加体育课吗？" }
+      ],
+      "defaultFollowUp": "P3-ACTIVITY-1-2-F1",
+      "keywords": ["public health", "facilities", "campaigns", "healthcare costs"],
+      "tips": "表明立场并提出具体措施，说明对社会的好处。",
+      "expressions": ["Yes, I think they should.", "One thing they could do is ...", "In the long run, this would ..."],
+      "reference": "Yes, I think they should, because public health affects everyone. One thing they could do is build more free or cheap sports facilities, like outdoor courts and cycling paths, especially in crowded neighbourhoods. They could also organise community events, such as city marathons or free fitness classes in parks. In the long run, this would reduce healthcare costs, because people who exercise regularly are less likely to develop serious illnesses. It's an investment rather than an expense.",
+      "difficulties": ["encourage sb to do sth 结构", "虚拟语气 would / could"]
+    },
+    {
+      "id": "P3-ACTIVITY-1-3",
+      "card": "P2-ACTIVITY-1",
+      "q": "How has people's diet changed in recent years?",
+      "zh": "近年来人们的饮食发生了哪些变化？",
+      "difficulty": 2,
+      "followUps": [
+        { "id": "P3-ACTIVITY-1-3-F1", "q": "Is fast food the main problem?", "zh": "快餐是主要问题吗？" },
+        { "id": "P3-ACTIVITY-1-3-F2", "q": "Do you think people will eat more healthily in the future?", "zh": "你认为将来人们会吃得更健康吗？" }
+      ],
+      "defaultFollowUp": "P3-ACTIVITY-1-3-F2",
+      "keywords": ["processed food", "takeaway", "health-conscious", "variety"],
+      "tips": "描述两个相反的趋势，使句子更有层次。",
+      "expressions": ["There seem to be two opposite trends.", "On one side, ...", "On the other side, ...", "Overall, ..."],
+      "reference": "There seem to be two opposite trends. On one side, people eat more processed food and takeaway meals than before, because of busy lifestyles and delivery apps. Sugary drinks, especially milk tea, have become hugely popular among young people. On the other side, more people are becoming health-conscious. Supermarkets now sell more organic vegetables and low-sugar products, and many young office workers bring healthy lunches or track their calories with apps. Overall, the gap between healthy and unhealthy eaters seems to be growing.",
+      "difficulties": ["现在完成时 have become", "对比结构"]
+    },
+    {
+      "id": "P3-ACTIVITY-2-1",
+      "card": "P2-ACTIVITY-2",
+      "q": "Why is it important for people to have hobbies?",
+      "zh": "为什么拥有爱好对人们很重要？",
+      "difficulty": 1,
+      "followUps": [
+        { "id": "P3-ACTIVITY-2-1-F1", "q": "Do very busy people really need hobbies?", "zh": "非常忙的人真的需要爱好吗？" },
+        { "id": "P3-ACTIVITY-2-1-F2", "q": "Can a hobby become a career?", "zh": "爱好可以变成职业吗？" }
+      ],
+      "defaultFollowUp": "P3-ACTIVITY-2-1-F2",
+      "keywords": ["balance", "stress relief", "identity", "social life"],
+      "tips": "给出 2 个理由，并举例说明。",
+      "expressions": ["Hobbies give people a break from ...", "They also help people ...", "Without hobbies, life can become ..."],
+      "reference": "Hobbies give people a break from the pressure of work or study. When you're doing something you love, like painting or playing an instrument, you forget about your worries for a while, which is good for mental health. They also help people meet others with similar interests, so hobbies can expand your social life. Besides, hobbies give people a sense of identity beyond their job. Without hobbies, life can become just a cycle of working, eating and sleeping.",
+      "difficulties": ["It is important for sb to do sth 结构"]
+    },
+    {
+      "id": "P3-ACTIVITY-2-2",
+      "card": "P2-ACTIVITY-2",
+      "q": "How are the hobbies of young people different from those of older people?",
+      "zh": "年轻人的爱好和老年人的爱好有什么不同？",
+      "difficulty": 2,
+      "followUps": [
+        { "id": "P3-ACTIVITY-2-2-F1", "q": "Why do you think these differences exist?", "zh": "你认为为什么会存在这些差异？" },
+        { "id": "P3-ACTIVITY-2-2-F2", "q": "Can hobbies bring different generations together?", "zh": "爱好能把不同代的人联系在一起吗？" }
+      ],
+      "defaultFollowUp": "P3-ACTIVITY-2-2-F1",
+      "keywords": ["screen-based", "outdoor", "square dancing", "gaming"],
+      "tips": "分别描述两代人的典型爱好，并做对比。",
+      "expressions": ["Young people's hobbies tend to be ...", "Older people, by contrast, ...", "Interestingly, though, ..."],
+      "reference": "Young people's hobbies tend to be more screen-based, like playing video games, editing videos or following online content creators. Older people, by contrast, often prefer physical and social activities, such as square dancing, practising tai chi in parks or playing cards with neighbours. Interestingly, though, the gap is getting smaller. More older people now enjoy taking photos with their phones and sharing them online, and some young people have become interested in traditional hobbies like calligraphy or tea culture.",
+      "difficulties": ["those of 的指代用法", "by contrast 的使用"]
+    },
+    {
+      "id": "P3-ACTIVITY-2-3",
+      "card": "P2-ACTIVITY-2",
+      "q": "Do people have enough free time nowadays?",
+      "zh": "现在的人们有足够的空闲时间吗？",
+      "difficulty": 2,
+      "followUps": [
+        { "id": "P3-ACTIVITY-2-3-F1", "q": "What is taking away people's free time?", "zh": "是什么占用了人们的空闲时间？" },
+        { "id": "P3-ACTIVITY-2-3-F2", "q": "Should the working week be shorter?", "zh": "每周工作时间应该缩短吗？" }
+      ],
+      "defaultFollowUp": "P3-ACTIVITY-2-3-F2",
+      "keywords": ["overtime", "commuting", "work-life balance", "blurred"],
+      "tips": "表明观点，分析原因，并可区分不同人群。",
+      "expressions": ["For many people, I'd say no.", "The boundary between work and free time has become blurred.", "It varies, though, ..."],
+      "reference": "For many people, I'd say no. In big cities, long working hours and overtime are common, and people often spend two hours a day commuting. Also, because of smartphones, the boundary between work and free time has become blurred. People answer work messages in the evening and at weekends. It varies, though. Retired people and some students may have plenty of free time. But for working adults, especially parents with young children, real free time is quite rare.",
+      "difficulties": ["enough 的位置（enough free time）"]
+    },
+    {
+      "id": "P3-ACTIVITY-3-1",
+      "card": "P2-ACTIVITY-3",
+      "q": "Why do many people prefer indoor activities nowadays?",
+      "zh": "为什么现在很多人更喜欢室内活动？",
+      "difficulty": 2,
+      "followUps": [
+        { "id": "P3-ACTIVITY-3-1-F1", "q": "Is this a problem for children in particular?", "zh": "这对儿童来说是特别严重的问题吗？" },
+        { "id": "P3-ACTIVITY-3-1-F2", "q": "How could people be encouraged to spend more time outdoors?", "zh": "怎样才能鼓励人们花更多时间在户外？" }
+      ],
+      "defaultFollowUp": "P3-ACTIVITY-3-1-F1",
+      "keywords": ["entertainment at home", "air pollution", "convenience", "comfort"],
+      "tips": "分析 2–3 个原因（娱乐方式、环境、便利）。",
+      "expressions": ["One reason is that home entertainment has become ...", "In addition, ...", "Weather and pollution also ..."],
+      "reference": "One reason is that home entertainment has become so attractive. With streaming services, video games and food delivery, people can have a great time without leaving the sofa. In addition, many people live in cities where there isn't much green space nearby, so going outdoors requires planning and travel. Weather and pollution also play a part. On very hot or smoggy days, staying in an air-conditioned room is simply more comfortable. It's a matter of convenience more than choice.",
+      "difficulties": ["prefer 的用法", "原因之间的衔接"]
+    },
+    {
+      "id": "P3-ACTIVITY-3-2",
+      "card": "P2-ACTIVITY-3",
+      "q": "What are the benefits of doing activities in a group?",
+      "zh": "集体参与活动有什么好处？",
+      "difficulty": 1,
+      "followUps": [
+        { "id": "P3-ACTIVITY-3-2-F1", "q": "Are there any disadvantages to group activities?", "zh": "集体活动有什么缺点吗？" },
+        { "id": "P3-ACTIVITY-3-2-F2", "q": "Do team activities help people at work?", "zh": "团队活动对工作有帮助吗？" }
+      ],
+      "defaultFollowUp": "P3-ACTIVITY-3-2-F1",
+      "keywords": ["motivation", "teamwork", "social skills", "safety"],
+      "tips": "列出 2–3 个好处并举例。",
+      "expressions": ["The first benefit is motivation.", "Group activities also teach ...", "Not to mention ..."],
+      "reference": "The first benefit is motivation. When you exercise or study with a group, you're less likely to give up, because others are expecting you to show up. Group activities also teach social skills like cooperation and communication. On a team hike, for example, you have to agree on the pace and look after each other. Not to mention that they're simply more fun. Sharing an experience with others makes it more memorable, and it's a great way to make new friends.",
+      "difficulties": ["show up / look after 等短语"]
+    },
+    {
+      "id": "P3-ACTIVITY-3-3",
+      "card": "P2-ACTIVITY-3",
+      "q": "Should schools organise more outdoor activities for students?",
+      "zh": "学校应该为学生组织更多户外活动吗？",
+      "difficulty": 2,
+      "followUps": [
+        { "id": "P3-ACTIVITY-3-3-F1", "q": "Are these activities safe enough?", "zh": "这些活动足够安全吗？" },
+        { "id": "P3-ACTIVITY-3-3-F2", "q": "Who should pay for school trips?", "zh": "学校出游的费用应该由谁承担？" }
+      ],
+      "defaultFollowUp": "P3-ACTIVITY-3-3-F1",
+      "keywords": ["physical health", "classroom", "hands-on learning", "screen time"],
+      "tips": "表明立场，给出 2 个理由，并简要回应可能的担忧。",
+      "expressions": ["Yes, definitely.", "Students spend most of their day ...", "Outdoor activities also allow ...", "Of course, safety needs to be ..."],
+      "reference": "Yes, definitely. Students spend most of their day sitting in classrooms and then doing homework, so they get very little fresh air or exercise. Outdoor activities are good for their physical and mental health. They also allow hands-on learning. A biology lesson in a forest or a history trip to an old town is much more memorable than a textbook. Of course, safety needs to be carefully planned, but that shouldn't be a reason to keep students indoors all the time.",
+      "difficulties": ["organise 的英式拼写", "让步表达 of course ..., but ..."]
+    },
+    {
+      "id": "P3-ACTIVITY-4-1",
+      "card": "P2-ACTIVITY-4",
+      "q": "How has the way children play changed over the years?",
+      "zh": "这些年孩子们玩耍的方式发生了怎样的变化？",
+      "difficulty": 2,
+      "followUps": [
+        { "id": "P3-ACTIVITY-4-1-F1", "q": "Is this change good or bad, in your opinion?", "zh": "你认为这种变化是好是坏？" },
+        { "id": "P3-ACTIVITY-4-1-F2", "q": "Should parents limit children's screen time?", "zh": "父母应该限制孩子使用电子屏幕的时间吗？" }
+      ],
+      "defaultFollowUp": "P3-ACTIVITY-4-1-F1",
+      "keywords": ["outdoors", "digital devices", "organised activities", "supervised"],
+      "tips": "对比过去与现在的具体玩法，说明原因。",
+      "expressions": ["In the past, children usually ...", "These days, ...", "One reason for this change is ..."],
+      "reference": "In the past, children usually played outside with other kids in the neighbourhood, inventing their own games with very simple things like stones or skipping ropes. These days, a lot of play happens on digital devices, like tablets and game consoles. Children's free time is also more organised. Many attend classes in drawing, music or sports at weekends. One reason for this change is that parents worry more about safety, so they prefer children to play at home or in supervised activities.",
+      "difficulties": ["过去与现在的时态对比"]
+    },
+    {
+      "id": "P3-ACTIVITY-4-2",
+      "card": "P2-ACTIVITY-4",
+      "q": "Do you think children today are under too much pressure?",
+      "zh": "你认为现在的孩子压力太大了吗？",
+      "difficulty": 2,
+      "followUps": [
+        { "id": "P3-ACTIVITY-4-2-F1", "q": "Where does this pressure mainly come from?", "zh": "这种压力主要来自哪里？" },
+        { "id": "P3-ACTIVITY-4-2-F2", "q": "How can parents help reduce it?", "zh": "父母可以怎样帮助减轻压力？" }
+      ],
+      "defaultFollowUp": "P3-ACTIVITY-4-2-F1",
+      "keywords": ["competition", "after-school classes", "exam", "childhood"],
+      "tips": "明确表态并给出原因与影响。",
+      "expressions": ["Yes, I'm afraid many of them are.", "The competition starts very early.", "As a consequence, ..."],
+      "reference": "Yes, I'm afraid many of them are. In China, the competition starts very early. Some children attend after-school classes almost every day, even in primary school, because parents worry they'll fall behind. The pressure to get into a good school is intense. As a consequence, some children suffer from anxiety or lack of sleep, and they don't have enough time to simply play and be children. Recently, there have been policies to reduce homework, which I think is a positive step.",
+      "difficulties": ["be under pressure 的介词", "fall behind 的用法"]
+    },
+    {
+      "id": "P3-ACTIVITY-4-3",
+      "card": "P2-ACTIVITY-4",
+      "q": "Is it important for children to play with other children?",
+      "zh": "孩子和其他孩子一起玩重要吗？",
+      "difficulty": 1,
+      "followUps": [
+        { "id": "P3-ACTIVITY-4-3-F1", "q": "What do children learn from playing in groups?", "zh": "孩子们在集体游戏中能学到什么？" },
+        { "id": "P3-ACTIVITY-4-3-F2", "q": "Should children spend more time playing than studying?", "zh": "孩子应该把更多时间花在玩耍而不是学习上吗？" }
+      ],
+      "defaultFollowUp": "P3-ACTIVITY-4-3-F2",
+      "keywords": ["social skills", "share", "take turns", "conflict"],
+      "tips": "表明观点，解释孩子在集体游戏中能学到的能力。",
+      "expressions": ["Yes, it's extremely important.", "Through playing together, children learn to ...", "These skills are hard to learn from ..."],
+      "reference": "Yes, it's extremely important. Through playing together, children learn to share, take turns and deal with conflict, which are skills they'll need for the rest of their lives. For example, when two kids want the same toy, they have to negotiate or find a compromise. These skills are hard to learn from adults or screens, because adults usually give way to children, and games on tablets don't involve real people. Playing with others also helps children become more confident and less shy.",
+      "difficulties": ["learn to do 的结构", "give way to 的用法"]
+    }
+  ]
+}

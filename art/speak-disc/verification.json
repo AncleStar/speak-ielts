@@ -1,0 +1,42 @@
+{
+  "passed": true,
+  "scope": "GLB structure and Blender round-trip; browser performance not tested",
+  "checks": [
+    {
+      "file": "training-disc.glb",
+      "bytes": 841904,
+      "roundTripImport": true,
+      "requiredNodes": [
+        "TrainingDisc",
+        "Disc_ReelLarge",
+        "Disc_ReelSmall",
+        "Disc_LabelAnchor",
+        "Disc_LabelSurface",
+        "Disc_CategoryAccent",
+        "Disc_FrontCover"
+      ],
+      "noExternalFiles": true,
+      "meshes": 15,
+      "extensions": [
+        "KHR_materials_transmission",
+        "KHR_materials_ior"
+      ]
+    },
+    {
+      "file": "playback-deck.glb",
+      "bytes": 185256,
+      "roundTripImport": true,
+      "requiredNodes": [
+        "PlaybackDeck",
+        "Deck_RecordLED",
+        "Deck_InsertAnchor",
+        "Deck_Slot"
+      ],
+      "noExternalFiles": true,
+      "meshes": 6,
+      "extensions": [
+        "KHR_materials_emissive_strength"
+      ]
+    }
+  ]
+}

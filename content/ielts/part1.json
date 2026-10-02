@@ -1,0 +1,1489 @@
+{
+  "topics": [
+    {
+      "code": "HOME",
+      "name": "居住与家乡",
+      "intro": "Let's talk about where you live.",
+      "questions": [
+        {
+          "n": 1,
+          "q": "Do you live in a house or an apartment?",
+          "zh": "你住的是房屋还是公寓？",
+          "difficulty": 1,
+          "sample": true,
+          "keywords": [
+            "apartment",
+            "floor",
+            "neighbourhood",
+            "spacious"
+          ],
+          "tips": "先直接说住房类型，再补充一个细节：几楼、和谁住、房子的一个特点。",
+          "expressions": [
+            "I live in a ... on the ... floor.",
+            "It's quite spacious / a bit cramped.",
+            "What I like about it is ..."
+          ],
+          "reference": "I live in an apartment on the twelfth floor. I share it with my parents. It isn't very big, but it gets plenty of sunlight in the afternoon, which makes the living room feel warm and comfortable.",
+          "difficulties": [
+            "只回答 \"apartment\" 一个词就停下",
+            "注意楼层表达：on the twelfth floor，不要漏掉 on 或 the"
+          ],
+          "goal": "说清住房类型，并补充一个居住细节",
+          "rule": "说清住房类型，并补充一个居住细节；允许不同生活经历和不同观点，不要求使用参考答案中的词语。"
+        },
+        {
+          "n": 2,
+          "q": "What do you like most about the area where you live?",
+          "zh": "你最喜欢自己居住区域的哪一点？",
+          "difficulty": 1,
+          "sample": true,
+          "keywords": [
+            "convenient",
+            "quiet",
+            "park",
+            "within walking distance"
+          ],
+          "tips": "先说出最喜欢的一点，再用一个具体例子说明（例如步行几分钟能到哪里）。",
+          "expressions": [
+            "The best thing about my area is ...",
+            "It's within walking distance of ...",
+            "It makes my life much easier."
+          ],
+          "reference": "The best thing about my area is how convenient it is. There's a supermarket, a small park and a subway station all within walking distance, so I can buy groceries or go for a walk in the evening without spending much time on the road.",
+          "difficulties": [
+            "用 very convenient 反复描述而没有具体细节"
+          ],
+          "goal": "指出最喜欢的社区特点，并举一个例子",
+          "rule": "指出最喜欢的社区特点，并举一个例子；允许不同生活经历和不同观点，不要求使用参考答案中的词语。"
+        },
+        {
+          "n": 3,
+          "q": "What is your hometown known for?",
+          "zh": "你的家乡以什么出名？",
+          "difficulty": 1,
+          "sample": true,
+          "keywords": [
+            "famous for",
+            "local speciality",
+            "history",
+            "scenery"
+          ],
+          "tips": "先说出一样东西（食物、景点、产业），再解释它为什么有名或你的个人感受。",
+          "expressions": [
+            "My hometown is best known for ...",
+            "People travel there to ...",
+            "Locals are really proud of it."
+          ],
+          "reference": "My hometown is best known for its noodles. There are small noodle shops on almost every street, and many visitors come just to try them. Honestly, whenever I go back, the first thing I do is have a big bowl for breakfast.",
+          "difficulties": [
+            "不知道家乡有什么特色时，可以说一个普通但真实的特点"
+          ],
+          "goal": "介绍一种家乡特色，并说明它为什么特别",
+          "rule": "介绍一种家乡特色，并说明它为什么特别；允许不同生活经历和不同观点，不要求使用参考答案中的词语。"
+        },
+        {
+          "n": 4,
+          "q": "Has your hometown changed much in recent years?",
+          "zh": "你的家乡近几年变化大吗？",
+          "difficulty": 2,
+          "keywords": [
+            "develop",
+            "new buildings",
+            "transport",
+            "used to"
+          ],
+          "tips": "先回答变化大或不大，再用\"过去……现在……\"对比一个具体方面。",
+          "expressions": [
+            "It has changed a lot.",
+            "It used to be ..., but now ...",
+            "One of the biggest changes is ..."
+          ],
+          "reference": "Yes, it has changed a lot. It used to be a quiet place with mostly old, low buildings, but now there are shopping centres and a new high-speed railway station. One of the biggest changes is transport, because it now takes only two hours to reach the provincial capital.",
+          "difficulties": [
+            "过去的习惯或状态可用 used to；概括截至现在的变化可用 has changed，再用过去与现在作对比",
+            "不要只说 change，可以指出具体哪里变了"
+          ],
+          "goal": "对比家乡过去与现在的一项具体变化",
+          "rule": "对比家乡过去与现在的一项具体变化；允许不同生活经历和不同观点，不要求使用参考答案中的词语。"
+        },
+        {
+          "n": 5,
+          "q": "Would you like to live somewhere else in the future?",
+          "zh": "将来你想搬到别的地方住吗？",
+          "difficulty": 2,
+          "keywords": [
+            "move",
+            "opportunities",
+            "settle down",
+            "closer to"
+          ],
+          "tips": "给出想或不想，并说明一个原因；可以加上想去的具体城市。",
+          "expressions": [
+            "I'd love to move to ... because ...",
+            "I'd rather stay where I am since ...",
+            "In the long run, ..."
+          ],
+          "reference": "I think I'd like to move to a bigger city for a few years, maybe Shanghai, mainly because there are more job opportunities in my field. But in the long run, I'd probably come back and settle down near my parents, because family is really important to me.",
+          "difficulties": [
+            "would like 后接 to + 动词原形，例如 I'd like to move；注意不要漏掉 to",
+            "只说 yes 或 no 缺少原因"
+          ]
+        }
+      ]
+    },
+    {
+      "code": "FAMILY",
+      "name": "家庭",
+      "intro": "Now I'd like to ask you about your family.",
+      "questions": [
+        {
+          "n": 1,
+          "q": "How many people are there in your family?",
+          "zh": "你家里有几口人？",
+          "difficulty": 1,
+          "keywords": [
+            "parents",
+            "only child",
+            "siblings",
+            "grandparents"
+          ],
+          "tips": "直接说人数和成员，再补充一个家人的小细节。",
+          "expressions": [
+            "There are ... of us.",
+            "I'm an only child.",
+            "My grandparents live with us, too."
+          ],
+          "reference": "There are four of us: my parents, my younger sister and me. My sister is five years younger than me, so when we were little I often helped her with her homework, and we're still very close now.",
+          "difficulties": [
+            "family 视为整体时用 is；英式英语强调家庭成员时也可用 are",
+            "不要只列人数，可以补充一个真实细节"
+          ],
+          "goal": "介绍家庭成员，并补充一个人物细节",
+          "rule": "介绍家庭成员，并补充一个人物细节；允许不同生活经历和不同观点，不要求使用参考答案中的词语。"
+        },
+        {
+          "n": 2,
+          "q": "Who are you closest to in your family?",
+          "zh": "你和家里哪位成员最亲近？",
+          "difficulty": 1,
+          "keywords": [
+            "close to",
+            "get along",
+            "confide in",
+            "support"
+          ],
+          "tips": "先说出是谁，再给一个原因或一件具体的事。",
+          "expressions": [
+            "I'm closest to ...",
+            "We get along really well.",
+            "I can always talk to her about ..."
+          ],
+          "reference": "I'm probably closest to my mother. She's a great listener, and whenever I'm stressed about exams or work, I can talk to her about anything. We also have similar interests, like cooking, so we often spend weekends trying new recipes together.",
+          "difficulties": [
+            "close 的比较级是 closer，最高级是 closest；说最亲近的人可用 I am closest to ..."
+          ],
+          "goal": "介绍最亲近的家人，并说明原因",
+          "rule": "介绍最亲近的家人，并说明原因；允许不同生活经历和不同观点，不要求使用参考答案中的词语。"
+        },
+        {
+          "n": 3,
+          "q": "What do you usually do together as a family?",
+          "zh": "你们全家通常一起做些什么？",
+          "difficulty": 1,
+          "keywords": [
+            "have dinner",
+            "go for a walk",
+            "visit relatives",
+            "during holidays"
+          ],
+          "tips": "说一两项活动，并补充频率或气氛。",
+          "expressions": [
+            "We usually ... together.",
+            "Once a week, we ...",
+            "It's a nice way to catch up."
+          ],
+          "reference": "We usually have dinner together every evening, which is a nice way to catch up on each other's day. At weekends, we sometimes go for a walk by the river or visit my grandparents, who live about half an hour away.",
+          "difficulties": [
+            "频率副词位置不当",
+            "每个动词都用 do"
+          ],
+          "goal": "描述一项家庭活动，并补充频率或感受",
+          "rule": "描述一项家庭活动，并补充频率或感受；允许不同生活经历和不同观点，不要求使用参考答案中的词语。"
+        },
+        {
+          "n": 4,
+          "q": "How often do you see your relatives?",
+          "zh": "你多久见一次亲戚？",
+          "difficulty": 1,
+          "keywords": [
+            "relatives",
+            "Spring Festival",
+            "get together",
+            "once or twice a year"
+          ],
+          "tips": "先说频率，再说明在什么场合见面，或者为什么不常见。",
+          "expressions": [
+            "I see them about ... a year.",
+            "We usually get together during ...",
+            "Because they live far away, ..."
+          ],
+          "reference": "Not very often, to be honest. Most of my relatives live in another province, so I only see them once or twice a year, usually during the Spring Festival. When we do get together, it's really lively, with lots of food and long conversations.",
+          "difficulties": [
+            "relatives 与 relationship 混淆"
+          ],
+          "goal": "说明见亲戚的频率，并补充场合或原因",
+          "rule": "说明见亲戚的频率，并补充场合或原因；允许不同生活经历和不同观点，不要求使用参考答案中的词语。"
+        },
+        {
+          "n": 5,
+          "q": "Is family more important to you now than when you were a child?",
+          "zh": "和小时候相比，家庭现在对你更重要了吗？",
+          "difficulty": 2,
+          "keywords": [
+            "appreciate",
+            "take for granted",
+            "grow up",
+            "independent"
+          ],
+          "tips": "给出明确态度，再用\"小时候……现在……\"对比说明原因。",
+          "expressions": [
+            "Yes, I appreciate my family much more now.",
+            "When I was a kid, I took them for granted.",
+            "Now that I ..., I realise ..."
+          ],
+          "reference": "Yes, definitely. When I was a child, I took my family for granted and was more interested in playing with friends. Now that I live on my own, I realise how much my parents did for me, so I call them several times a week and value the time we spend together.",
+          "difficulties": [
+            "比较结构 more ... than 的完整性",
+            "时态对比不清楚"
+          ]
+        }
+      ]
+    },
+    {
+      "code": "STUDY",
+      "name": "学习",
+      "intro": "Let's talk about your studies.",
+      "questions": [
+        {
+          "n": 1,
+          "q": "What are you studying at the moment, or what did you study in the past?",
+          "zh": "你目前在学什么专业？或者你以前学的是什么？",
+          "difficulty": 1,
+          "keywords": [
+            "major",
+            "university",
+            "degree",
+            "subject"
+          ],
+          "tips": "先说专业或学习内容，再补充学到了哪个阶段或一个感受。",
+          "expressions": [
+            "I'm majoring in ...",
+            "I studied ... at university.",
+            "I'm in my third year."
+          ],
+          "reference": "I'm currently majoring in environmental engineering, and I'm in my third year at university. It's a practical subject, so apart from lectures we spend a lot of time in the lab testing water and soil samples, which I find quite interesting.",
+          "difficulties": [
+            "major 作动词时要用 major in",
+            "年级表达 third year"
+          ]
+        },
+        {
+          "n": 2,
+          "q": "Why did you choose this subject?",
+          "zh": "你为什么选择这个专业？",
+          "difficulty": 1,
+          "keywords": [
+            "interested in",
+            "career prospects",
+            "advice",
+            "passion"
+          ],
+          "tips": "给一个主要原因，再补充一个次要原因或具体经历。",
+          "expressions": [
+            "The main reason was that ...",
+            "I've always been interested in ...",
+            "My parents also suggested ..."
+          ],
+          "reference": "The main reason was that I've always been interested in protecting the environment. When I was in high school, I joined a volunteer project cleaning up a local river, and that experience made me want to learn how to solve pollution problems properly. The career prospects are also quite good.",
+          "difficulties": [
+            "because 与 because of 的用法",
+            "原因说得太笼统"
+          ]
+        },
+        {
+          "n": 3,
+          "q": "What do you find most difficult about studying?",
+          "zh": "你觉得学习中最难的是什么？",
+          "difficulty": 2,
+          "keywords": [
+            "concentrate",
+            "distractions",
+            "time management",
+            "motivation"
+          ],
+          "tips": "说出一个具体困难，再说明你怎么应对。",
+          "expressions": [
+            "The hardest part for me is ...",
+            "I tend to get distracted by ...",
+            "To deal with this, I ..."
+          ],
+          "reference": "The hardest part for me is staying focused. I tend to get distracted by my phone, especially when I'm reading long articles. To deal with this, I've started leaving my phone in another room and studying in short blocks of about forty minutes, which really helps.",
+          "difficulties": [
+            "find it difficult to do 句型",
+            "只说问题不说应对"
+          ]
+        },
+        {
+          "n": 4,
+          "q": "Do you prefer studying alone or with other people?",
+          "zh": "你喜欢独自学习还是和别人一起学习？",
+          "difficulty": 1,
+          "keywords": [
+            "prefer",
+            "discuss",
+            "focus",
+            "study group"
+          ],
+          "tips": "说明偏好，并给原因；也可以说\"看情况\"并分别举例。",
+          "expressions": [
+            "I generally prefer ... because ...",
+            "It depends on what I'm studying.",
+            "When it comes to ..., I'd rather ..."
+          ],
+          "reference": "It depends on what I'm studying. For memorising vocabulary or reading, I prefer studying alone because I can focus better. But when it comes to preparing for a project or solving hard maths problems, I'd rather work with classmates, since we can explain things to each other.",
+          "difficulties": [
+            "prefer A to B / prefer doing 句型",
+            "would rather 后接动词原形"
+          ]
+        },
+        {
+          "n": 5,
+          "q": "Would you like to study something new in the future?",
+          "zh": "将来你想学习一些新东西吗？",
+          "difficulty": 2,
+          "keywords": [
+            "take a course",
+            "pick up",
+            "skill",
+            "online"
+          ],
+          "tips": "说出想学的具体内容，再说原因和打算怎么学。",
+          "expressions": [
+            "I'd really like to learn ...",
+            "I've been thinking about taking a course in ...",
+            "It would be useful for ..."
+          ],
+          "reference": "Yes, I'd really like to learn some basic programming. A lot of data in my field is analysed with software, so it would be useful for my career. I've been thinking about taking an online course during the summer holiday, maybe one or two hours a day.",
+          "difficulties": [
+            "something new 的语序",
+            "would like to 后接动词原形"
+          ]
+        }
+      ]
+    },
+    {
+      "code": "WORK",
+      "name": "工作",
+      "intro": "Let's talk about work.",
+      "questions": [
+        {
+          "n": 1,
+          "q": "What kind of work do you do, or what job would you like to do in the future?",
+          "zh": "你做什么工作？或者将来想做什么工作？",
+          "difficulty": 1,
+          "keywords": [
+            "work as",
+            "company",
+            "career",
+            "in the future"
+          ],
+          "tips": "说出工作或理想职业，再补充一个具体的工作内容。",
+          "expressions": [
+            "I work as ... at ...",
+            "I'd like to become ...",
+            "My job mainly involves ..."
+          ],
+          "reference": "I work as an accountant at a medium-sized trading company. My job mainly involves checking financial reports and making sure payments are made on time. It can be repetitive sometimes, but I like the fact that everything has to be accurate.",
+          "difficulties": [
+            "work as + 职业（不加冠词错误：work as an accountant）"
+          ]
+        },
+        {
+          "n": 2,
+          "q": "Why did you choose this kind of work?",
+          "zh": "你为什么选择这类工作？",
+          "difficulty": 1,
+          "keywords": [
+            "suit",
+            "stable",
+            "interest",
+            "skills"
+          ],
+          "tips": "给出主要原因，并联系自己的性格或经历。",
+          "expressions": [
+            "It suits my personality.",
+            "I was attracted by ...",
+            "I've always been good at ..."
+          ],
+          "reference": "I think it suits my personality. I'm quite careful and I enjoy working with numbers, so accounting felt like a natural choice. Also, it's a fairly stable profession, and I knew I could always find work in almost any industry.",
+          "difficulties": [
+            "suit 与 fit 的区别"
+          ]
+        },
+        {
+          "n": 3,
+          "q": "What do you like most about your job, or your future job?",
+          "zh": "你最喜欢自己（或未来）工作的哪一点？",
+          "difficulty": 1,
+          "keywords": [
+            "colleagues",
+            "sense of achievement",
+            "challenge",
+            "flexible"
+          ],
+          "tips": "说出一点，再用一件具体的事说明。",
+          "expressions": [
+            "What I like most is ...",
+            "It gives me a sense of achievement when ...",
+            "For instance, last month ..."
+          ],
+          "reference": "What I like most is my colleagues. They're friendly and always willing to help, especially at the end of the year when we're really busy. Last December, for instance, we stayed late for a week to finish the annual report, but it actually felt like teamwork rather than hard work.",
+          "difficulties": [
+            "What I like most is ... 句型后的结构"
+          ]
+        },
+        {
+          "n": 4,
+          "q": "Would you prefer to work in an office or from home?",
+          "zh": "你更愿意在办公室工作还是在家工作？",
+          "difficulty": 2,
+          "keywords": [
+            "commute",
+            "distractions",
+            "work-life balance",
+            "communicate"
+          ],
+          "tips": "给出选择并说明理由，可以提到另一种方式的缺点作为对比。",
+          "expressions": [
+            "I'd prefer to ..., mainly because ...",
+            "Working from home saves time on commuting, but ...",
+            "On balance, ..."
+          ],
+          "reference": "I'd prefer to work in an office, mainly because it's easier to separate work from my personal life. When I worked from home for a few months, I found myself checking emails late at night. Working from home saves time on commuting, but on balance I focus better at the office.",
+          "difficulties": [
+            "prefer to do 与 prefer doing",
+            "work from home 的介词"
+          ]
+        },
+        {
+          "n": 5,
+          "q": "Do you think you will do the same job in ten years' time?",
+          "zh": "你觉得十年后你还会做同样的工作吗？",
+          "difficulty": 2,
+          "keywords": [
+            "promotion",
+            "switch careers",
+            "manager",
+            "predict"
+          ],
+          "tips": "表达判断并说明原因，可以描述理想中的变化。",
+          "expressions": [
+            "It's hard to say, but ...",
+            "I'd probably still be in the same field.",
+            "I'm hoping to move into ..."
+          ],
+          "reference": "It's hard to say, but I'd probably still be in the same field. However, I'm hoping to move into a management role, so instead of checking reports myself, I'd be leading a small team. I might also switch to a larger company to get more experience.",
+          "difficulties": [
+            "将来时 will / would 的使用",
+            "in ten years' time 的所有格"
+          ]
+        }
+      ]
+    },
+    {
+      "code": "HOBBY",
+      "name": "兴趣",
+      "intro": "Let's talk about your free time.",
+      "questions": [
+        {
+          "n": 1,
+          "q": "What do you like to do in your free time?",
+          "zh": "你空闲时喜欢做什么？",
+          "difficulty": 1,
+          "keywords": [
+            "spare time",
+            "relax",
+            "be into",
+            "usually"
+          ],
+          "tips": "说出一两项活动，并解释为什么喜欢或补充频率。",
+          "expressions": [
+            "In my spare time, I'm really into ...",
+            "It helps me unwind.",
+            "I usually do it at least ..."
+          ],
+          "reference": "In my spare time, I'm really into photography. I usually take my camera out at weekends and walk around old streets looking for interesting scenes. It helps me unwind after a busy week, and it also makes me notice small details that I'd normally miss.",
+          "difficulties": [
+            "like to do / like doing 都可以，但要完整",
+            "be into 后接名词或动名词"
+          ]
+        },
+        {
+          "n": 2,
+          "q": "Did you have the same hobbies when you were a child?",
+          "zh": "你小时候也有同样的爱好吗？",
+          "difficulty": 1,
+          "keywords": [
+            "used to",
+            "childhood",
+            "grow out of",
+            "change"
+          ],
+          "tips": "回答是否相同，再对比小时候与现在。",
+          "expressions": [
+            "Not really. When I was a kid, I used to ...",
+            "I've grown out of ...",
+            "My interests have changed a lot."
+          ],
+          "reference": "Not really. When I was a kid, I used to spend hours drawing cartoon characters, and I also loved building things with Lego. I think I've grown out of those hobbies, but in a way photography is connected to drawing, because both are about looking at the world carefully.",
+          "difficulties": [
+            "used to do 表示过去习惯",
+            "过去时与现在时的切换"
+          ]
+        },
+        {
+          "n": 3,
+          "q": "Do you prefer hobbies you can do alone or with other people?",
+          "zh": "你更喜欢一个人能做的爱好，还是和别人一起做的爱好？",
+          "difficulty": 2,
+          "keywords": [
+            "sociable",
+            "on my own",
+            "company",
+            "independent"
+          ],
+          "tips": "说明偏好与原因，可以举例自己的爱好。",
+          "expressions": [
+            "I'd say I prefer ... because ...",
+            "Doing things on my own lets me ...",
+            "That said, I also enjoy ..."
+          ],
+          "reference": "I'd say I prefer hobbies I can do on my own, like photography or reading, because I can do them whenever I want without arranging a time with others. That said, I also enjoy playing badminton with friends now and then, since it's more fun and sociable.",
+          "difficulties": [
+            "on my own / by myself 的表达",
+            "That said 的用法"
+          ]
+        },
+        {
+          "n": 4,
+          "q": "Is there a hobby you would like to try?",
+          "zh": "有没有你想尝试的爱好？",
+          "difficulty": 1,
+          "keywords": [
+            "give it a try",
+            "take up",
+            "always wanted to",
+            "lessons"
+          ],
+          "tips": "说出一个具体爱好，并解释为什么想尝试以及打算怎么开始。",
+          "expressions": [
+            "I've always wanted to try ...",
+            "I might take up ... next year.",
+            "What attracts me is ..."
+          ],
+          "reference": "I've always wanted to try rock climbing. A few of my friends go to an indoor climbing centre, and they say it's great exercise for both your body and your mind. What attracts me is that you have to plan each move carefully, so I might take some beginner lessons next year.",
+          "difficulties": [
+            "take up 表示开始某项爱好"
+          ]
+        },
+        {
+          "n": 5,
+          "q": "Do you spend money on your hobbies?",
+          "zh": "你会在爱好上花钱吗？",
+          "difficulty": 2,
+          "keywords": [
+            "equipment",
+            "worth it",
+            "expensive",
+            "budget"
+          ],
+          "tips": "回答会或不会，并具体说花在什么上、是否值得。",
+          "expressions": [
+            "Yes, quite a lot, actually.",
+            "The equipment can be expensive.",
+            "I think it's worth it because ..."
+          ],
+          "reference": "Yes, quite a lot, actually. Photography equipment can be expensive, especially lenses. Last year I saved for several months to buy a second-hand lens. But I think it's worth it, because it's something I use every week and it brings me a lot of joy.",
+          "difficulties": [
+            "spend money on something 的介词",
+            "worth it / worth doing"
+          ]
+        }
+      ]
+    },
+    {
+      "code": "ROUTINE",
+      "name": "日常安排",
+      "intro": "Let's talk about your daily routine.",
+      "questions": [
+        {
+          "n": 1,
+          "q": "What do you enjoy doing after a busy day?",
+          "zh": "忙碌一天之后，你喜欢做些什么？",
+          "difficulty": 1,
+          "sample": true,
+          "keywords": [
+            "unwind",
+            "take a walk",
+            "listen to music",
+            "recharge"
+          ],
+          "tips": "首句直接说出活动，再补充一个细节：在哪里、多久、带来什么感受。",
+          "expressions": [
+            "After a long day, I like to ...",
+            "It helps me unwind.",
+            "It's the best way for me to recharge."
+          ],
+          "reference": "After a long day, I like to take a walk in the park near my home while listening to some music. It only takes about twenty minutes, but it really helps me unwind and stop thinking about work, so I usually sleep much better afterwards.",
+          "difficulties": [
+            "enjoy 后接动名词 enjoy doing",
+            "只说 relax 而没有具体活动"
+          ],
+          "goal": "介绍忙碌之后的活动，并说出感受",
+          "rule": "介绍忙碌之后的活动，并说出感受；允许不同生活经历和不同观点，不要求使用参考答案中的词语。"
+        },
+        {
+          "n": 2,
+          "q": "Are you a morning person or a night person?",
+          "zh": "你是早起型的人还是夜猫子？",
+          "difficulty": 1,
+          "sample": true,
+          "keywords": [
+            "morning person",
+            "night owl",
+            "energetic",
+            "productive"
+          ],
+          "tips": "先说类型，再用一个具体习惯证明。",
+          "expressions": [
+            "I'm definitely a ... person.",
+            "I feel most productive when ...",
+            "I find it hard to ..."
+          ],
+          "reference": "I'm definitely a morning person. I usually wake up around six without an alarm, and I feel most productive before lunch, so I try to do my most important tasks then. By ten at night, I find it really hard to concentrate on anything serious.",
+          "difficulties": [
+            "night owl 等习语的使用",
+            "person 前冠词 a"
+          ],
+          "goal": "说明早起或晚睡偏好，用一个习惯解释",
+          "rule": "说明早起或晚睡偏好，用一个习惯解释；允许不同生活经历和不同观点，不要求使用参考答案中的词语。"
+        },
+        {
+          "n": 3,
+          "q": "What is the busiest part of your day?",
+          "zh": "你一天中最忙的是什么时候？",
+          "difficulty": 1,
+          "sample": true,
+          "keywords": [
+            "rush",
+            "deadline",
+            "morning",
+            "afternoon"
+          ],
+          "tips": "说出时间段，再描述这段时间要做的具体事情。",
+          "expressions": [
+            "The busiest part of my day is ...",
+            "I have to ... and ... at the same time.",
+            "It can be quite stressful."
+          ],
+          "reference": "The busiest part of my day is probably the late afternoon. That's when most of my classes finish and I have to rush to the library, reply to messages from my project group and sometimes do a part-time tutoring job. It can be quite stressful, but I'm used to it now.",
+          "difficulties": [
+            "be used to doing 与 used to do 混淆"
+          ],
+          "goal": "说清一天最忙的时段，并描述具体任务",
+          "rule": "说清一天最忙的时段，并描述具体任务；允许不同生活经历和不同观点，不要求使用参考答案中的词语。"
+        },
+        {
+          "n": 4,
+          "q": "Is your weekend routine different from your weekday routine?",
+          "zh": "你周末的作息和工作日不一样吗？",
+          "difficulty": 1,
+          "keywords": [
+            "sleep in",
+            "relaxed",
+            "weekdays",
+            "on the other hand"
+          ],
+          "tips": "先说是否不同，再用对比结构描述两者的差别。",
+          "expressions": [
+            "Yes, quite different.",
+            "On weekdays I ..., whereas at weekends I ...",
+            "I tend to sleep in on Saturdays."
+          ],
+          "reference": "Yes, quite different. On weekdays I follow a strict schedule, getting up at seven and going to classes until the evening, whereas at weekends I tend to sleep in until nine. I also spend more time cooking and meeting friends, so it feels much more relaxed.",
+          "difficulties": [
+            "whereas / while 表对比",
+            "weekend 的介词 at / on"
+          ],
+          "goal": "比较周末与工作日的一项作息差别",
+          "rule": "比较周末与工作日的一项作息差别；允许不同生活经历和不同观点，不要求使用参考答案中的词语。"
+        },
+        {
+          "n": 5,
+          "q": "Would you like to change anything about your daily routine?",
+          "zh": "你想改变日常作息中的某些方面吗？",
+          "difficulty": 2,
+          "keywords": [
+            "habit",
+            "exercise",
+            "screen time",
+            "schedule"
+          ],
+          "tips": "说出想改变的一点，并解释原因和打算。",
+          "expressions": [
+            "I'd like to spend less time ...",
+            "I really should ...",
+            "I'm planning to ..."
+          ],
+          "reference": "Yes, I'd like to spend less time on my phone before bed. At the moment I often scroll through videos for an hour, and then I feel tired the next morning. I'm planning to read a book instead and maybe do some light stretching, which should help me sleep better.",
+          "difficulties": [
+            "less time 与 fewer 的区别",
+            "should 表示建议"
+          ]
+        }
+      ]
+    },
+    {
+      "code": "TRAVEL",
+      "name": "旅行",
+      "intro": "Let's talk about travelling.",
+      "questions": [
+        {
+          "n": 1,
+          "q": "Do you enjoy travelling?",
+          "zh": "你喜欢旅行吗？",
+          "difficulty": 1,
+          "keywords": [
+            "explore",
+            "new places",
+            "broaden my horizons",
+            "culture"
+          ],
+          "tips": "回答喜欢与否，并给出原因或最喜欢的旅行方式。",
+          "expressions": [
+            "Yes, I love travelling because ...",
+            "It's a great way to ...",
+            "What I enjoy most is ..."
+          ],
+          "reference": "Yes, I love travelling, mainly because I enjoy exploring places that are completely different from my hometown. What I enjoy most is trying local food and walking around small streets rather than just visiting famous sights. It always makes me feel refreshed.",
+          "difficulties": [
+            "travel 与 trip 的区别",
+            "英式拼写 travelling"
+          ]
+        },
+        {
+          "n": 2,
+          "q": "Where did you go on your last trip?",
+          "zh": "你上次旅行去了哪里？",
+          "difficulty": 1,
+          "keywords": [
+            "last summer",
+            "visited",
+            "stayed",
+            "highlight"
+          ],
+          "tips": "说出地点与时间，再补充一个印象深刻的细节。用过去时。",
+          "expressions": [
+            "The last trip I took was to ...",
+            "We stayed there for ... days.",
+            "The highlight was ..."
+          ],
+          "reference": "The last trip I took was to Xiamen, a coastal city in the south-east, last October. I went with two classmates and we stayed there for four days. The highlight was cycling along the seaside road at sunset, which was absolutely beautiful.",
+          "difficulties": [
+            "一般过去时的规则与不规则动词（took, went, stayed）"
+          ]
+        },
+        {
+          "n": 3,
+          "q": "Do you prefer travelling alone or with other people?",
+          "zh": "你喜欢独自旅行还是和别人一起旅行？",
+          "difficulty": 2,
+          "keywords": [
+            "flexible",
+            "share",
+            "safety",
+            "company"
+          ],
+          "tips": "说明偏好，并对比两种方式的一个优缺点。",
+          "expressions": [
+            "I generally prefer travelling with ...",
+            "The advantage is that ...",
+            "On the other hand, travelling alone ..."
+          ],
+          "reference": "I generally prefer travelling with friends. The advantage is that we can share costs and experiences, and it feels safer, especially in places I don't know. On the other hand, travelling alone gives you more freedom, so I'd like to try a solo trip at least once.",
+          "difficulties": [
+            "prefer doing 结构",
+            "比较时逻辑词的使用"
+          ]
+        },
+        {
+          "n": 4,
+          "q": "What do you usually take with you when you travel?",
+          "zh": "旅行时你通常会带些什么？",
+          "difficulty": 1,
+          "keywords": [
+            "pack",
+            "charger",
+            "essentials",
+            "light"
+          ],
+          "tips": "列出一两样必带物品，并解释原因。",
+          "expressions": [
+            "I always make sure I have ...",
+            "I try to pack light.",
+            "The one thing I never forget is ..."
+          ],
+          "reference": "I try to pack light, so I usually just take a backpack. The one thing I never forget is a portable charger, because I use my phone for maps, tickets and payments. I also bring a small notebook to write down things I want to remember from the trip.",
+          "difficulties": [
+            "take / bring 的区别",
+            "列举时缺少原因"
+          ]
+        },
+        {
+          "n": 5,
+          "q": "Is there a place you really want to visit in the future?",
+          "zh": "将来有没有特别想去的地方？",
+          "difficulty": 1,
+          "keywords": [
+            "dream destination",
+            "scenery",
+            "someday",
+            "bucket list"
+          ],
+          "tips": "说出地点，并给出一两个想去的原因。",
+          "expressions": [
+            "I've always dreamed of visiting ...",
+            "It's at the top of my list.",
+            "I'd love to see ..."
+          ],
+          "reference": "I've always dreamed of visiting Iceland. I've seen photos of its glaciers and waterfalls, and the landscape looks completely different from anywhere I've been. I'd especially love to see the northern lights, so I'm hoping to go there in winter someday.",
+          "difficulties": [
+            "现在完成时 I've always ... 的使用"
+          ]
+        }
+      ]
+    },
+    {
+      "code": "FOOD",
+      "name": "饮食",
+      "intro": "Let's talk about food.",
+      "questions": [
+        {
+          "n": 1,
+          "q": "What kind of food do you like?",
+          "zh": "你喜欢什么样的食物？",
+          "difficulty": 1,
+          "keywords": [
+            "spicy",
+            "home-cooked",
+            "cuisine",
+            "favourite"
+          ],
+          "tips": "说出一种类型或菜系，再补充一道具体的菜。",
+          "expressions": [
+            "I'm a big fan of ... food.",
+            "My favourite dish is ...",
+            "I can't resist ..."
+          ],
+          "reference": "I'm a big fan of spicy food, especially Sichuan cuisine. My favourite dish is mapo tofu, because it's hot, a little numbing and goes perfectly with rice. I also like simple home-cooked meals, since they feel healthier than restaurant food.",
+          "difficulties": [
+            "food 通常不可数；谈不同种类时也可用 foods",
+            "尝试用具体味道词补充喜欢的原因"
+          ],
+          "goal": "介绍喜欢的食物类型，并举一道菜的例子",
+          "rule": "介绍喜欢的食物类型，并举一道菜的例子；允许不同生活经历和不同观点，不要求使用参考答案中的词语。"
+        },
+        {
+          "n": 2,
+          "q": "Do you often cook at home?",
+          "zh": "你经常在家做饭吗？",
+          "difficulty": 1,
+          "keywords": [
+            "cook",
+            "recipe",
+            "takeaway",
+            "save money"
+          ],
+          "tips": "说出频率，并说明原因或常做的菜。",
+          "expressions": [
+            "I cook about ... times a week.",
+            "I usually make simple dishes like ...",
+            "It's cheaper than ordering takeaway."
+          ],
+          "reference": "I cook about three or four times a week. I usually make simple dishes like fried rice or tomato and egg soup, because I don't have much time on weekdays. For me, cooking at home usually costs less than ordering takeaway, and I can choose the ingredients, and I find it quite relaxing.",
+          "difficulties": [
+            "cook / cooker 的区别",
+            "频率表达"
+          ],
+          "goal": "说明在家做饭的频率，并补充一道常做的菜",
+          "rule": "说明在家做饭的频率，并补充一道常做的菜；允许不同生活经历和不同观点，不要求使用参考答案中的词语。"
+        },
+        {
+          "n": 3,
+          "q": "Is there any food you didn't like as a child but enjoy now?",
+          "zh": "有没有哪种食物你小时候不喜欢，现在却很喜欢？",
+          "difficulty": 2,
+          "keywords": [
+            "bitter",
+            "taste",
+            "grow to like",
+            "used to hate"
+          ],
+          "tips": "说出食物，并对比过去和现在的感受及原因。",
+          "expressions": [
+            "I used to hate ..., but now ...",
+            "I've grown to like ...",
+            "My taste has changed."
+          ],
+          "reference": "Yes, bitter melon. I used to hate it when I was a child because it tasted so bitter, and I'd always leave it on my plate. But now I've grown to like it, especially in summer, because it feels refreshing. I guess my taste has changed as I've got older.",
+          "difficulties": [
+            "used to 与一般过去时的配合",
+            "grow to like 的表达"
+          ],
+          "goal": "对比过去与现在对一种食物的感受",
+          "rule": "对比过去与现在对一种食物的感受；允许不同生活经历和不同观点，不要求使用参考答案中的词语。"
+        },
+        {
+          "n": 4,
+          "q": "Do you prefer eating at home or eating out?",
+          "zh": "你更喜欢在家吃饭还是出去吃？",
+          "difficulty": 1,
+          "keywords": [
+            "eat out",
+            "atmosphere",
+            "hygiene",
+            "variety"
+          ],
+          "tips": "说明偏好并给出原因，可提到另一种方式的场合。",
+          "expressions": [
+            "On the whole, I prefer ...",
+            "Eating out is nice for special occasions.",
+            "At home, I know exactly what goes into the food."
+          ],
+          "reference": "On the whole, I prefer eating at home, because I know exactly what goes into the food and it's more relaxing. That said, eating out is nice for special occasions, like birthdays, or when I want to try a dish that needs special equipment I don't have at home.",
+          "difficulties": [
+            "eat out 与 eat outside 的区别"
+          ],
+          "goal": "表达在家吃或外出吃的偏好，并给出原因",
+          "rule": "表达在家吃或外出吃的偏好，并给出原因；允许不同生活经历和不同观点，不要求使用参考答案中的词语。"
+        },
+        {
+          "n": 5,
+          "q": "What is a traditional dish from your hometown?",
+          "zh": "你家乡有什么传统菜肴？",
+          "difficulty": 2,
+          "keywords": [
+            "traditional",
+            "ingredients",
+            "festival",
+            "made from"
+          ],
+          "tips": "说出菜名，简单描述原料或做法，以及什么时候吃。",
+          "expressions": [
+            "A traditional dish from my hometown is ...",
+            "It's made from ...",
+            "People usually eat it during ..."
+          ],
+          "reference": "A traditional dish from my hometown is a kind of sticky rice cake. It's made from glutinous rice and sweet red beans, and people usually steam it at home before the Spring Festival. It's quite filling, and for me it's a taste that always reminds me of family gatherings.",
+          "difficulties": [
+            "被动语态 be made from",
+            "菜名无法翻译时的解释方法"
+          ]
+        }
+      ]
+    },
+    {
+      "code": "SPORT",
+      "name": "运动",
+      "intro": "Let's talk about sport and exercise.",
+      "questions": [
+        {
+          "n": 1,
+          "q": "Do you do any sport or exercise?",
+          "zh": "你做运动或锻炼吗？",
+          "difficulty": 1,
+          "keywords": [
+            "jogging",
+            "gym",
+            "keep fit",
+            "regularly"
+          ],
+          "tips": "说出运动种类和频率，再补一个原因。",
+          "expressions": [
+            "I try to ... at least ... a week.",
+            "I go jogging / swimming.",
+            "It keeps me fit."
+          ],
+          "reference": "Yes, I try to go jogging at least three times a week, usually in the evening around the sports field at my university. I started doing it last year because I was spending too much time sitting down, and now I feel much more energetic.",
+          "difficulties": [
+            "do / play / go 与不同运动的搭配"
+          ]
+        },
+        {
+          "n": 2,
+          "q": "What sport was popular at your school?",
+          "zh": "你的学校流行什么运动？",
+          "difficulty": 1,
+          "keywords": [
+            "basketball",
+            "break time",
+            "team",
+            "compete"
+          ],
+          "tips": "说出运动，并描述大家什么时候、怎样参与。",
+          "expressions": [
+            "... was by far the most popular sport.",
+            "During break time, lots of students ...",
+            "We even had a school team."
+          ],
+          "reference": "Basketball was by far the most popular sport at my secondary school. During lunch breaks, the courts were always full, and there was a competition between classes every spring. I wasn't very good at it, but I always went to cheer for my class.",
+          "difficulties": [
+            "by far + 最高级",
+            "一般过去时"
+          ]
+        },
+        {
+          "n": 3,
+          "q": "Do you prefer watching sport or playing it?",
+          "zh": "你更喜欢看体育比赛还是亲自参与？",
+          "difficulty": 1,
+          "keywords": [
+            "participate",
+            "spectator",
+            "exciting",
+            "on TV"
+          ],
+          "tips": "说明偏好并给出原因。",
+          "expressions": [
+            "I'd much rather ... than ...",
+            "Watching is exciting, but ...",
+            "There's nothing like ..."
+          ],
+          "reference": "I'd much rather play sport than watch it. Watching a match on TV can be exciting, but I get bored if I just sit there for two hours. When I'm actually playing, even something simple like badminton, I feel involved and I get some exercise at the same time.",
+          "difficulties": [
+            "would rather A than B 句型"
+          ]
+        },
+        {
+          "n": 4,
+          "q": "Is it easy to find places to exercise where you live?",
+          "zh": "你住的地方容易找到锻炼的场所吗？",
+          "difficulty": 2,
+          "keywords": [
+            "facilities",
+            "sports centre",
+            "free",
+            "crowded"
+          ],
+          "tips": "回答容易与否，再具体描述附近的设施及其优缺点。",
+          "expressions": [
+            "Yes, fairly easy.",
+            "There's a ... nearby.",
+            "The only problem is that ..."
+          ],
+          "reference": "Yes, fairly easy. There's a public park with a running track and some free outdoor fitness equipment just five minutes from my home. The only problem is that it gets really crowded in the evenings, so sometimes I have to go early in the morning instead.",
+          "difficulties": [
+            "facility 的单复数",
+            "描述位置的介词"
+          ]
+        },
+        {
+          "n": 5,
+          "q": "Would you like to try a new sport in the future?",
+          "zh": "将来你想尝试一项新运动吗？",
+          "difficulty": 1,
+          "keywords": [
+            "surfing",
+            "give it a go",
+            "challenging",
+            "lessons"
+          ],
+          "tips": "说出运动名称并说明原因。",
+          "expressions": [
+            "I'd love to give ... a go.",
+            "It looks really challenging.",
+            "I'd need to take some lessons first."
+          ],
+          "reference": "I'd love to give surfing a go. I've watched videos of people surfing and it looks both exciting and challenging, because you need good balance. Since I don't live near the sea, I'd need to take some lessons during a holiday, maybe on Hainan Island.",
+          "difficulties": [
+            "give it a go 等口语表达"
+          ]
+        }
+      ]
+    },
+    {
+      "code": "TECH",
+      "name": "科技",
+      "intro": "Let's talk about technology.",
+      "questions": [
+        {
+          "n": 1,
+          "q": "What piece of technology do you use most every day?",
+          "zh": "你每天用得最多的科技产品是什么？",
+          "difficulty": 1,
+          "keywords": [
+            "smartphone",
+            "laptop",
+            "rely on",
+            "all day"
+          ],
+          "tips": "说出设备，并说明用它做什么。",
+          "expressions": [
+            "Without doubt, it's my ...",
+            "I use it for ... and ...",
+            "I'd be lost without it."
+          ],
+          "reference": "Without doubt, it's my smartphone. I use it for almost everything: chatting with friends, paying for things, checking maps and even reading articles for my course. I'd honestly be lost without it, which is a little worrying when I think about it.",
+          "difficulties": [
+            "piece of technology 的量词用法"
+          ]
+        },
+        {
+          "n": 2,
+          "q": "How much time do you spend on your phone each day?",
+          "zh": "你每天花多少时间在手机上？",
+          "difficulty": 1,
+          "keywords": [
+            "screen time",
+            "hours",
+            "scroll",
+            "too much"
+          ],
+          "tips": "给出大致时长，并说明主要用来做什么及你的看法。",
+          "expressions": [
+            "Probably around ... hours a day.",
+            "Most of that time is spent on ...",
+            "I know it's too much."
+          ],
+          "reference": "Probably around five hours a day, according to my screen time report. Most of that time is spent on messaging apps and watching short videos. I know it's too much, so recently I've set a limit on video apps after ten at night.",
+          "difficulties": [
+            "spend time on something 的介词"
+          ]
+        },
+        {
+          "n": 3,
+          "q": "Is there any app you find really useful?",
+          "zh": "有没有你觉得特别有用的应用程序？",
+          "difficulty": 1,
+          "keywords": [
+            "app",
+            "handy",
+            "organise",
+            "save time"
+          ],
+          "tips": "说出应用类型或名称，并举例说明它如何帮助你。",
+          "expressions": [
+            "One app I find really handy is ...",
+            "It helps me ...",
+            "For example, ..."
+          ],
+          "reference": "One app I find really handy is a note-taking app that syncs across my phone and laptop. It helps me organise my study notes and to-do lists. For example, if I have an idea on the bus, I can write it down immediately and continue working on it later at home.",
+          "difficulties": [
+            "handy / useful 等形容词的替换"
+          ]
+        },
+        {
+          "n": 4,
+          "q": "Do you think you rely on technology too much?",
+          "zh": "你觉得自己过于依赖科技了吗？",
+          "difficulty": 2,
+          "keywords": [
+            "rely on",
+            "dependent",
+            "battery",
+            "without"
+          ],
+          "tips": "表明观点，并用一个亲身例子说明。",
+          "expressions": [
+            "To be honest, I probably do.",
+            "When my phone ran out of battery, I ...",
+            "I'm trying to ..."
+          ],
+          "reference": "To be honest, I probably do. Last month my phone ran out of battery while I was in a new part of the city, and I realised I couldn't pay for anything or find my way back. Since then I've started carrying some cash and trying to remember routes myself.",
+          "difficulties": [
+            "rely on / depend on 的介词",
+            "run out of 的用法"
+          ]
+        },
+        {
+          "n": 5,
+          "q": "What was the last new gadget you bought?",
+          "zh": "你最近买的新电子产品是什么？",
+          "difficulty": 1,
+          "keywords": [
+            "gadget",
+            "earphones",
+            "features",
+            "worth"
+          ],
+          "tips": "说出产品，描述它的一个功能以及是否值得。",
+          "expressions": [
+            "The last gadget I bought was ...",
+            "Its best feature is ...",
+            "It was worth every penny."
+          ],
+          "reference": "The last gadget I bought was a pair of wireless earphones with noise cancelling. Its best feature is that it blocks out most of the noise on the subway, so I can listen to podcasts clearly on my way to school. It wasn't cheap, but it was worth every penny.",
+          "difficulties": [
+            "gadget 的发音",
+            "描述功能的词汇"
+          ]
+        }
+      ]
+    },
+    {
+      "code": "SHOP",
+      "name": "购物",
+      "intro": "Let's talk about shopping.",
+      "questions": [
+        {
+          "n": 1,
+          "q": "Do you like shopping?",
+          "zh": "你喜欢购物吗？",
+          "difficulty": 1,
+          "keywords": [
+            "window shopping",
+            "necessary",
+            "enjoy",
+            "browse"
+          ],
+          "tips": "回答喜欢与否，并说明购物的方式或原因。",
+          "expressions": [
+            "It depends on what I'm shopping for.",
+            "I don't mind ..., but I can't stand ...",
+            "I enjoy browsing ..."
+          ],
+          "reference": "It depends on what I'm shopping for. I enjoy browsing in bookshops or little stores that sell handmade things, but I can't stand shopping for clothes in crowded malls. If I need something practical, I usually just buy it online quickly.",
+          "difficulties": [
+            "can't stand + 动名词"
+          ]
+        },
+        {
+          "n": 2,
+          "q": "Do you prefer shopping online or in shops?",
+          "zh": "你更喜欢网上购物还是去实体店购物？",
+          "difficulty": 1,
+          "keywords": [
+            "convenient",
+            "try on",
+            "delivery",
+            "compare prices"
+          ],
+          "tips": "说明偏好，并对比两种方式的一个优缺点。",
+          "expressions": [
+            "Most of the time I shop online, because ...",
+            "The downside is that ...",
+            "For clothes, I'd rather ..."
+          ],
+          "reference": "Most of the time I shop online, because it's convenient and I can compare prices easily. The downside is that you can't see or touch the product, so for clothes and shoes I'd rather go to a shop and try them on first. Otherwise, I often end up returning things.",
+          "difficulties": [
+            "try on 的用法",
+            "end up doing"
+          ]
+        },
+        {
+          "n": 3,
+          "q": "What was the last thing you bought?",
+          "zh": "你最近一次买了什么？",
+          "difficulty": 1,
+          "keywords": [
+            "bought",
+            "needed",
+            "price",
+            "useful"
+          ],
+          "tips": "说出物品，并补充为什么买、在哪里买。",
+          "expressions": [
+            "The last thing I bought was ...",
+            "I needed it because ...",
+            "I got it from ..."
+          ],
+          "reference": "The last thing I bought was a desk lamp. My old one was too dim, and I was getting headaches after studying at night. I got it from an online store for about a hundred yuan, and it has different brightness levels, so it's much easier on my eyes now.",
+          "difficulties": [
+            "buy 的过去式 bought 与 brought 混淆"
+          ]
+        },
+        {
+          "n": 4,
+          "q": "Do you often buy things you don't really need?",
+          "zh": "你经常买一些其实用不上的东西吗？",
+          "difficulty": 2,
+          "keywords": [
+            "impulse buying",
+            "discount",
+            "regret",
+            "sale"
+          ],
+          "tips": "诚实回答，并用一次具体经历说明。",
+          "expressions": [
+            "Occasionally, especially during sales.",
+            "I was tempted by the discount.",
+            "I ended up never using it."
+          ],
+          "reference": "Occasionally, especially during big online shopping festivals. Last year I was tempted by a huge discount and bought a coffee machine, but I ended up using it only twice because I don't drink much coffee. Now I try to wait a day before buying anything on sale.",
+          "difficulties": [
+            "be tempted by 的用法",
+            "避免只回答 yes / no"
+          ]
+        },
+        {
+          "n": 5,
+          "q": "Is there a shop in your area that you like?",
+          "zh": "你家附近有你喜欢的店吗？",
+          "difficulty": 1,
+          "keywords": [
+            "bakery",
+            "owner",
+            "atmosphere",
+            "regular customer"
+          ],
+          "tips": "说出店铺类型，并描述喜欢的原因。",
+          "expressions": [
+            "There's a little ... around the corner.",
+            "The owner is really friendly.",
+            "I've become a regular there."
+          ],
+          "reference": "Yes, there's a little bakery just around the corner from my apartment. The bread is always fresh in the morning, and the owner is really friendly. She remembers what I usually buy, so I've become a regular customer and often stop there on my way to class.",
+          "difficulties": [
+            "around the corner 等方位表达"
+          ]
+        }
+      ]
+    },
+    {
+      "code": "WEATHER",
+      "name": "天气与季节",
+      "intro": "Let's talk about the weather.",
+      "questions": [
+        {
+          "n": 1,
+          "q": "What is the weather usually like where you live?",
+          "zh": "你住的地方天气通常怎么样？",
+          "difficulty": 1,
+          "keywords": [
+            "humid",
+            "mild",
+            "four seasons",
+            "temperature"
+          ],
+          "tips": "概括天气特点，再具体说一个季节。",
+          "expressions": [
+            "We have four distinct seasons.",
+            "Summers are hot and humid.",
+            "It rarely snows."
+          ],
+          "reference": "We have four distinct seasons where I live. Summers are hot and humid, often over thirty-five degrees, while winters are cold but quite dry. Spring and autumn are the most pleasant times of year, although they seem to be getting shorter these days.",
+          "difficulties": [
+            "What is it like 问的是\"怎么样\"而不是\"喜欢\""
+          ],
+          "goal": "概括当地天气，并描述一个季节",
+          "rule": "概括当地天气，并描述一个季节；允许不同生活经历和不同观点，不要求使用参考答案中的词语。"
+        },
+        {
+          "n": 2,
+          "q": "What is your favourite season?",
+          "zh": "你最喜欢哪个季节？",
+          "difficulty": 1,
+          "keywords": [
+            "autumn",
+            "cool",
+            "scenery",
+            "outdoor activities"
+          ],
+          "tips": "说出季节并给出一两个原因。",
+          "expressions": [
+            "My favourite season is ... because ...",
+            "The weather is perfect for ...",
+            "I especially love ..."
+          ],
+          "reference": "My favourite season is autumn, because the weather is cool and clear after the hot summer. It's perfect for outdoor activities like hiking. I especially love the colours of the leaves in the parks, and it's also the season for fresh fruit like persimmons.",
+          "difficulties": [
+            "My favourite season is autumn 中 autumn 前不加冠词；时间表达 in autumn 与 in the autumn 都可以"
+          ],
+          "goal": "说出最喜欢的季节，并说明原因",
+          "rule": "说出最喜欢的季节，并说明原因；允许不同生活经历和不同观点，不要求使用参考答案中的词语。"
+        },
+        {
+          "n": 3,
+          "q": "Does the weather affect your mood?",
+          "zh": "天气会影响你的心情吗？",
+          "difficulty": 2,
+          "keywords": [
+            "gloomy",
+            "cheerful",
+            "affect",
+            "sunshine"
+          ],
+          "tips": "回答会或不会，并分别描述不同天气下的感受。",
+          "expressions": [
+            "Yes, quite a lot.",
+            "When it's ..., I feel ...",
+            "Grey days make me feel a bit low."
+          ],
+          "reference": "Yes, quite a lot. When it's sunny, I feel cheerful and full of energy, and I'm more likely to go out and meet people. But after several grey, rainy days in a row, I feel a bit low and I just want to stay in bed and watch films.",
+          "difficulties": [
+            "affect（动词）与 effect（名词）混淆"
+          ],
+          "goal": "描述天气对心情是否有影响，并举例",
+          "rule": "描述天气对心情是否有影响，并举例；允许不同生活经历和不同观点，不要求使用参考答案中的词语。"
+        },
+        {
+          "n": 4,
+          "q": "What do you like to do on rainy days?",
+          "zh": "下雨天你喜欢做什么？",
+          "difficulty": 1,
+          "keywords": [
+            "stay indoors",
+            "cosy",
+            "read",
+            "listen to the rain"
+          ],
+          "tips": "说出一两项活动，并补充感受。",
+          "expressions": [
+            "On rainy days, I usually ...",
+            "It feels really cosy.",
+            "I enjoy listening to the sound of rain."
+          ],
+          "reference": "On rainy days, I usually stay indoors and read a novel with a cup of hot tea. It feels really cosy, and I enjoy listening to the sound of the rain against the window. Sometimes I also use the time to tidy up my room, which I never do on sunny days.",
+          "difficulties": [
+            "on rainy days 的介词 on"
+          ],
+          "goal": "介绍一项雨天活动，并补充感受",
+          "rule": "介绍一项雨天活动，并补充感受；允许不同生活经历和不同观点，不要求使用参考答案中的词语。"
+        },
+        {
+          "n": 5,
+          "q": "Has the weather in your hometown changed over the years?",
+          "zh": "这些年你家乡的天气有变化吗？",
+          "difficulty": 2,
+          "keywords": [
+            "climate",
+            "warmer",
+            "extreme",
+            "used to"
+          ],
+          "tips": "说明是否有变化，用过去与现在的对比举例。",
+          "expressions": [
+            "Yes, I think it has.",
+            "Winters used to be much colder.",
+            "We've had more ... recently."
+          ],
+          "reference": "Yes, I think it has. When I was little, winters used to be much colder, and we often had snow at New Year. Now it hardly ever snows, and summers seem longer and hotter. We've also had more heavy storms in recent years, which older people say is unusual.",
+          "difficulties": [
+            "现在完成时与 used to 的对比",
+            "hardly ever 的用法"
+          ]
+        }
+      ]
+    }
+  ]
+}

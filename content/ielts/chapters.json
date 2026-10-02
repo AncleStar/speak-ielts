@@ -1,0 +1,96 @@
+{
+  "chapters": [
+    {
+      "chapter": 1,
+      "title": "开口热身",
+      "focus": "熟悉话题、听懂并直接回答",
+      "part": 1,
+      "timing": { "answerSeconds": 30 },
+      "hints": { "showText": true, "showZh": true, "showKeywords": true, "showExpressions": false, "showStructure": false, "showCard": false, "notes": false },
+      "hintNote": "训练设置：每题 30 秒倒计时仅用于练习，不代表官方单题时限。可显示英文题目、中文理解与关键词。",
+      "goal": {
+        "itemRule": "首句直接回应题目，并补充至少一个具体细节",
+        "description": "首句直接回应题目并补充至少一个细节；4 题中至少 3 题达成",
+        "requiredMet": 3,
+        "of": 4
+      }
+    },
+    {
+      "chapter": 2,
+      "title": "回答展开",
+      "focus": "回答 + 原因 + 细节或例子",
+      "part": 1,
+      "timing": { "answerSeconds": 45 },
+      "hints": { "showText": true, "showZh": false, "showKeywords": false, "showExpressions": true, "showStructure": true, "showCard": false, "notes": false },
+      "hintNote": "训练设置：每题 45 秒倒计时仅用于练习，不代表官方单题时限。显示英文题目与可展开的表达提示。",
+      "goal": {
+        "itemRule": "给出观点，说明原因，并补充细节或例子（观点＋原因＋细节/例子）",
+        "description": "观点＋原因＋细节/例子；4 题中至少 3 题达成",
+        "requiredMet": 3,
+        "of": 4
+      }
+    },
+    {
+      "chapter": 3,
+      "title": "连贯叙述",
+      "focus": "描述人物、地点、物品、经历、活动",
+      "part": 2,
+      "timing": { "prepSeconds": 60, "answerSeconds": 90 },
+      "hints": { "showText": true, "showZh": true, "showKeywords": true, "showExpressions": true, "showStructure": true, "showCard": true, "notes": true },
+      "hintNote": "训练设置：准备 60 秒、回答 90 秒。显示任务卡与组织思路提示，可在便签区记录要点（便签不参与评价）。",
+      "goal": {
+        "itemRule": "覆盖任务卡要点，有开头—经过—结尾的结构",
+        "description": "覆盖任务卡要点，有开头—经过—结尾；有效作答不少于 60 秒",
+        "minEffectiveSeconds": 60,
+        "requiredMet": 1,
+        "of": 1
+      }
+    },
+    {
+      "chapter": 4,
+      "title": "长答挑战",
+      "focus": "完整 Part 2 陈述",
+      "part": 2,
+      "timing": { "prepSeconds": 60, "answerSeconds": 120 },
+      "hints": { "showText": true, "showZh": false, "showKeywords": false, "showExpressions": false, "showStructure": false, "showCard": true, "notes": true },
+      "hintNote": "训练设置：准备 60 秒、回答最长 120 秒。只显示任务卡与便签。",
+      "goal": {
+        "itemRule": "覆盖任务卡全部要点，并解释最后一问",
+        "description": "覆盖全部要点并解释最后一问；有效作答不少于 90 秒",
+        "minEffectiveSeconds": 90,
+        "requiredMet": 1,
+        "of": 1
+      }
+    },
+    {
+      "chapter": 5,
+      "title": "深度讨论",
+      "focus": "比较、因果、影响、解决办法、预测",
+      "part": 3,
+      "timing": { "answerSeconds": 75, "followUpSeconds": 45 },
+      "hints": { "showText": true, "showZh": false, "showKeywords": false, "showExpressions": false, "showStructure": true, "showCard": false, "notes": false },
+      "hintNote": "训练设置：主问题 75 秒、追问 45 秒。每道主问题回答后，考官会追加一次追问。",
+      "goal": {
+        "itemRule": "明确表达观点，并用原因、对比或例子支撑",
+        "description": "明确观点并用原因/对比/例子支撑；3 道主问题中至少 2 题达成",
+        "requiredMet": 2,
+        "of": 3
+      }
+    },
+    {
+      "chapter": 6,
+      "title": "完整模拟",
+      "focus": "三个部分连续作答",
+      "part": 0,
+      "timing": { "mock": true },
+      "hints": { "showText": false, "showZh": false, "showKeywords": false, "showExpressions": false, "showStructure": false, "showCard": true, "notes": true },
+      "hintNote": "完整模考 12 分 30 秒：Part 1 4:30、Part 2 3:30、Part 3 4:30。问答字幕默认隐藏，Part 2 显示任务卡。",
+      "goal": {
+        "itemRule": "完整完成三个部分",
+        "description": "三个部分完整完成且未中断",
+        "requiredMet": 0,
+        "of": 0
+      }
+    }
+  ]
+}

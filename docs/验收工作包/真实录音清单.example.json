@@ -1,0 +1,7 @@
+[
+  { "id": "clear-01", "file": "clear-01.wav", "reference": "替换为本人回听核对的英文原话", "category": "clear" },
+  { "id": "accent-01", "file": "accent-01.wav", "reference": "替换为本人回听核对的英文原话", "category": "chinese_accent" },
+  { "id": "noise-01", "file": "noise-01.wav", "reference": "替换为本人回听核对的英文原话", "category": "noise" },
+  { "id": "pauses-01", "file": "pauses-01.wav", "reference": "替换为本人回听核对的英文原话", "category": "pauses" },
+  { "id": "silence-01", "file": "silence-01.wav", "reference": "", "category": "silence" }
+]

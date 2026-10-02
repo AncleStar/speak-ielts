@@ -1,0 +1,51 @@
+/* Entry choreography follows RhineLabUI's welcome highlight → array reveal.
+   Editable UI lettering and existing licensed 3D assets are kept in the app.
+   Original speed: scan 3.28s; welcome 3.8s + .36s exit; array 7.2s.
+   Phase boundaries also live in lib/client/terminal-entry-timing.ts. */
+.terminal-entry{position:fixed;inset:0;z-index:80;color:var(--rhine-ink);pointer-events:none;--entry-ease:cubic-bezier(.16,1,.3,1);}
+.terminal-entry-curtain{position:absolute;inset:0;background:var(--rhine-paper);}
+.terminal-entry .terminal-scan{background:var(--rhine-paper);transition:none;}
+.terminal-entry .terminal-welcome{z-index:4;top:46%;width:max-content;max-width:calc(100% - 40px);animation:none;transform:translate(-50%,-50%);}
+.terminal-entry[data-phase="selecting"] .terminal-entry-curtain{animation:entry-curtain-exit .36s ease both;}
+.terminal-entry[data-phase="selecting"] .terminal-welcome{animation:entry-welcome-exit .36s ease both;}
+.terminal-entry .terminal-welcome[data-visible="false"]{visibility:hidden;}
+.terminal-entry .terminal-welcome p{margin:0;overflow:hidden;line-height:1.35;}
+.terminal-entry .terminal-welcome-heading{font-size:clamp(23px,3vw,45px);font-weight:300;letter-spacing:.05em;}
+.terminal-entry .terminal-welcome-company{display:grid;margin:18px 0;position:relative;}
+.terminal-entry .terminal-welcome-company strong{grid-area:1/1;display:block;margin:0;padding:4px 14px;background:transparent;color:var(--rhine-ink);font-size:clamp(26px,3.7vw,58px);line-height:1.3;letter-spacing:-.025em;font-weight:650;}
+.terminal-entry .terminal-welcome-company .terminal-welcome-highlight{background:var(--rhine-ink);color:var(--rhine-paper);}
+.terminal-entry .terminal-welcome-database{font-size:clamp(16px,2vw,30px);letter-spacing:.035em;font-weight:300;}
+.terminal-entry .terminal-welcome-note{margin-top:28px;font-size:clamp(10px,.8vw,12px);letter-spacing:.16em;}
+.terminal-welcome[data-visible="true"] .terminal-welcome-heading span{display:block;animation:entry-line .65s var(--entry-ease) both;}
+.terminal-welcome[data-visible="true"] .terminal-welcome-company{animation:entry-line .7s .76s var(--entry-ease) both;}
+.terminal-welcome[data-visible="true"] .terminal-welcome-highlight{animation:entry-highlight .88s .76s cubic-bezier(.65,0,.2,1) both;}
+.terminal-welcome[data-visible="true"] .terminal-welcome-database span{display:block;animation:entry-line .7s 2.28s var(--entry-ease) both;}
+.terminal-welcome[data-visible="true"] .terminal-welcome-note{animation:entry-soft .75s 2.6s var(--entry-ease) both;}
+.terminal-entry-controls{position:absolute;bottom:max(24px,5vh);left:20px;right:20px;text-align:center;pointer-events:none;font-size:11px;color:var(--rhine-muted);}
+.terminal-entry-controls p{transition:opacity .3s;}
+.terminal-entry-controls button{display:flex;align-items:center;justify-content:center;gap:12px;min-height:44px;margin:9px auto 0;padding:0 16px;color:var(--rhine-ink);pointer-events:auto;background:var(--rhine-paper);}
+.terminal-entry-controls button:focus-visible{outline:1px solid var(--rhine-ink);outline-offset:3px;}
+html:has(.terminal-entry) body{overflow:hidden;}
+html[data-entry-paused="true"] :is(.terminal-entry,.terminal-entry-content) *{animation-play-state:paused!important;}
+.terminal-entry[data-phase="selecting"] .terminal-entry-controls p{opacity:0;}
+.terminal-entry[data-phase="selecting"] .terminal-entry-controls{animation:entry-controls-exit .55s 7s ease both;}
+.rhine-selected-title{display:flex;gap:inherit;align-items:center;}
+.rhine-root[data-entry="selecting"] .rhine-file-title{position:relative;}
+.rhine-selecting-files{position:absolute;inset:0 auto auto 0;white-space:nowrap;animation:entry-selecting 3.78s .36s linear both;overflow:hidden;width:max-content;max-width:100%;}
+.rhine-root[data-entry="selecting"] .rhine-selected-title{animation:entry-soft .7s 4.14s var(--entry-ease,cubic-bezier(.16,1,.3,1)) both;}
+.rhine-root[data-entry="selecting"] .rhine-callout-rule{transform-origin:left;animation:entry-rule .9s .54s cubic-bezier(.16,1,.3,1) both;}
+.rhine-root[data-entry="selecting"] :is(.rhine-file-summary,.rhine-question-preview,.rhine-access-row,.rhine-topic-tags){animation:entry-soft .75s 4.34s cubic-bezier(.16,1,.3,1) both;}
+.rhine-root[data-entry="selecting"] .terminal-header{animation:entry-soft .36s cubic-bezier(.16,1,.3,1) both;}
+.rhine-root[data-entry="selecting"] :is(.rhine-library-tools,.rhine-library-shortcuts,.rhine-counter,.rhine-row-navigation,.rhine-column-navigation,.rhine-library-footer,.disc-stage-meta){animation:entry-soft .8s 3.7s cubic-bezier(.16,1,.3,1) both;}
+@keyframes entry-line{from{opacity:0;transform:translateY(75%);clip-path:inset(0 0 100%);}to{opacity:1;transform:translateY(0);clip-path:inset(0);}}
+@keyframes entry-highlight{from{clip-path:inset(0 100% 0 0);}to{clip-path:inset(0);}}
+@keyframes entry-soft{from{opacity:0;translate:0 10px;}to{opacity:1;translate:0 0;}}
+@keyframes entry-rule{from{transform:scaleX(0);}to{transform:scaleX(1);}}
+@keyframes entry-controls-exit{from{opacity:1;}to{opacity:0;}}
+@keyframes entry-curtain-exit{from{opacity:1;}to{opacity:0;}}
+@keyframes entry-welcome-exit{from{opacity:1;transform:translate(-50%,-50%) scale(1);}to{opacity:0;transform:translate(-50%,-50%) scale(.93);}}
+@keyframes entry-selecting{0%{clip-path:inset(0 100% 0 0);opacity:0;}10%{opacity:1;}28%,84%{clip-path:inset(0);opacity:1;transform:translateY(0);}100%{clip-path:inset(0);opacity:0;transform:translateY(-10px);}}
+@media(max-width:760px){.terminal-entry .terminal-welcome-company{margin:14px 0;}.terminal-entry .terminal-welcome-company strong{font-size:clamp(24px,7.3vw,44px);padding:5px 10px;}.terminal-entry .terminal-welcome{top:43%;}.terminal-entry .terminal-welcome-note{letter-spacing:.07em;}.rhine-selected-title{gap:8px;}.terminal-entry-controls button{margin-top:0;}}
+@media(prefers-reduced-motion:reduce){.terminal-entry *, .rhine-root[data-entry="selecting"] *{animation:none!important;transition:none!important;}}
+@media(max-width:760px){.terminal-entry .rhine-auth-header{top:20px;}.terminal-entry .rhine-auth-header .speak-brand{width:130px;}.terminal-entry .rhine-auth-header .speak-brand strong{font-size:25px;}.terminal-entry .rhine-auth-header .speak-brand>span:nth-child(2){font-size:8px;letter-spacing:.25px;}.terminal-entry .rhine-auth-header .speak-brand>span:last-child{font-size:16px;}}
+html[data-motion="reduced"] .terminal-entry *,html[data-motion="reduced"] .rhine-root[data-entry="selecting"] *{animation:none!important;transition:none!important;}

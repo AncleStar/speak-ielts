@@ -1,0 +1,49 @@
+{
+  "blender": "5.2.2 LTS",
+  "render": "disc-and-deck-preview.png",
+  "assets": [
+    {
+      "file": "training-disc.glb",
+      "bytes": 841904,
+      "meshes": 15,
+      "triangles": 18100,
+      "nodes": [
+        "TrainingDisc",
+        "Disc_CategoryAccent",
+        "Disc_FrontCover",
+        "Disc_LabelAnchor",
+        "Disc_LabelSurface",
+        "Disc_ReelLarge",
+        "Disc_ReelLarge_Disc_AmberAccent",
+        "Disc_ReelLarge_Hub",
+        "Disc_ReelLarge_Metal",
+        "Disc_ReelLarge_Outer",
+        "Disc_ReelSmall",
+        "Disc_ReelSmall_Disc_AmberAccent",
+        "Disc_ReelSmall_Hub",
+        "Disc_ReelSmall_Metal",
+        "Disc_ReelSmall_Outer",
+        "TrainingDisc_Disc_ClearPolycarbonate",
+        "TrainingDisc_Disc_Ivory",
+        "TrainingDisc_Hardware_SatinAluminium",
+        "TrainingDisc_Label_Charcoal"
+      ]
+    },
+    {
+      "file": "playback-deck.glb",
+      "bytes": 185256,
+      "meshes": 6,
+      "triangles": 3812,
+      "nodes": [
+        "PlaybackDeck",
+        "Deck_Body",
+        "Deck_InsertAnchor",
+        "Deck_RecordLED",
+        "Deck_Slot",
+        "Deck_Top",
+        "PlaybackDeck_Label_Charcoal",
+        "PlaybackDeck_Slot_DarkRubber"
+      ]
+    }
+  ]
+}

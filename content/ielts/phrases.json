@@ -1,0 +1,19 @@
+{
+  "phrases": {
+    "training_intro": "Hello, and welcome to today's practice. I'll ask you some questions. Please answer after I finish each question.",
+    "training_end": "Thank you. That's the end of this practice.",
+    "mock_intro": "Good morning. Welcome to this speaking practice test. In the first part, I'd like to ask you some questions about yourself.",
+    "p1_topic_switch": "Thank you. Now let's move on to a different topic.",
+    "p1_to_p2": "Thank you. That's the end of part one.",
+    "p2_instruction": "Now, I'm going to give you a topic, and I'd like you to talk about it for one to two minutes. Before you talk, you'll have one minute to think about what you're going to say. You can make some notes if you wish. Here is your topic.",
+    "p2_start": "All right. Remember, you have one to two minutes for this, so don't worry if I stop you. I'll tell you when the time is up. Can you start speaking now, please?",
+    "p2_stop": "Thank you.",
+    "p2_to_p3": "Thank you. We've been talking about your topic, and now I'd like to discuss with you some more general questions related to it.",
+    "part_timeout": "Thank you. Let's move on.",
+    "closing": "Thank you. That is the end of the speaking test.",
+    "prep_end": "Your preparation time is up. Please start speaking now.",
+    "time_up": "Thank you. Time is up.",
+    "followup_lead": "Let me ask you a little more about that.",
+    "device_check": "Hello. This is a sound check. If you can hear my voice clearly, your speaker is working."
+  }
+}

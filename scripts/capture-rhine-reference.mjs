@@ -1,0 +1,41 @@
+import { chromium } from '@playwright/test';
+import fs from 'node:fs/promises';
+
+const out = 'data/reference/rhine-capture';
+await fs.mkdir(out, { recursive: true });
+const browser = await chromium.launch({ channel: 'msedge' });
+const context = await browser.newContext({ viewport: { width: 1600, height: 900 }, recordVideo: { dir: out, size: { width: 1600, height: 900 } } });
+const page = await context.newPage();
+const errors = [];
+page.on('pageerror', e => errors.push(e.message));
+await page.goto('https://rhine.lubeiluchen.cc/', { waitUntil: 'domcontentloaded', timeout: 60000 });
+await page.locator('.entry-start').click({timeout:60000});
+let prev = 0;
+for (const second of [1, 5, 10, 14, 18, 22, 28]) {
+  await page.waitForTimeout((second - prev) * 1000); prev = second;
+  await page.screenshot({ path: `${out}/boot-${second}.png` });
+  console.log(JSON.stringify({ second, text: (await page.locator('body').innerText()).slice(0, 1800) }));
+}
+await fs.writeFile(`${out}/desktop-dom.html`, await page.content());
+if (await page.locator('#skip').isVisible()) await page.locator('#skip').click();
+else if (await page.locator('.back-button').isVisible()) await page.locator('.back-button').click();
+await page.waitForTimeout(2500);
+await page.screenshot({path:`${out}/array.png`});
+await page.getByRole('button',{name:'下一个档案',exact:true}).click();
+await page.waitForTimeout(600);
+await page.screenshot({path:`${out}/array-selection.png`});
+await page.locator('.read-file').click();
+await page.waitForTimeout(1200);
+await page.screenshot({path:`${out}/extract.png`});
+await page.waitForTimeout(4500);
+await page.screenshot({path:`${out}/detail.png`});
+await fs.writeFile(`${out}/detail-dom.html`,await page.content());
+await page.setViewportSize({width:390,height:844});
+await page.waitForTimeout(1500);
+await page.screenshot({path:`${out}/mobile-detail.png`});
+await page.locator('.back-button').click();
+await page.waitForTimeout(2500);
+await page.screenshot({path:`${out}/mobile-array.png`});
+console.log(JSON.stringify({ controls: await page.locator('button,a,input').evaluateAll(els => els.map(el => ({ tag: el.tagName, text: el.textContent?.trim(), id: el.id, class: el.className, aria: el.getAttribute('aria-label') }))), errors }));
+await context.close();
+await browser.close();

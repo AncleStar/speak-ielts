@@ -1,0 +1,101 @@
+name: ielts-interview
+
+x-app: &app
+  image: ielts-interview:${APP_IMAGE_TAG:-local}
+  build: .
+  env_file: .env
+  environment: &app-env
+    NODE_ENV: production
+    DATABASE_URL: postgres://interview:${POSTGRES_PASSWORD:?Set POSTGRES_PASSWORD in .env}@db:5432/interview
+    DATA_DIR: /app/data
+    LOCAL_STORAGE_DIR: /app/data/storage
+    TIME_SCALE: "1"
+  volumes:
+    - app-data:/app/data
+  init: true
+
+x-backup: &backup
+  image: postgres:17-bookworm
+  environment:
+    PGHOST: db
+    PGUSER: interview
+    PGPASSWORD: ${POSTGRES_PASSWORD:?Set POSTGRES_PASSWORD in .env}
+    PGDATABASE: interview
+  volumes:
+    - ./docker:/ops:ro
+    - app-data:/app-data:ro
+    - ./backups:/backups
+  depends_on:
+    db:
+      condition: service_healthy
+
+services:
+  db:
+    image: postgres:17-bookworm
+    environment:
+      POSTGRES_DB: interview
+      POSTGRES_USER: interview
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?Set POSTGRES_PASSWORD in .env}
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U interview -d interview"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+    restart: unless-stopped
+  backup-premigrate:
+    <<: *backup
+    command: ["sh", "/ops/backup-once.sh", "premigrate"]
+  setup:
+    <<: *app
+    command: ["npm", "run", "setup"]
+    depends_on:
+      backup-premigrate:
+        condition: service_completed_successfully
+  web:
+    <<: *app
+    ports:
+      - "127.0.0.1:3000:3000"
+    depends_on:
+      setup:
+        condition: service_completed_successfully
+    healthcheck:
+      test: ["CMD", "node", "-e", "fetch('http://127.0.0.1:3000/api/health').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+    restart: unless-stopped
+  worker:
+    <<: *app
+    command: ["npm", "run", "worker"]
+    depends_on:
+      setup:
+        condition: service_completed_successfully
+    restart: unless-stopped
+  backup:
+    <<: *backup
+    command: ["sh", "/ops/backup-loop.sh"]
+    restart: unless-stopped
+  caddy:
+    image: caddy:2
+    profiles: ["https"]
+    environment:
+      APP_DOMAIN: ${APP_DOMAIN:-localhost}
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./docker/Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy-data:/data
+      - caddy-config:/config
+    depends_on:
+      web:
+        condition: service_healthy
+    restart: unless-stopped
+
+volumes:
+  postgres-data:
+  app-data:
+  caddy-data:
+  caddy-config:

@@ -1,0 +1,753 @@
+{
+  "categories": [
+    {
+      "code": "PERSON",
+      "name": "人物"
+    },
+    {
+      "code": "PLACE",
+      "name": "地点"
+    },
+    {
+      "code": "OBJECT",
+      "name": "物品"
+    },
+    {
+      "code": "EXP",
+      "name": "经历"
+    },
+    {
+      "code": "ACTIVITY",
+      "name": "活动"
+    }
+  ],
+  "cards": [
+    {
+      "id": "P2-PERSON-1",
+      "q": "Describe a person who has helped you learn something important.",
+      "points": [
+        "who this person is",
+        "how you know this person",
+        "what they helped you learn"
+      ],
+      "lastPoint": "and explain why this was important to you.",
+      "zh": "描述一位帮助你学会某件重要事情的人：他/她是谁、你们怎么认识、帮你学会了什么，并解释这件事为什么对你重要。",
+      "difficulty": 2,
+      "sample": true,
+      "roundingOff": [
+        {
+          "id": "P2-PERSON-1-R1",
+          "q": "Do you still keep in touch with this person?"
+        },
+        {
+          "id": "P2-PERSON-1-R2",
+          "q": "Would you like to teach others in the same way?"
+        }
+      ],
+      "keywords": [
+        "mentor",
+        "patient",
+        "encourage",
+        "turning point"
+      ],
+      "tips": "按\"人物介绍 → 相识经过 → 学到的东西（具体一件事）→ 为什么重要\"组织；最后一问要有明确的解释。",
+      "expressions": [
+        "I'd like to talk about ..., who ...",
+        "I first met her when ...",
+        "What she taught me was ...",
+        "Looking back, it was a real turning point."
+      ],
+      "reference": "I'd like to talk about my high school physics teacher, Mr Zhang, who helped me learn how to deal with failure. I first met him in my second year of high school, when I moved into his class. At that time I was a very anxious student, and whenever I got a bad mark I would give up on the subject completely. After one exam where I scored really low, he asked me to stay after class. Instead of criticising me, he went through every mistake with me and showed me that most of them came from the same small misunderstanding. He told me that a mistake is just information about what to practise next. After that, he gave me a small notebook to record my errors, and every week we looked at it together for ten minutes. Within a few months, my marks improved a lot, but more importantly, I stopped being afraid of making mistakes. This was important to me because the same attitude has helped me at university and in my part-time job. Looking back, it was a real turning point in how I see learning.",
+      "difficulties": [
+        "开头介绍过长，导致最后一问来不及解释",
+        "过去经历时态不统一"
+      ]
+    },
+    {
+      "id": "P2-PERSON-2",
+      "q": "Describe a friend you enjoy spending time with.",
+      "points": [
+        "who this friend is",
+        "how you became friends",
+        "what you usually do together"
+      ],
+      "lastPoint": "and explain why you enjoy spending time with this friend.",
+      "zh": "描述一位你喜欢和他/她待在一起的朋友：是谁、怎么成为朋友、通常一起做什么，并解释为什么喜欢和他/她相处。",
+      "difficulty": 1,
+      "roundingOff": [
+        {
+          "id": "P2-PERSON-2-R1",
+          "q": "Do you think you will stay friends for a long time?"
+        }
+      ],
+      "keywords": [
+        "easy-going",
+        "sense of humour",
+        "hang out",
+        "have a lot in common"
+      ],
+      "tips": "用一件具体的共同经历让描述生动；最后说明两人相处的感受与原因。",
+      "expressions": [
+        "We hit it off straight away.",
+        "We have a lot in common.",
+        "We usually hang out ...",
+        "She always makes me laugh."
+      ],
+      "reference": "The friend I'd like to describe is Lily, who I've known for about six years. We became friends in our first week of university, when we were put in the same dormitory. On the first night, neither of us could sleep because of the heat, so we ended up sitting on the balcony and talking until three in the morning. We hit it off straight away, because we have a lot in common, like our love of old films and street food. Nowadays we live in different parts of the city, but we still hang out almost every weekend. Usually we explore a new neighbourhood, try a small restaurant, and then go to a cinema that shows classic movies. I enjoy spending time with her for a few reasons. First, she has a great sense of humour, so even ordinary things become funny when she's around. Second, she's very honest. When I'm about to make a bad decision, she tells me directly, but in a kind way. With her, I never feel I have to pretend, and that's rare.",
+      "difficulties": [
+        "\"what you usually do\" 部分只列清单，缺少描述"
+      ]
+    },
+    {
+      "id": "P2-PERSON-3",
+      "q": "Describe a person you know who is very good at their job.",
+      "points": [
+        "who this person is",
+        "what job they do",
+        "how you know they are good at it"
+      ],
+      "lastPoint": "and explain how you feel about this person.",
+      "zh": "描述一位你认识的、非常擅长自己工作的人：是谁、做什么工作、你怎么知道他/她做得好，并说明你对他/她的感受。",
+      "difficulty": 2,
+      "roundingOff": [
+        {
+          "id": "P2-PERSON-3-R1",
+          "q": "Would you like to do the same job as this person?"
+        }
+      ],
+      "keywords": [
+        "professional",
+        "attention to detail",
+        "reputation",
+        "admire"
+      ],
+      "tips": "用具体事例证明\"做得好\"，避免只说 she is very good；最后表达感受（钦佩、受启发等）。",
+      "expressions": [
+        "She's highly respected in ...",
+        "What really impressed me was ...",
+        "You can tell she's good at her job because ...",
+        "I really admire her for ..."
+      ],
+      "reference": "I'm going to talk about my aunt, who works as a nurse in the emergency department of a hospital in my hometown. I know she's very good at her job from both what other people say and what I've seen myself. A couple of years ago my grandfather had a bad fall and was taken to her hospital late at night. Even though the department was extremely busy, she stayed completely calm. She explained every step to my family in simple language, checked on my grandfather every hour, and noticed a small change in his breathing that the machines hadn't flagged yet. The doctor later told us that her quick reaction probably prevented a much more serious problem. Her colleagues also often ask her for advice, and she's been chosen to train new nurses for three years in a row. How do I feel about her? I really admire her, not just because she's skilled, but because she treats every patient as if they were her own family. She's the reason I believe that attention to detail and kindness can make a huge difference in any job.",
+      "difficulties": [
+        "\"how you know\" 需要证据，不要只用形容词"
+      ]
+    },
+    {
+      "id": "P2-PERSON-4",
+      "q": "Describe someone older than you whom you admire.",
+      "points": [
+        "who this person is",
+        "how you know them",
+        "what they are like"
+      ],
+      "lastPoint": "and explain why you admire this person.",
+      "zh": "描述一位比你年长、令你钦佩的人：是谁、怎么认识、他/她是什么样的人，并解释你为什么钦佩他/她。",
+      "difficulty": 2,
+      "roundingOff": [
+        {
+          "id": "P2-PERSON-4-R1",
+          "q": "Do you think you are similar to this person in any way?"
+        }
+      ],
+      "keywords": [
+        "resilient",
+        "generous",
+        "set an example",
+        "life experience"
+      ],
+      "tips": "描述性格时配合具体行为；钦佩的原因要与性格描述相呼应。",
+      "expressions": [
+        "He's in his seventies, but ...",
+        "He's the kind of person who ...",
+        "What I admire most is ...",
+        "He sets a good example for ..."
+      ],
+      "reference": "I'd like to describe my neighbour, Mr Wang, who is in his seventies and lives in the flat below mine. I got to know him when I first moved into the building, because he helped me carry my boxes up the stairs, even though he was much older than me. Since then we've chatted almost every day in the courtyard. He's the kind of person who is always curious. At the age of seventy, he decided to learn how to use a smartphone properly, and now he takes photos of the flowers he grows and shares them in a group chat with other residents. He's also very generous with his time. He teaches children in the neighbourhood how to play Chinese chess for free, and he organises a small clean-up every month. What I admire most is his attitude to life. He lost his wife a few years ago, and he could easily have become lonely and bitter, but instead he chose to stay active and help others. He sets a great example for me, because he shows that it's never too late to learn and connect with people.",
+      "difficulties": [
+        "whom / who 的使用",
+        "描述性格时只用形容词堆砌"
+      ]
+    },
+    {
+      "id": "P2-PLACE-1",
+      "q": "Describe a place where you go to clear your mind.",
+      "points": [
+        "where this place is",
+        "how often you go there",
+        "what you do there"
+      ],
+      "lastPoint": "and explain why this place helps you clear your mind.",
+      "zh": "描述一个你去放空思绪的地方：在哪里、多久去一次、在那里做什么，并解释为什么这个地方能让你平静下来。",
+      "difficulty": 1,
+      "sample": true,
+      "roundingOff": [
+        {
+          "id": "P2-PLACE-1-R1",
+          "q": "Do you usually go there alone?"
+        },
+        {
+          "id": "P2-PLACE-1-R2",
+          "q": "Would you recommend this place to your friends?"
+        }
+      ],
+      "keywords": [
+        "peaceful",
+        "riverside",
+        "get away from",
+        "clear my head"
+      ],
+      "tips": "用感官细节（看到、听到的）描写地点；解释原因时说明它和日常压力的对比。",
+      "expressions": [
+        "There's a quiet spot by ...",
+        "Whenever I feel overwhelmed, I ...",
+        "It's a great place to clear my head.",
+        "It feels like a world away from ..."
+      ],
+      "reference": "The place I'd like to talk about is a small riverside path about fifteen minutes' walk from my apartment. It's on the edge of a park, and most people don't know about it, so it's usually very quiet. I go there about twice a week, especially when I've had a stressful day at school or I need to make a decision. What I do there is really simple. I walk slowly along the river for about half an hour, and then I sit on an old wooden bench under a willow tree. Sometimes I listen to calm music, but more often I just watch the water and the birds. In the evening you can see the lights of the city reflected on the river, which is really beautiful. I think this place helps me clear my mind for two reasons. First, it's one of the few places near my home where I can't hear traffic, so it feels like a world away from my busy life. Second, walking gives my thoughts time to settle, so by the time I go home, problems that seemed huge usually feel much more manageable.",
+      "difficulties": [
+        "地点描述缺少方位与感官细节",
+        "最后一问的原因不够具体"
+      ]
+    },
+    {
+      "id": "P2-PLACE-2",
+      "q": "Describe a city or town you visited that you would like to visit again.",
+      "points": [
+        "where it is",
+        "when you went there",
+        "what you did there"
+      ],
+      "lastPoint": "and explain why you would like to visit it again.",
+      "zh": "描述一个你去过并想再去的城市或小镇：在哪里、什么时候去的、在那里做了什么，并解释为什么想再去。",
+      "difficulty": 1,
+      "roundingOff": [
+        {
+          "id": "P2-PLACE-2-R1",
+          "q": "Would you go there with the same people next time?"
+        }
+      ],
+      "keywords": [
+        "ancient town",
+        "atmosphere",
+        "local food",
+        "didn't have enough time"
+      ],
+      "tips": "过去的经历用过去时，想再去的原因用将来/虚拟语气；可以说上次留下的遗憾。",
+      "expressions": [
+        "I visited ... a couple of years ago.",
+        "We spent most of our time ...",
+        "I didn't get the chance to ...",
+        "Next time, I'd love to ..."
+      ],
+      "reference": "I'd like to talk about Dali, a city in Yunnan province in south-west China. I went there two summers ago with my cousin, just after my university entrance exam, and we stayed for five days. Dali has an old town with stone streets and traditional houses, and behind it there are mountains, while in front of it there's a huge lake called Erhai. We spent most of our time cycling around the lake, stopping in small villages to take photos and try local food, like grilled cheese and rice noodles. One evening we climbed up to a viewpoint and watched the sunset over the lake, which is still one of the most beautiful things I've ever seen. I'd love to visit it again for a couple of reasons. The main one is that we didn't have enough time. It rained for two days, so we couldn't hike in the mountains as we had planned. Also, the pace of life there is so relaxed that I'd like to stay longer, maybe for two weeks, and just live like a local. Next time, I'd like to bring my parents, because I think they'd love the scenery as much as I did.",
+      "difficulties": [
+        "过去时与虚拟语气的切换"
+      ]
+    },
+    {
+      "id": "P2-PLACE-3",
+      "q": "Describe a public place in your city that you often go to.",
+      "points": [
+        "where it is",
+        "what it looks like",
+        "what you do there"
+      ],
+      "lastPoint": "and explain why you often go there.",
+      "zh": "描述你所在城市中你常去的一个公共场所：在哪里、是什么样子、在那里做什么，并解释你为什么常去。",
+      "difficulty": 2,
+      "roundingOff": [
+        {
+          "id": "P2-PLACE-3-R1",
+          "q": "Do many people go there at the weekend?"
+        }
+      ],
+      "keywords": [
+        "library",
+        "facilities",
+        "open to the public",
+        "atmosphere"
+      ],
+      "tips": "\"what it looks like\" 要有外观/内部描述；原因可以分功能与感受两层。",
+      "expressions": [
+        "It's located in the city centre, right next to ...",
+        "The building itself is ...",
+        "I usually spend ... there.",
+        "It's become a kind of second home for me."
+      ],
+      "reference": "The public place I go to most often is the new city library, which is located in the cultural district, right next to the museum. It opened about three years ago, and the building itself is quite striking. It's shaped like a stack of books, with huge glass windows, so the inside is filled with natural light. There are five floors, including a children's area, a quiet reading room and a café on the ground floor. I usually go there on Saturday mornings and stay for three or four hours. Most of the time I study for my exams in the quiet room, but I also like browsing the new arrivals section, and sometimes I attend free talks about history or photography. I often go there for a few reasons. First, it's a much better place to concentrate than my home, where there are always distractions. Second, it's completely free and open to everyone, which I think is great. And finally, I simply enjoy the atmosphere. Seeing so many people reading quietly motivates me. It's become a kind of second home for me.",
+      "difficulties": [
+        "外观描述词汇不足",
+        "原因只有一句话"
+      ],
+      "goal": "围绕地点、外观、活动与常去原因组织一段连贯陈述",
+      "rule": "涵盖任务卡三个提示点，并解释为什么常去；允许描述性组织，不强制使用故事的经过与结尾。"
+    },
+    {
+      "id": "P2-PLACE-4",
+      "q": "Describe a building you find interesting.",
+      "points": [
+        "where the building is",
+        "what it looks like",
+        "what it is used for"
+      ],
+      "lastPoint": "and explain why you find it interesting.",
+      "zh": "描述一座你觉得有意思的建筑：在哪里、外观如何、用途是什么，并解释为什么你觉得它有意思。",
+      "difficulty": 3,
+      "roundingOff": [
+        {
+          "id": "P2-PLACE-4-R1",
+          "q": "Have you ever been inside this building?"
+        }
+      ],
+      "keywords": [
+        "architecture",
+        "combine",
+        "traditional",
+        "converted"
+      ],
+      "tips": "外观描述从整体到细节；可以对比建筑的过去与现在的用途。",
+      "expressions": [
+        "It was originally built as ...",
+        "It has been converted into ...",
+        "What makes it special is ...",
+        "It combines ... with ..."
+      ],
+      "reference": "The building I find interesting is an old factory in my hometown that has been converted into an arts centre. It's located near the railway station, in an area that used to be full of textile factories. It was originally built in the 1950s, so from the outside it looks quite plain, with red brick walls, tall chimneys and rows of small windows. However, when you go inside, it's a completely different world. The designers kept the old steel beams and some of the machines, but they added glass walls, modern lighting and wooden floors. Nowadays it's used for art exhibitions, small concerts and weekend markets, where local designers sell handmade products. I find it interesting mainly because it combines the city's history with its present. My grandparents actually worked in factories like this one, so when I walk around, I feel connected to their generation. At the same time, it shows that old buildings don't have to be knocked down. They can be given a new life. I think that's a smart and sustainable way to develop a city.",
+      "difficulties": [
+        "被动语态（was built, has been converted）",
+        "建筑词汇"
+      ]
+    },
+    {
+      "id": "P2-OBJECT-1",
+      "q": "Describe an object that you use every day and find useful.",
+      "points": [
+        "what the object is",
+        "when you got it",
+        "how you use it"
+      ],
+      "lastPoint": "and explain why you find it useful.",
+      "zh": "描述一件你每天使用并觉得很有用的物品：是什么、什么时候得到的、怎么使用，并解释为什么觉得它有用。",
+      "difficulty": 1,
+      "roundingOff": [
+        {
+          "id": "P2-OBJECT-1-R1",
+          "q": "Would you buy the same thing again if you lost it?"
+        }
+      ],
+      "keywords": [
+        "practical",
+        "durable",
+        "carry around",
+        "can't do without"
+      ],
+      "tips": "描述外观与使用场景，用具体日常片段说明\"有用\"。",
+      "expressions": [
+        "It's nothing special, but ...",
+        "I got it as a present from ...",
+        "I use it for ...",
+        "I honestly can't do without it."
+      ],
+      "reference": "The object I'd like to talk about is a stainless steel water bottle. It's nothing special to look at. It's dark blue, about the size of a can, and it has a few scratches on it now. I got it about two years ago as a present from my sister when I started my internship, because she knew I often forgot to drink water when I was busy. I use it every single day. In the morning I fill it with hot tea before I leave home, and it keeps the tea warm until the afternoon. At work, I refill it with water, and I carry it around in my backpack wherever I go. I find it useful for several reasons. First, it's really practical. It keeps drinks hot or cold for hours, and it doesn't leak. Second, it has saved me a lot of money, because I no longer buy bottled drinks. And third, it's better for the environment, since I've probably avoided hundreds of plastic bottles. It's a simple thing, but I honestly can't do without it.",
+      "difficulties": [
+        "描述普通物品时词汇重复（useful, good）"
+      ]
+    },
+    {
+      "id": "P2-OBJECT-2",
+      "q": "Describe a gift you gave to someone that made them happy.",
+      "points": [
+        "what the gift was",
+        "who you gave it to",
+        "why you chose it"
+      ],
+      "lastPoint": "and explain how the person felt about it.",
+      "zh": "描述一件你送给别人并让对方很开心的礼物：礼物是什么、送给谁、为什么选它，并说明对方的感受。",
+      "difficulty": 2,
+      "roundingOff": [
+        {
+          "id": "P2-OBJECT-2-R1",
+          "q": "Do you enjoy choosing gifts for other people?"
+        }
+      ],
+      "keywords": [
+        "thoughtful",
+        "handmade",
+        "surprise",
+        "meaningful"
+      ],
+      "tips": "选礼物的原因可以讲准备过程；对方的反应用具体动作和话语描写。",
+      "expressions": [
+        "I decided to make ... myself.",
+        "I wanted to give her something meaningful.",
+        "Her eyes lit up when ...",
+        "She was so touched that ..."
+      ],
+      "reference": "I'd like to describe a photo album I made for my grandmother's eightieth birthday last year. The idea came to me when I was helping her tidy her room and found a box of old black-and-white photos that were fading and mixed up. I chose this gift because she already has everything she needs, and I wanted to give her something meaningful rather than expensive. So for about a month, I secretly borrowed the photos, scanned them, and asked my parents and aunts to tell me the stories behind them. Then I printed them and put them in a big album in time order, with short notes under each picture, like the year and the people in it. I also added some recent photos of her grandchildren at the end. When I gave it to her at the birthday dinner, her eyes lit up. She turned the pages very slowly and kept telling everyone stories that even my parents had never heard. She was so touched that she cried a little. Now she keeps it on the table next to her bed and shows it to every visitor. For me, it was the best gift I've ever given.",
+      "difficulties": [
+        "过去时叙述的连贯性",
+        "感受描写只用 happy"
+      ]
+    },
+    {
+      "id": "P2-OBJECT-3",
+      "q": "Describe something you own that you would like to replace.",
+      "points": [
+        "what it is",
+        "how long you have had it",
+        "what is wrong with it"
+      ],
+      "lastPoint": "and explain what you would like to replace it with.",
+      "zh": "描述一件你拥有并想更换的物品：是什么、用了多久、它有什么问题，并说明你想换成什么。",
+      "difficulty": 2,
+      "roundingOff": [
+        {
+          "id": "P2-OBJECT-3-R1",
+          "q": "What will you do with the old one?"
+        }
+      ],
+      "keywords": [
+        "out of date",
+        "battery",
+        "slow down",
+        "upgrade"
+      ],
+      "tips": "用现在完成时说明使用时长；问题描述要具体；最后一问说明新物品的特点与理由。",
+      "expressions": [
+        "I've had it for about ... years.",
+        "It's started to ...",
+        "The main problem is that ...",
+        "I'm thinking of upgrading to ..."
+      ],
+      "reference": "Something I'd really like to replace is my laptop. I've had it for about five years now. My parents bought it for me when I started university, and at that time it was quite a good model. It has been with me through all my assignments and my graduation thesis, so I'm a bit attached to it. However, it has started to cause a lot of problems. The battery only lasts about forty minutes, so I always have to sit near a socket. It has also slowed down a lot. Opening a large file or joining a video call can take several minutes, and the fan makes a loud noise, which is embarrassing in the library. A couple of keys don't work properly either. I would like to replace it with a lighter laptop that has a long battery life, because I often work in cafés and on trains. I don't need the most powerful model, but I'd like one with a good screen, since I spend so many hours reading. I'm saving up at the moment, and I hope to buy one before the end of the year.",
+      "difficulties": [
+        "现在完成时 have had / has started",
+        "描述故障的词汇"
+      ]
+    },
+    {
+      "id": "P2-OBJECT-4",
+      "q": "Describe a piece of clothing that is special to you.",
+      "points": [
+        "what it is",
+        "where you got it",
+        "when you wear it"
+      ],
+      "lastPoint": "and explain why it is special to you.",
+      "zh": "描述一件对你有特别意义的衣物：是什么、从哪里得到、什么时候穿，并解释它为什么特别。",
+      "difficulty": 2,
+      "roundingOff": [
+        {
+          "id": "P2-OBJECT-4-R1",
+          "q": "Do you think you will keep it for a long time?"
+        }
+      ],
+      "keywords": [
+        "hand-knitted",
+        "sentimental value",
+        "special occasions",
+        "reminds me of"
+      ],
+      "tips": "外观描述（颜色、材质、图案）+ 来历故事 + 情感意义。",
+      "expressions": [
+        "It was knitted by ...",
+        "It has great sentimental value.",
+        "I only wear it on ...",
+        "Every time I put it on, it reminds me of ..."
+      ],
+      "reference": "The piece of clothing I'd like to describe is a thick grey scarf that my mother knitted for me. It's quite long, with a simple pattern of dark red stripes at both ends, and it's made of soft wool. She made it for me the winter before I left home to study in northern China, because she was worried I wouldn't be used to the cold. I remember she stayed up late for several weeks to finish it, even though she was busy with work. I wear it almost every day in winter, especially on windy days when I'm cycling to class. I also wear it whenever I travel, because it's big enough to use as a small blanket on trains. It's special to me for two reasons. Firstly, it's handmade, so there's no other scarf exactly like it in the world. Secondly, and more importantly, it has great sentimental value. When I was homesick during my first year, wearing it made me feel as if my mother was close to me. Even though it's a bit worn now, I would never throw it away.",
+      "difficulties": [
+        "衣物、材质相关词汇",
+        "情感原因表达不够具体"
+      ]
+    },
+    {
+      "id": "P2-EXP-1",
+      "q": "Describe a time when you learned something new outside school.",
+      "points": [
+        "what you learned",
+        "when and where you learned it",
+        "how you learned it"
+      ],
+      "lastPoint": "and explain how you felt about this experience.",
+      "zh": "描述一次你在学校之外学会新东西的经历：学了什么、何时何地学的、怎么学的，并说明你对这段经历的感受。",
+      "difficulty": 1,
+      "roundingOff": [
+        {
+          "id": "P2-EXP-1-R1",
+          "q": "Do you still use this skill today?"
+        }
+      ],
+      "keywords": [
+        "trial and error",
+        "online tutorials",
+        "practise",
+        "sense of achievement"
+      ],
+      "tips": "按时间顺序讲述学习过程，包含一个遇到困难的细节；感受部分要真实具体。",
+      "expressions": [
+        "It all started when ...",
+        "At first, I kept ...",
+        "After a lot of trial and error, ...",
+        "I felt a real sense of achievement."
+      ],
+      "reference": "I'd like to talk about the time I learned how to cook properly. It happened three years ago, during the long summer holiday after my first year at university. My parents were both working late that summer, so I decided to take responsibility for dinner. The problem was that I could only make instant noodles. So I learned mainly by watching online tutorials and by asking my grandmother for advice on the phone. At first, it was a disaster. I kept burning the garlic, I put too much salt in everything, and once I even set off the smoke alarm. But I wrote down what went wrong each time, and after a lot of trial and error, I started to get better. By the end of the summer, I could cook about ten dishes, including my grandmother's braised pork, which is quite difficult. I felt really proud of myself. It was the first time I had learned a practical skill completely on my own, without a teacher or an exam. It also made me appreciate how much effort my parents had put into cooking for me all those years.",
+      "difficulties": [
+        "过去完成时 had learned 的使用",
+        "叙事缺少转折"
+      ]
+    },
+    {
+      "id": "P2-EXP-2",
+      "q": "Describe a time when you had to wait for something important.",
+      "points": [
+        "what you were waiting for",
+        "how long you had to wait",
+        "what you did while you were waiting"
+      ],
+      "lastPoint": "and explain how you felt while you were waiting.",
+      "zh": "描述一次你必须等待重要事情的经历：在等什么、等了多久、等待期间做了什么，并说明等待时的感受。",
+      "difficulty": 2,
+      "roundingOff": [
+        {
+          "id": "P2-EXP-2-R1",
+          "q": "Are you usually a patient person?"
+        }
+      ],
+      "keywords": [
+        "results",
+        "anxious",
+        "distract myself",
+        "relief"
+      ],
+      "tips": "描写情绪的变化过程（紧张 → 分散注意力 → 结果揭晓）。",
+      "expressions": [
+        "I was waiting to hear whether ...",
+        "The wait felt endless.",
+        "To distract myself, I ...",
+        "When I finally ..., I felt a huge sense of relief."
+      ],
+      "reference": "I'd like to describe the time I had to wait for my university entrance exam results. The exam was in early June, but the results weren't published until the end of the month, so I had to wait for almost three weeks. This was really important for me, because the score would decide which university I could apply to. During the first few days, I tried not to think about it and spent time with friends, playing basketball and watching films. But as the date got closer, I became more and more anxious. I kept going over the exam questions in my head, trying to work out my score. To distract myself, I started volunteering at a local library, helping to organise books for the summer reading programme, which actually helped a lot. Honestly, the wait felt endless, and I didn't sleep well in the last few nights. When the results finally came out, I was checking the website at midnight with my parents beside me. My score was slightly better than I expected, and I felt a huge sense of relief. Looking back, the waiting was almost harder than the exam itself.",
+      "difficulties": [
+        "过去进行时 I was waiting",
+        "情绪词汇单一（nervous）"
+      ]
+    },
+    {
+      "id": "P2-EXP-3",
+      "q": "Describe a time when you helped someone solve a problem.",
+      "points": [
+        "who you helped",
+        "what the problem was",
+        "how you helped them"
+      ],
+      "lastPoint": "and explain how you felt after helping this person.",
+      "zh": "描述一次你帮助别人解决问题的经历：帮了谁、问题是什么、你怎么帮的，并说明帮忙之后的感受。",
+      "difficulty": 2,
+      "roundingOff": [
+        {
+          "id": "P2-EXP-3-R1",
+          "q": "Do people often ask you for help?"
+        }
+      ],
+      "keywords": [
+        "step by step",
+        "patient",
+        "figure out",
+        "grateful"
+      ],
+      "tips": "问题描述清楚后，按步骤说明帮忙的过程；感受部分可以说收获。",
+      "expressions": [
+        "He was really struggling with ...",
+        "I offered to help him ...",
+        "We went through it step by step.",
+        "It felt great to know that ..."
+      ],
+      "reference": "I'd like to talk about a time last winter when I helped an elderly man in my neighbourhood. I noticed him standing in front of the self-service machine at the hospital near my home, looking very confused. When I asked if he needed help, he told me he had come to collect his medical test results, but the machine required a phone app and a scan code, and he didn't have a smartphone. He had already been trying for twenty minutes and was worried he'd have to come back another day. So first, I found a staff member and explained the situation. She showed us a service desk where older people could get results without the app, but there was a long queue. I waited with him and chatted to keep him company. When we got to the front, I helped him fill in the paper form, because the print was very small. In the end, he got his results, and he thanked me again and again. I felt really good afterwards, not because I did something difficult, but because it was so simple for me and so hard for him. It made me realise that many older people are being left behind by technology.",
+      "difficulties": [
+        "叙述步骤时连接词不足",
+        "感受只说 happy"
+      ]
+    },
+    {
+      "id": "P2-EXP-4",
+      "q": "Describe a time when you changed your mind about something.",
+      "points": [
+        "what you changed your mind about",
+        "what your original opinion was",
+        "what made you change your mind"
+      ],
+      "lastPoint": "and explain how you felt about changing your mind.",
+      "zh": "描述一次你改变主意/看法的经历：关于什么、原来的看法、是什么让你改变，并说明你对改变看法的感受。",
+      "difficulty": 3,
+      "roundingOff": [
+        {
+          "id": "P2-EXP-4-R1",
+          "q": "Is it easy for you to admit you were wrong?"
+        }
+      ],
+      "keywords": [
+        "originally",
+        "assumption",
+        "open-minded",
+        "turned out"
+      ],
+      "tips": "\"原来认为 → 事件 → 现在认为\" 三段对比清晰；使用表示观点变化的表达。",
+      "expressions": [
+        "I used to think that ...",
+        "My view changed completely when ...",
+        "It turned out that ...",
+        "I'm glad I kept an open mind."
+      ],
+      "reference": "I'd like to talk about how I changed my mind about living in a small town. For most of my life, I used to think that small towns were boring and that successful people always moved to big cities. I grew up in a large city myself, and whenever we visited relatives in the countryside, I couldn't wait to go home. My view changed completely two years ago, when I spent a month in a small town in Zhejiang for a university research project. I was expecting to feel bored and isolated, but it turned out to be one of the best months of my life. People there had much more time for each other. My host family invited me to dinner with their neighbours almost every evening, and I noticed that everyone knew each other's names. I also discovered that there were small businesses and young people who had moved back from cities to start online shops and cafés. So I realised my original opinion was based on assumptions, not experience. I felt a bit embarrassed at first, but mostly I felt grateful. It taught me to keep an open mind before judging a place or a group of people.",
+      "difficulties": [
+        "used to 与 turned out 等表示变化的表达",
+        "论证原来观点的依据不足"
+      ]
+    },
+    {
+      "id": "P2-ACTIVITY-1",
+      "q": "Describe an activity you do to stay healthy.",
+      "points": [
+        "what the activity is",
+        "when and where you do it",
+        "who you do it with"
+      ],
+      "lastPoint": "and explain how it helps you stay healthy.",
+      "zh": "描述一项你为保持健康而做的活动：是什么、何时何地做、和谁一起，并解释它如何帮助你保持健康。",
+      "difficulty": 1,
+      "roundingOff": [
+        {
+          "id": "P2-ACTIVITY-1-R1",
+          "q": "Would you encourage your friends to try this activity?"
+        }
+      ],
+      "keywords": [
+        "swimming",
+        "routine",
+        "physically and mentally",
+        "stamina"
+      ],
+      "tips": "介绍活动的具体做法；\"如何帮助健康\"分身体与心理两方面。",
+      "expressions": [
+        "I've been doing it for ...",
+        "I usually go ... times a week.",
+        "It's great for both my body and my mind.",
+        "I've noticed that ..."
+      ],
+      "reference": "The activity I'd like to describe is swimming, which I've been doing regularly for about two years. I usually go to a public swimming pool near my office three times a week, on Monday, Wednesday and Friday evenings, and I swim for about forty-five minutes each time. Most of the time I go with a colleague, who is also trying to get fitter, so we encourage each other. If one of us feels lazy, the other one sends a message saying, 'See you at the pool.' It really works. Swimming helps me stay healthy in several ways. Physically, it's a full-body workout, but it's gentle on my joints, which is important because I hurt my knee playing football a few years ago. My stamina has improved a lot. At the beginning I could only swim four lengths without stopping, but now I can easily do twenty. Mentally, it's also great. When I'm in the water, I can't look at my phone, so it's the only time in my day when I'm completely disconnected. I've noticed that I sleep much better on the days when I swim.",
+      "difficulties": [
+        "现在完成进行时 have been doing",
+        "健康益处只说 good for health"
+      ]
+    },
+    {
+      "id": "P2-ACTIVITY-2",
+      "q": "Describe a hobby you would like to take up in the future.",
+      "points": [
+        "what the hobby is",
+        "how you learned about it",
+        "what you would need to start it"
+      ],
+      "lastPoint": "and explain why you would like to take it up.",
+      "zh": "描述一个你将来想开始的爱好：是什么、你怎么了解到它、开始需要什么，并解释为什么想开始这项爱好。",
+      "difficulty": 2,
+      "roundingOff": [
+        {
+          "id": "P2-ACTIVITY-2-R1",
+          "q": "When do you think you will start?"
+        }
+      ],
+      "keywords": [
+        "pottery",
+        "hands-on",
+        "equipment",
+        "creative"
+      ],
+      "tips": "谈论未来计划用 would / would like to / I'd need；理由要与个人生活联系。",
+      "expressions": [
+        "I've been thinking about taking up ...",
+        "I first came across it when ...",
+        "I'd need to ...",
+        "It would give me a chance to ..."
+      ],
+      "reference": "A hobby I'd really like to take up in the future is pottery, which means making bowls, cups and plates from clay. I first came across it about a year ago when a friend invited me to a one-day workshop at a small studio downtown. I made a very uneven little cup, but I loved the experience. I've also watched lots of videos online, and it looks very relaxing. To start it properly, I would need to sign up for a regular course, because it's really hard to learn the pottery wheel on your own. The studio offers an eight-week beginner course on weekday evenings, and it includes the clay and the use of the kiln, so I wouldn't need to buy much equipment at first. The main thing I'd need is time. I'd like to take it up for a few reasons. Most of my work is done on a computer, so I'd love to do something hands-on and creative. It would also give me a chance to slow down, since you can't rush clay. And honestly, I like the idea of drinking tea from a cup I made myself.",
+      "difficulties": [
+        "虚拟语气 would / I'd need 的一致性"
+      ]
+    },
+    {
+      "id": "P2-ACTIVITY-3",
+      "q": "Describe an outdoor activity you did with other people.",
+      "points": [
+        "what the activity was",
+        "who you did it with",
+        "where you did it"
+      ],
+      "lastPoint": "and explain whether you enjoyed it.",
+      "zh": "描述一次你和别人一起进行的户外活动：是什么活动、和谁一起、在哪里，并说明你是否喜欢。",
+      "difficulty": 1,
+      "roundingOff": [
+        {
+          "id": "P2-ACTIVITY-3-R1",
+          "q": "Would you do this activity again?"
+        }
+      ],
+      "keywords": [
+        "hiking",
+        "campsite",
+        "teamwork",
+        "exhausted but happy"
+      ],
+      "tips": "按时间顺序叙述，加入一个意外或有趣的细节；最后明确表态并说明原因。",
+      "expressions": [
+        "Last spring, a group of us decided to ...",
+        "The trail was ...",
+        "Halfway up, ...",
+        "Overall, I really enjoyed it because ..."
+      ],
+      "reference": "I'd like to talk about a hiking trip I did last spring with five classmates. We went to a mountain area about two hours by bus from our city. It's quite famous for its bamboo forests and waterfalls, but it's not too crowded if you go early. We started at seven in the morning, carrying backpacks with snacks, water and raincoats. The trail was steep in some places, with stone steps that seemed never-ending. Halfway up, it suddenly started raining heavily, and we had to shelter under a small wooden pavilion for almost an hour. At first, everyone was a bit annoyed, but then someone started telling ghost stories, and we ended up laughing so much that we forgot about the rain. When we finally reached the top in the afternoon, the clouds cleared, and we could see the whole valley. Did I enjoy it? Absolutely. Physically it was exhausting, and my legs hurt for two days afterwards. But what made it special was the teamwork. We waited for the slowest person, shared our food, and helped each other on the slippery parts. It made our friendship much closer.",
+      "difficulties": [
+        "叙事过去时的一致性",
+        "最后一问没有明确表态"
+      ]
+    },
+    {
+      "id": "P2-ACTIVITY-4",
+      "q": "Describe an activity that you enjoyed doing as a child.",
+      "points": [
+        "what the activity was",
+        "when and where you did it",
+        "who you did it with"
+      ],
+      "lastPoint": "and explain why you enjoyed it.",
+      "zh": "描述一项你小时候喜欢的活动：是什么、何时何地进行、和谁一起，并解释你为什么喜欢。",
+      "difficulty": 1,
+      "roundingOff": [
+        {
+          "id": "P2-ACTIVITY-4-R1",
+          "q": "Do children still do this activity nowadays?"
+        }
+      ],
+      "keywords": [
+        "fly kites",
+        "childhood memories",
+        "carefree",
+        "used to"
+      ],
+      "tips": "用 used to / would 描述童年习惯；加入感官细节与情感回忆。",
+      "expressions": [
+        "When I was about eight, I used to ...",
+        "We would spend hours ...",
+        "Those were such carefree days.",
+        "It brings back happy memories."
+      ],
+      "reference": "When I was a child, one activity I really enjoyed was flying kites with my grandfather. I was about seven or eight at the time, and my family lived near a big square next to a river. Every Sunday afternoon in spring, when the wind was strong, my grandfather would take me there. He actually made most of our kites himself, using bamboo sticks and colourful paper, and one of them was shaped like a huge butterfly. We would spend hours on the square, along with lots of other families. My grandfather taught me how to run against the wind to get the kite into the air, and then how to slowly let out the string so it could climb higher and higher. Sometimes our kite got caught in a tree, and we had to wait for the wind to blow it free. I enjoyed it for several reasons. It was one of the few times I could run around freely outside, instead of doing homework. I also loved the feeling of controlling something so high in the sky. But most of all, it was special time with my grandfather, and it still brings back very happy memories.",
+      "difficulties": [
+        "would 表示过去习惯",
+        "童年回忆缺少细节"
+      ]
+    }
+  ]
+}

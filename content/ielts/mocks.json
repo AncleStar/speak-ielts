@@ -1,0 +1,39 @@
+{
+  "mocks": [
+    {
+      "id": "mock-1",
+      "title": "模考 1：居住与家乡 · 购物 · 公共场所",
+      "part1": ["P1-HOME-1", "P1-HOME-2", "P1-HOME-3", "P1-HOME-4", "P1-HOME-5", "P1-SHOP-1", "P1-SHOP-2", "P1-SHOP-3", "P1-SHOP-4", "P1-SHOP-5"],
+      "part2": "P2-PLACE-3",
+      "part3": ["P3-PLACE-3-1", "P3-PLACE-3-2", "P3-PLACE-3-3"]
+    },
+    {
+      "id": "mock-2",
+      "title": "模考 2：学习 · 饮食 · 擅长工作的人",
+      "part1": ["P1-STUDY-1", "P1-STUDY-2", "P1-STUDY-3", "P1-STUDY-4", "P1-STUDY-5", "P1-FOOD-1", "P1-FOOD-2", "P1-FOOD-3", "P1-FOOD-4", "P1-FOOD-5"],
+      "part2": "P2-PERSON-3",
+      "part3": ["P3-PERSON-3-1", "P3-PERSON-3-2", "P3-PERSON-3-3"]
+    },
+    {
+      "id": "mock-3",
+      "title": "模考 3：工作 · 科技 · 想更换的物品",
+      "part1": ["P1-WORK-1", "P1-WORK-2", "P1-WORK-3", "P1-WORK-4", "P1-WORK-5", "P1-TECH-1", "P1-TECH-2", "P1-TECH-3", "P1-TECH-4", "P1-TECH-5"],
+      "part2": "P2-OBJECT-3",
+      "part3": ["P3-OBJECT-3-1", "P3-OBJECT-3-2", "P3-OBJECT-3-3"]
+    },
+    {
+      "id": "mock-4",
+      "title": "模考 4：家庭 · 旅行 · 帮助他人的经历",
+      "part1": ["P1-FAMILY-1", "P1-FAMILY-2", "P1-FAMILY-3", "P1-FAMILY-4", "P1-FAMILY-5", "P1-TRAVEL-1", "P1-TRAVEL-2", "P1-TRAVEL-3", "P1-TRAVEL-4", "P1-TRAVEL-5"],
+      "part2": "P2-EXP-3",
+      "part3": ["P3-EXP-3-1", "P3-EXP-3-2", "P3-EXP-3-3"]
+    },
+    {
+      "id": "mock-5",
+      "title": "模考 5：日常安排 · 天气与季节 · 户外活动",
+      "part1": ["P1-ROUTINE-1", "P1-ROUTINE-2", "P1-ROUTINE-3", "P1-ROUTINE-4", "P1-ROUTINE-5", "P1-WEATHER-1", "P1-WEATHER-2", "P1-WEATHER-3", "P1-WEATHER-4", "P1-WEATHER-5"],
+      "part2": "P2-ACTIVITY-3",
+      "part3": ["P3-ACTIVITY-3-1", "P3-ACTIVITY-3-2", "P3-ACTIVITY-3-3"]
+    }
+  ]
+}
