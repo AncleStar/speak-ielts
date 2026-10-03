@@ -10,6 +10,26 @@ SPEAK 是面向个人与小范围试用的雅思口语训练 Web 应用。中文
 
 项目采用 [MIT](LICENSE)；第三方模型、字体与素材的许可见 [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md)。发布前运行 `npm run check:release`，或使用 `npm run export:source` 生成经过检查的源码目录；不要直接打包整个工作目录。详见 [开源发布](docs/开源发布.md)。
 
+## 界面预览
+
+以下为应用实际页面截图，使用测试账号与示例记录；截图中的倒计时来自加速测试环境。点击图片可查看原图。
+
+**训练磁盘库**：按 Part 和话题浏览题目，选中磁盘后进入练习。
+
+[![训练磁盘库：3D 磁盘阵列、题目预览与载入入口](docs/screenshots/training-discs.png)](docs/screenshots/training-discs.png)
+
+| 身份接入 | 登录欢迎页 |
+| --- | --- |
+| [![登录界面：邮箱、密码与邀请码注册入口](docs/screenshots/login.png)](docs/screenshots/login.png) | [![登录后的欢迎画面：SPEAK TRAINING](docs/screenshots/welcome.png)](docs/screenshots/welcome.png) |
+| **限时口语面试** | **学习记录** |
+| [![口语面试：虚拟考官、英文问题、倒计时与录音波形](docs/screenshots/interview.png)](docs/screenshots/interview.png) | [![学习记录：磁盘卡片、练习状态与记录筛选](docs/screenshots/history.png)](docs/screenshots/history.png) |
+
+**手机端**：适配竖屏的磁盘选择与语音作答界面。
+
+| 选择训练磁盘 | 语音面试 |
+| --- | --- |
+| <a href="docs/screenshots/mobile-discs.png"><img src="docs/screenshots/mobile-discs.png" alt="手机端训练磁盘库：话题切换与题目选择" width="260"></a> | <a href="docs/screenshots/mobile-interview.png"><img src="docs/screenshots/mobile-interview.png" alt="手机端面试：虚拟考官、录音与结束作答" width="260"></a> |
+
 ## 个人 API Key、模型和用量
 
 登录后从「设置 → API Key、模型与用量」进入。支持百炼北京地域的 Qwen3 ASR 稳定版 / 2026-02-10 快照和 Qwen Plus / Qwen Flash 非思考模式。保存个人 Key 后用于后续转写、反馈与追问，考官语音沿用站点配置。
