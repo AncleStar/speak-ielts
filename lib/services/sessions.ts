@@ -26,6 +26,7 @@ import {
 } from "@/lib/sessions/plan";
 import { FOLLOWUP_WAIT_SECONDS, mockPartDurationMs, startOfDayShanghai } from "@/lib/timing";
 import { metered } from "@/lib/providers/metered";
+import { assertRecordingConsent, withRecordingConsent } from "@/lib/services/recording-consent";
 
 export type SessionRow = typeof practiceSession.$inferSelect;
 
@@ -129,7 +130,7 @@ async function buildPlan(u: UserLite, input: CreateSessionInput): Promise<{ plan
 
 /** 创建训练 / 模考 / 自由练习 / 重练会话：检查额度、固定题目版本、准备考官音频。 */
 export async function createSession(u: UserLite, input: CreateSessionInput): Promise<{ id: string; reused: boolean }> {
-  return withLock("session-admission", () => createSessionLocked(u, input));
+  return withRecordingConsent(u.id, () => createSessionLocked(u, input), ["session-admission"]);
 }
 
 async function createSessionLocked(u: UserLite, input: CreateSessionInput): Promise<{ id: string; reused: boolean }> {
@@ -316,7 +317,7 @@ export async function recordEvent(
   sessionId: string,
   ev: { eventId: string; type: SessionEventType; part?: number; position?: number; planIndex?: number; reason?: string },
 ) {
-  return withLock(`session-event:${sessionId}`, () => recordEventLocked(userId, sessionId, ev));
+  return ["finish", "interrupt"].includes(ev.type) ? withLock(`session-event:${sessionId}`, () => recordEventLocked(userId, sessionId, ev)) : withRecordingConsent(userId, () => recordEventLocked(userId, sessionId, ev), [`session-event:${sessionId}`]);
 }
 
 async function recordEventLocked(userId: string, sessionId: string, ev: { eventId: string; type: SessionEventType; part?: number; position?: number; planIndex?: number; reason?: string }) {
@@ -459,6 +460,7 @@ export async function afterSessionClosed(sessionId: string) {
  * 模型只返回编号，服务端校验编号属于当前题目；超时、转写失败或选择失败时使用默认追问。
  */
 export async function selectFollowUp(userId: string, sessionId: string, planIndex: number) {
+  const consent = await assertRecordingConsent(userId);
   const s = await getOwnedSession(userId, sessionId);
   const plan = await planWithCurrentVoice(s.plan as SessionPlan);
   const item = plan.items[planIndex];
@@ -504,7 +506,7 @@ export async function selectFollowUp(userId: string, sessionId: string, planInde
     if (transcript && deadline - Date.now() > 300) {
       try {
         const msgs = buildFollowUpMessages({ question: item.prompt.text, transcript, candidates: fu.candidates });
-        const r = await metered(`followup:${main.id}`, userId).llmJson({
+        const r = await metered(`followup:${main.id}`, userId, () => assertRecordingConsent(userId, consent.version).then(() => {})).llmJson({
           purpose: "followup",
           ...msgs,
           maxTokens: 200,

@@ -72,7 +72,7 @@ class UploadQueue {
 
   enqueue(meta: RecordingMeta, blob?: Blob): Promise<UploadResult> {
     const scope = localIdentity();
-    if (!scope || meta.userId !== scope.userId || meta.localEpoch !== scope.epoch) return Promise.reject(new LocalSessionEnded());
+    if (!scope || scope.consentAllowed !== true || meta.userId !== scope.userId || meta.localEpoch !== scope.epoch || meta.consentVersion !== scope.consentVersion) return Promise.reject(new LocalSessionEnded());
     const existing = this.pending.get(meta.id);
     if (existing) return existing;
     this.failed.delete(meta.id);
@@ -107,6 +107,7 @@ class UploadQueue {
             submissionId: meta.id,
             clientDurationMs: Math.round(meta.durationMs),
             interrupted: meta.interrupted,
+            consentVersion: meta.consentVersion,
           },
         });
         if (signal.aborted) throw new LocalSessionEnded();

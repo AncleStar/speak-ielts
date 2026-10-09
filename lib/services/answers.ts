@@ -12,10 +12,10 @@ import { slotLimitSeconds, type AnswerKind, type SessionPlan } from "@/lib/sessi
 import { recordingKey, storage } from "@/lib/storage";
 import { isDurationWithinLimit } from "@/lib/timing";
 import { questionVersion } from "@/db/schema";
-import { withLock } from "@/lib/lock";
 import { reserveSessionQuota } from "@/lib/quota";
 import { startOfDayShanghai } from "@/lib/timing";
 import { assertUserAiBudget } from "@/lib/ai/runtime";
+import { withRecordingConsent } from "@/lib/services/recording-consent";
 
 export type AnswerRow = typeof answer.$inferSelect;
 
@@ -26,17 +26,17 @@ function ticketKey() {
 }
 
 /** 短期上传凭证：限定回答对象与有效期 */
-export function signUploadTicket(answerId: string, userId: string, now = Date.now()): string {
+export function signUploadTicket(answerId: string, userId: string, now = Date.now(), consentVersion = 0): string {
   const exp = now + TICKET_TTL_MS;
-  const sig = crypto.createHmac("sha256", ticketKey()).update(`${answerId}.${userId}.${exp}`).digest("base64url");
-  return `${exp}.${sig}`;
+  const sig = crypto.createHmac("sha256", ticketKey()).update(`${answerId}.${userId}.${consentVersion}.${exp}`).digest("base64url");
+  return `${consentVersion}.${exp}.${sig}`;
 }
 
-export function verifyUploadTicket(ticket: string, answerId: string, userId: string, now = Date.now()): boolean {
-  const [expStr, sig] = ticket.split(".");
+export function verifyUploadTicket(ticket: string, answerId: string, userId: string, now = Date.now(), consentVersion = 0): boolean {
+  const [version, expStr, sig, extra] = ticket.split(".");
   const exp = Number(expStr);
-  if (!exp || !sig || exp < now) return false;
-  const expected = crypto.createHmac("sha256", ticketKey()).update(`${answerId}.${userId}.${exp}`).digest("base64url");
+  if (extra !== undefined || version !== String(consentVersion) || !exp || !sig || exp < now) return false;
+  const expected = crypto.createHmac("sha256", ticketKey()).update(`${answerId}.${userId}.${consentVersion}.${exp}`).digest("base64url");
   const a = Buffer.from(sig);
   const b = Buffer.from(expected);
   return a.length === b.length && crypto.timingSafeEqual(a, b);
@@ -50,16 +50,18 @@ export interface TicketInput {
   submissionId: string;
   clientDurationMs: number;
   interrupted?: boolean;
+  consentVersion?: number;
 }
 
 /**
  * 申请上传凭证：校验会话归属与题目位置，按提交标识创建或复用回答（重复申请不产生重复记录）。
  */
 export async function createUploadTicket(userId: string, input: TicketInput) {
-  return withLock(`upload-admission:${userId}`, () => createUploadTicketLocked(userId, input));
+  return withRecordingConsent(userId, version => createUploadTicketLocked(userId, input, version), [`upload-admission:${userId}`]);
 }
 
-async function createUploadTicketLocked(userId: string, input: TicketInput) {
+async function createUploadTicketLocked(userId: string, input: TicketInput, version: number) {
+  if (input.consentVersion !== undefined && input.consentVersion !== version) throw forbidden("录音授权已改变，请开始新的录音", "consent_required");
   if (!/^[A-Za-z0-9_-]{8,80}$/.test(input.submissionId ?? "")) throw badRequest("无效的提交标识");
   const [u] = await db.select({ consentAt: user.consentAt }).from(user).where(eq(user.id, userId));
   if (!u?.consentAt) throw forbidden("请先同意录音说明", "consent_required");
@@ -71,7 +73,8 @@ async function createUploadTicketLocked(userId: string, input: TicketInput) {
     .from(answer)
     .where(and(eq(answer.sessionId, s.id), eq(answer.submissionId, input.submissionId)));
   if (existing) {
-    return { answerId: existing.id, status: existing.status, ticket: signUploadTicket(existing.id, userId) };
+    if (!existing.storageKey && existing.processingStage === "consent_wait") throw forbidden("这次录音的授权已撤回，请开始新的录音", "consent_required");
+    return { answerId: existing.id, status: existing.status, ticket: signUploadTicket(existing.id, userId, Date.now(), version) };
   }
 
   if (s.status !== "active") throw conflict("本次练习已结束，不能再提交新的回答", "session_closed");
@@ -131,16 +134,16 @@ async function createUploadTicketLocked(userId: string, input: TicketInput) {
   await tx.update(practiceSession).set({ reservedSeconds: reserve, lastActivityAt: new Date() }).where(eq(practiceSession.id, s.id));
   return row;
   });
-  return { answerId: row.id, status: row.status, ticket: signUploadTicket(row.id, userId) };
+  return { answerId: row.id, status: row.status, ticket: signUploadTicket(row.id, userId, Date.now(), version) };
 }
 
 /** 接收录音：凭上传凭证，校验大小与实际类型（按文件头），写入私有存储。 */
 export async function receiveAudio(userId: string, answerId: string, ticket: string, body: Buffer) {
-  return withLock(`audio:${answerId}`, () => receiveAudioLocked(userId, answerId, ticket, body));
+  return withRecordingConsent(userId, version => receiveAudioLocked(userId, answerId, ticket, body, version), [`audio:${answerId}`]);
 }
 
-async function receiveAudioLocked(userId: string, answerId: string, ticket: string, body: Buffer) {
-  if (!verifyUploadTicket(ticket, answerId, userId)) throw new AppError(403, "invalid_ticket", "上传凭证无效或已过期");
+async function receiveAudioLocked(userId: string, answerId: string, ticket: string, body: Buffer, version: number) {
+  if (!verifyUploadTicket(ticket, answerId, userId, Date.now(), version)) throw new AppError(403, "invalid_ticket", "上传凭证无效、已过期或录音授权已改变");
   const [a] = await db.select().from(answer).where(and(eq(answer.id, answerId), eq(answer.userId, userId)));
   if (!a) throw notFound("回答");
   await assertSessionVisible(a.sessionId);
@@ -161,6 +164,9 @@ async function receiveAudioLocked(userId: string, answerId: string, ticket: stri
 
 /** 确认录音已保存并创建处理任务（同一回答只创建一次） */
 export async function submitAnswer(userId: string, answerId: string) {
+  return withRecordingConsent(userId, () => submitAnswerLocked(userId, answerId));
+}
+async function submitAnswerLocked(userId: string, answerId: string) {
   const [a] = await db.select().from(answer).where(and(eq(answer.id, answerId), eq(answer.userId, userId)));
   if (!a) throw notFound("回答");
   await assertSessionVisible(a.sessionId);
@@ -239,6 +245,9 @@ export function publicAnswer(a: AnswerRow) {
 
 /** 提交修正文本；可选择用修正文本重新生成反馈（原始转写保留） */
 export async function submitCorrection(userId: string, answerId: string, text: string, regenerate: boolean) {
+  return regenerate ? withRecordingConsent(userId, () => submitCorrectionLocked(userId, answerId, text, regenerate)) : submitCorrectionLocked(userId, answerId, text, regenerate);
+}
+async function submitCorrectionLocked(userId: string, answerId: string, text: string, regenerate: boolean) {
   const t = text.trim();
   if (t.length < 2 || t.length > 5000) throw badRequest("修正文本长度应在 2–5000 字符之间");
   const [a] = await db.select().from(answer).where(and(eq(answer.id, answerId), eq(answer.userId, userId)));
@@ -256,18 +265,21 @@ export async function submitCorrection(userId: string, answerId: string, text: s
 
 /** 重试失败的处理（重试时跳过已完成阶段） */
 export async function retryProcessing(userId: string, answerId: string) {
+  return withRecordingConsent(userId, () => retryProcessingLocked(userId, answerId));
+}
+async function retryProcessingLocked(userId: string, answerId: string) {
   const [a] = await db.select().from(answer).where(and(eq(answer.id, answerId), eq(answer.userId, userId)));
   if (!a) throw notFound("回答");
   await assertSessionVisible(a.sessionId);
-  if (a.status === "uploaded") return submitAnswer(userId, answerId);
+  if (a.status === "uploaded") return submitAnswerLocked(userId, answerId);
   if (a.status !== "failed") throw conflict("只有处理失败的回答可以重试", "not_failed");
   if (a.processingStage === "budget_wait") await assertUserAiBudget(userId);
   if (a.transcript === null && (!a.storageKey || a.audioDeletedAt || a.createdAt.getTime() + 30 * 86400_000 <= Date.now())) {
-    throw new AppError(410, "audio_expired", "录音已到期，无法重新识别，请重新作答。");
+    throw new AppError(410, "audio_expired", "录音未上传或已到期，无法重新识别，请重新作答。");
   }
   const [claimed] = await db
     .update(answer)
-    .set({ status: "queued", error: null, updatedAt: new Date() })
+    .set({ status: "queued", processingStage: a.transcript === null ? "audio" : "feedback", error: null, updatedAt: new Date() })
     .where(and(eq(answer.id, a.id), eq(answer.status, "failed")))
     .returning({ id: answer.id });
   if (claimed) await enqueue(QUEUES.processAnswer, { answerId: a.id, mode: a.feedbackUsesCorrection ? "correction" : "full" });

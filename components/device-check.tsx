@@ -10,6 +10,8 @@ import { Field, Select } from "@/components/ui/form";
 import { ExaminerAudio } from "@/lib/client/examiner-audio";
 import { DEVICE_KEY, MicError, MicRecorder, MIC_ERROR_TEXT, pickMimeType, savedDeviceId, type MicErrorKind } from "@/lib/client/recorder";
 import { LevelMeter } from "./interview/waveform";
+import { recordingPermitted } from "@/lib/client/idb";
+import { PRIVATE_SESSION_EVENT, RECORDING_CONSENT_EVENT } from "@/lib/client/private-session";
 
 const TEST_SECONDS = 5;
 
@@ -47,12 +49,19 @@ export function DeviceCheck({ sampleTtsId, next, voiceLabel }: { sampleTtsId: st
   const [peak, setPeak] = useState(0);
   const [voice, setVoice] = useState<"idle" | "playing" | "ok" | "failed">("idle");
   const [trackLost, setTrackLost] = useState(false);
+  const [consentError, setConsentError] = useState("");
+  const attempt = useRef(0), testRecorder = useRef<MediaRecorder | null>(null), testAudioUrl = useRef("");
 
   useEffect(() => {
     rec.current = new MicRecorder();
     audio.current = new ExaminerAudio();
     setDeviceId(savedDeviceId() ?? "");
+    const ended = () => { attempt.current++; rec.current?.release({ discard: true }); audio.current?.dispose(); if (testRecorder.current) { testRecorder.current.ondataavailable = null; testRecorder.current.onstop = null; if (testRecorder.current.state !== "inactive") testRecorder.current.stop(); } if (testAudioUrl.current) URL.revokeObjectURL(testAudioUrl.current); testAudioUrl.current = ""; setTestUrl(null); setTesting(false); setStatus("idle"); setConsentError("录音授权或登录状态已改变，麦克风已关闭。请在设置中重新同意后检测。"); };
+    window.addEventListener(PRIVATE_SESSION_EVENT, ended); window.addEventListener(RECORDING_CONSENT_EVENT, ended);
     return () => {
+      window.removeEventListener(PRIVATE_SESSION_EVENT, ended); window.removeEventListener(RECORDING_CONSENT_EVENT, ended); attempt.current++;
+      if (testRecorder.current?.state === "recording") { testRecorder.current.onstop = null; testRecorder.current.stop(); }
+      if (testAudioUrl.current) URL.revokeObjectURL(testAudioUrl.current);
       rec.current?.release();
       audio.current?.dispose();
     };
@@ -70,11 +79,14 @@ export function DeviceCheck({ sampleTtsId, next, voiceLabel }: { sampleTtsId: st
   }, [status]);
 
   async function connect(id?: string) {
+    if (!recordingPermitted()) { setConsentError("请先在设置中同意录音授权。"); return; }
+    const thisAttempt = ++attempt.current; setConsentError("");
     setStatus("requesting");
     setErrKind(null);
     setTrackLost(false);
     try {
       await rec.current!.init(id || undefined);
+      if (thisAttempt !== attempt.current) return;
       await rec.current!.resumeContext();
       rec.current!.onInterrupted = () => setTrackLost(true);
       const list = (await navigator.mediaDevices.enumerateDevices()).filter((d) => d.kind === "audioinput");
@@ -83,6 +95,7 @@ export function DeviceCheck({ sampleTtsId, next, voiceLabel }: { sampleTtsId: st
       if (actual) setDeviceId(actual);
       setStatus("ready");
     } catch (e) {
+      if (thisAttempt !== attempt.current) return;
       setErrKind(e instanceof MicError ? e.kind : "unknown");
       setStatus("error");
     }
@@ -99,13 +112,16 @@ export function DeviceCheck({ sampleTtsId, next, voiceLabel }: { sampleTtsId: st
   }
 
   async function testRecord() {
+    const thisAttempt = attempt.current;
     const stream = rec.current?.stream;
     if (!stream) return;
     setTesting(true);
     setTestUrl(null);
+    if (testAudioUrl.current) URL.revokeObjectURL(testAudioUrl.current); testAudioUrl.current = "";
     setPeak(0);
     const mime = pickMimeType();
     const mr = mime ? new MediaRecorder(stream, { mimeType: mime }) : new MediaRecorder(stream);
+    testRecorder.current = mr;
     const chunks: Blob[] = [];
     mr.ondataavailable = (e) => e.data.size && chunks.push(e.data);
     let maxLevel = 0;
@@ -114,17 +130,19 @@ export function DeviceCheck({ sampleTtsId, next, voiceLabel }: { sampleTtsId: st
     }, 100);
     mr.onstop = () => {
       clearInterval(meter);
+      if (thisAttempt !== attempt.current || !recordingPermitted()) return;
       setPeak(maxLevel);
-      setTestUrl(URL.createObjectURL(new Blob(chunks, { type: mr.mimeType || mime })));
+      testAudioUrl.current = URL.createObjectURL(new Blob(chunks, { type: mr.mimeType || mime })); setTestUrl(testAudioUrl.current);
       setTesting(false);
     };
     mr.start(500);
     for (let s = TEST_SECONDS; s > 0; s--) {
       setCountdown(s);
       await new Promise((r) => setTimeout(r, 1000));
+      if (thisAttempt !== attempt.current) { clearInterval(meter); return; }
     }
     setCountdown(0);
-    mr.stop();
+    if (mr.state !== "inactive") mr.stop();
   }
 
   async function testVoice() {
@@ -146,6 +164,7 @@ export function DeviceCheck({ sampleTtsId, next, voiceLabel }: { sampleTtsId: st
           <CardDescription>浏览器会询问是否允许使用麦克风，请选择“允许”。</CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
+          {consentError && <Alert tone="warning">{consentError}</Alert>}
           {status === "idle" || status === "requesting" ? (
             <Button onClick={() => connect(deviceId)} disabled={status === "requesting"} data-testid="mic-connect">
               {status === "requesting" ? "正在请求权限…" : "检测麦克风"}

@@ -75,7 +75,7 @@ export async function usageOverview() {
       service: usageEvent.service,
       mock: usageEvent.mock,
       cost: sql<number>`coalesce(sum(${usageEvent.costYuan}), 0)::float8`,
-      n: sql<number>`count(*)::int`,
+      n: sql<number>`count(*) filter (where ${usageEvent.units}->>'cancelledBeforeDispatch' is distinct from 'true')::int`,
       units: sql<unknown>`jsonb_build_object(
         'seconds', coalesce(sum((${usageEvent.units}->>'seconds')::float8), 0),
         'chars', coalesce(sum((${usageEvent.units}->>'chars')::float8), 0),
@@ -126,8 +126,8 @@ export async function trialMetrics() {
   const [a] = await db
     .select({
       total: sql<number>`count(*)::int`,
-      uploaded: sql<number>`count(*) filter (where ${answer.status} <> 'created')::int`,
-      failed: sql<number>`count(*) filter (where ${answer.status} = 'failed')::int`,
+      uploaded: sql<number>`count(*) filter (where ${answer.sizeBytes} is not null or ${answer.storageKey} is not null)::int`,
+      failed: sql<number>`count(*) filter (where ${answer.status} = 'failed' and ${answer.processingStage} is distinct from 'consent_wait' and (${answer.sizeBytes} is not null or ${answer.storageKey} is not null))::int`,
       insufficient: sql<number>`count(*) filter (where ${answer.status} = 'insufficient')::int`,
     })
     .from(answer)

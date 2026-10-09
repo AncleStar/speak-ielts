@@ -41,6 +41,7 @@ export const user = pgTable("user", {
   selfLevel: text("self_level"),
   subtitlePref: text("subtitle_pref").notNull().default("auto"),
   consentAt: ts("consent_at"),
+  recordingConsentVersion: integer("recording_consent_version").notNull().default(0),
   onboardedAt: ts("onboarded_at"),
   allowAdminView: boolean("allow_admin_view").notNull().default(false),
   dailyQuotaMinutes: integer("daily_quota_minutes"),

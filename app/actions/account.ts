@@ -9,6 +9,7 @@ import { getAuth, verifyUserPassword } from "@/lib/auth";
 import { getCurrentUser } from "@/lib/auth-server";
 import { db } from "@/lib/db";
 import { deleteUserAccount } from "@/lib/services/deletion";
+import { grantRecordingConsent, withdrawRecordingConsent } from "@/lib/services/recording-consent";
 
 export type FormState = { error?: string; ok?: string } | null;
 
@@ -57,16 +58,7 @@ export async function onboardingAction(_prev: FormState, fd: FormData): Promise<
     consent: fd.get("consent"),
   });
   if (!parsed.success) return { error: parsed.error.issues[0].message };
-  await db
-    .update(user)
-    .set({
-      targetBand: parsed.data.targetBand,
-      selfLevel: parsed.data.selfLevel,
-      consentAt: u.consentAt ?? new Date(),
-      onboardedAt: new Date(),
-      updatedAt: new Date(),
-    })
-    .where(eq(user.id, u.id));
+  await grantRecordingConsent(u.id, parsed.data);
   redirect("/device-check?next=/welcome");
 }
 
@@ -90,11 +82,10 @@ export async function updateSettingsAction(_prev: FormState, fd: FormData): Prom
 }
 
 /** 撤回录音同意：之后不能再录音，已有记录不受影响 */
-export async function withdrawConsentAction(): Promise<void> {
+export async function withdrawConsentAction() {
   const u = await getCurrentUser();
   if (!u) redirect("/login");
-  await db.update(user).set({ consentAt: null, updatedAt: new Date() }).where(eq(user.id, u.id));
-  redirect("/onboarding");
+  return { userId: u.id, ...await withdrawRecordingConsent(u.id) };
 }
 
 /** 删除账号：验证密码后立即停用并撤销登录，后台删除全部录音与记录 */

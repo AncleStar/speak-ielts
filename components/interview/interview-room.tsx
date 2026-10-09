@@ -13,7 +13,7 @@ import { deleteRecording, getBlob, isPersistent, listRecordings, purgeExpired, t
 import { MIC_ERROR_TEXT, MicError, MicRecorder, savedDeviceId, type StopResult } from "@/lib/client/recorder";
 import { uploadQueue } from "@/lib/client/uploader";
 import { ScreenWakeLock } from "@/lib/client/wake-lock";
-import { PRIVATE_SESSION_EVENT } from "@/lib/client/private-session";
+import { PRIVATE_SESSION_EVENT, RECORDING_CONSENT_EVENT } from "@/lib/client/private-session";
 import type { getSessionView } from "@/lib/services/sessions";
 import type { AnswerKind, PlanItem, PromptAudio, SessionPlan } from "@/lib/sessions/plan";
 import { canAskRounding, nextMockStep, p2PrepLimitMs, p2SpeakLimitMs } from "@/lib/timing";
@@ -77,6 +77,7 @@ export function InterviewRoom({ sessionId, subtitlePref, userId }: { sessionId: 
   const exitBusy = useRef(false);
   const exitMock = useRef(false);
   const privateEnded = useRef(false);
+  const consentEnded = useRef(false);
   useEffect(()=>()=>stopDiscPlayback?.(),[stopDiscPlayback]);
   const [view, setView] = useState<SessionView | null>(null);
   const [phase, setPhase] = useState<Phase>("loading");
@@ -105,11 +106,13 @@ export function InterviewRoom({ sessionId, subtitlePref, userId }: { sessionId: 
     const storageLimited = () => setPersistent(false);
     const visibility = () => { if (document.visibilityState === "hidden") rt.current?.recorder.interrupt(); };
     const sessionEnded = () => { privateEnded.current = true; const r = rt.current; if (!r) return; r.aborted = true; r.waiter?.resolve("exit"); r.waiter = null; r.recorder.release({ discard: true }); r.audio.dispose(); void r.wake.release(); stopDiscPlayback?.(); delete document.documentElement.dataset.recording; };
+    const consentChanged = () => { consentEnded.current = true; sessionEnded(); setPhase("closed"); setStep("idle"); setTimer(null); setPartInfo(null); setActions([]); setExaminer("waiting"); setLocalPending([]); setMessage("录音授权已撤回或改变，面试已停止。本机未上传录音已清除；已保存记录仍可复盘。请在设置中重新同意后开始新练习。"); };
     window.addEventListener(PRIVATE_SESSION_EVENT, sessionEnded);
+    window.addEventListener(RECORDING_CONSENT_EVENT, consentChanged);
     network(); window.addEventListener("online", network); window.addEventListener("offline", network);
     window.addEventListener("recording-storage-limited", storageLimited);
     document.addEventListener("visibilitychange", visibility);
-    return () => { window.removeEventListener(PRIVATE_SESSION_EVENT, sessionEnded); window.removeEventListener("online", network); window.removeEventListener("offline", network); window.removeEventListener("recording-storage-limited", storageLimited); document.removeEventListener("visibilitychange", visibility); };
+    return () => { window.removeEventListener(PRIVATE_SESSION_EVENT, sessionEnded); window.removeEventListener(RECORDING_CONSENT_EVENT, consentChanged); window.removeEventListener("online", network); window.removeEventListener("offline", network); window.removeEventListener("recording-storage-limited", storageLimited); document.removeEventListener("visibilitychange", visibility); };
   }, []);
   useEffect(() => { document.documentElement.dataset.recording = String(step === "recording"); return () => { delete document.documentElement.dataset.recording; }; }, [step]);
 
@@ -814,6 +817,7 @@ export function InterviewRoom({ sessionId, subtitlePref, userId }: { sessionId: 
 
   const returnToDiscs=rhine?.library?rhine.practiceHref:`/practice?disc=${encodeURIComponent(view?.plan.items[0]?.questionId??"")}`;
   async function exitInterview() {
+    if (consentEnded.current) { router.push(returnToDiscs); return; }
     if(exitBusy.current)return;
     exitBusy.current=true;
     const r=rt.current!;
@@ -1025,7 +1029,7 @@ export function InterviewRoom({ sessionId, subtitlePref, userId }: { sessionId: 
             <EndPanel tone="warning" title="本次模考已中断" text={message ?? "已录内容仍可复盘。"} sessionId={sessionId} />
           ) : null}
           {phase === "closed" ? (
-            <EndPanel tone="info" title="这次练习已经结束" text="可以在报告中回听录音、查看反馈，或重新开始。" sessionId={sessionId} />
+            <div className="space-y-3"><EndPanel tone="info" title={consentEnded.current ? "录音授权已改变，面试已停止" : "这次练习已经结束"} text={message ?? "可以在报告中回听录音、查看反馈，或重新开始。"} sessionId={sessionId} />{consentEnded.current && <LinkButton href="/settings" variant="outline">前往设置与录音授权</LinkButton>}</div>
           ) : null}
           {phase === "error" ? (
             <div className="space-y-3">

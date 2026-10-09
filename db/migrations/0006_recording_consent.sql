@@ -1,0 +1,1 @@
+ALTER TABLE "user" ADD COLUMN "recording_consent_version" integer DEFAULT 0 NOT NULL;

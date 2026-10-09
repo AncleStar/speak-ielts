@@ -2,7 +2,8 @@
 
 import Link from "next/link";
 import { useActionState } from "react";
-import { deleteAccountAction, updateSettingsAction, withdrawConsentAction } from "@/app/actions/account";
+import { deleteAccountAction, updateSettingsAction } from "@/app/actions/account";
+import { WithdrawConsentButton } from "./withdraw-consent-button";
 import { SignOutButton } from "./sign-out-button";
 import { ConsentNotice } from "@/components/account/consent-notice";
 import { BANDS } from "@/components/account/onboarding-form";
@@ -88,11 +89,7 @@ export function SettingsForms({
         <CardContent className="space-y-3">
           <ConsentNotice mock={mock} />
           {consentAt ? (
-            <form action={withdrawConsentAction}>
-              <Button type="submit" variant="outline">
-                撤回录音同意
-              </Button>
-            </form>
+            <WithdrawConsentButton />
           ) : (
             <Link href="/onboarding" className="text-sm text-brand-700 underline">
               前往同意

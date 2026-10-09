@@ -3,12 +3,14 @@ import { validDraft, type ThoughtDraft } from "@/lib/thoughts/draft";
 
 /** Every private write checks its login epoch in the same IndexedDB transaction. */
 export interface RecordingMeta {
-  userId?: string; localEpoch?: string; id: string; sessionId: string; planIndex: number;
+  userId?: string; localEpoch?: string; consentVersion?: number; id: string; sessionId: string; planIndex: number;
   kind: "main" | "followup" | "rounding"; followUpId: string | null; promptText: string; mimeType: string;
   durationMs: number; createdAt: number; status: "recording" | "pending" | "failed"; interrupted: boolean; lastError?: string;
 }
-export interface LocalIdentity { id: "current"; userId: string | null; epoch: string }
+export interface RecordingConsentState { allowed: boolean; version: number }
+export interface LocalIdentity { id: "current"; userId: string | null; epoch: string; consentAllowed?: boolean; consentVersion?: number }
 export class LocalSessionEnded extends Error { constructor() { super("当前登录已结束，请重新登录。"); } }
+export class LocalConsentEnded extends LocalSessionEnded { constructor() { super(); this.message = "录音授权已撤回或改变，请重新同意后开始新录音。"; } }
 export class LocalThoughtDeleted extends Error { constructor() { super("这份观点已删除，相关草稿不会继续暂存。请新建观点。"); } }
 export const THOUGHT_DRAFT_SIGNAL = "speak-thought-drafts-change";
 const DB_NAME = "ielts-recordings", VERSION = 2, PRIVATE_STORES = ["recordings", "chunks", "thoughtDrafts", "privateSession"];
@@ -39,6 +41,7 @@ function open(): Promise<IDBDatabase | null> {
 }
 export async function isPersistent() { await open(); return persistent; }
 export function localIdentity() { return identity?.userId ? { ...identity } : null; }
+export function recordingPermitted() { return !!identity?.userId && identity.consentAllowed === true; }
 export function invalidateLocalMemory() { identity = null; memMeta.clear(); memChunks.clear(); memDrafts.clear(); memDeletedThoughts.clear(); }
 function matches(a: LocalIdentity | null | undefined, b: LocalIdentity | null | undefined) { return !!a && !!b && a.userId === b.userId && a.epoch === b.epoch; }
 function transaction<T>(db: IDBDatabase, stores: string[], mode: IDBTransactionMode, work: (t: IDBTransaction, result: (v: T) => void, fail: (e: Error) => void) => void) {
@@ -51,17 +54,22 @@ function transaction<T>(db: IDBDatabase, stores: string[], mode: IDBTransactionM
   });
 }
 async function write(stores: string[], scope: LocalIdentity, work: (t: IDBTransaction, fail: (e: Error) => void) => void) {
+  const audio = stores.includes("recordings") || stores.includes("chunks");
+  const checkConsent = (current: LocalIdentity | null | undefined) => { if (audio && (current?.consentAllowed !== true || current.consentVersion !== scope.consentVersion)) throw new LocalConsentEnded(); };
   if (!scope.userId || !matches(scope, identity)) throw new LocalSessionEnded();
+  checkConsent(identity);
   const db = await open(); if (!matches(scope, identity)) throw new LocalSessionEnded(); if (!db) return false;
+  checkConsent(identity);
   try {
     await transaction<void>(db, [...new Set(["privateSession", ...stores])], "readwrite", (t, done, fail) => {
       const request = t.objectStore("privateSession").get("current");
       request.onsuccess = () => {
         if (!matches(request.result, scope)) { fail(new LocalSessionEnded()); return; }
+        try { checkConsent(request.result); } catch (e) { fail(e as Error); return; }
         try { work(t, fail); done(); } catch (error) { fail(error instanceof Error ? error : new Error("浏览器存储操作失败")); }
       };
     });
-    if (!matches(scope, identity)) throw new LocalSessionEnded(); return true;
+    if (!matches(scope, identity)) throw new LocalSessionEnded(); checkConsent(identity); return true;
   } catch (error) { if (error instanceof LocalSessionEnded || error instanceof LocalThoughtDeleted) throw error; limited(); return false; }
 }
 async function all<T>(store: string): Promise<T[]> {
@@ -72,7 +80,7 @@ export async function readLocalIdentity(): Promise<LocalIdentity | null> {
   const db = await open(); if (!db) return memoryIdentity;
   return transaction<LocalIdentity | null>(db, ["privateSession"], "readonly", (t, done) => { const request = t.objectStore("privateSession").get("current"); request.onsuccess = () => done(request.result ?? null); });
 }
-export async function activateLocalAccount(userId: string, signal?: AbortSignal) {
+export async function activateLocalAccount(userId: string, signal?: AbortSignal, consent: RecordingConsentState = { allowed: false, version: 0 }) {
   const db = await open(); let selected: LocalIdentity;
   const observed = db ? await readLocalIdentity() : null;
   const legacyOwned = new Set<string>();
@@ -80,20 +88,21 @@ export async function activateLocalAccount(userId: string, signal?: AbortSignal)
     try { const response = await fetch(`/api/sessions/${encodeURIComponent(row.sessionId)}`, { cache: "no-store", signal: signal ?? AbortSignal.timeout(5000) }); if (response.ok) legacyOwned.add(row.id); } catch { /* keep unidentified old recordings hidden until ownership can be checked */ }
   }
   signal?.throwIfAborted();
-  if (!db) selected = memoryIdentity?.userId === userId ? memoryIdentity : { id: "current", userId, epoch: crypto.randomUUID() };
+  const nextConsent = (previous: LocalIdentity | undefined | null) => previous?.userId === userId && (previous.consentVersion ?? -1) > consent.version ? { consentAllowed: previous.consentAllowed, consentVersion: previous.consentVersion } : { consentAllowed: consent.allowed, consentVersion: consent.version };
+  if (!db) selected = { ...(memoryIdentity?.userId === userId ? memoryIdentity : { id: "current" as const, userId, epoch: crypto.randomUUID() }), ...nextConsent(memoryIdentity) };
   else selected = await transaction<LocalIdentity>(db, PRIVATE_STORES, "readwrite", (t, done, fail) => {
     const request = t.objectStore("privateSession").get("current"); request.onsuccess = () => {
       const previous = request.result as LocalIdentity | undefined;
       if (observed ? !matches(observed, previous) : !!previous && previous.userId !== userId) { fail(new LocalSessionEnded()); return; }
-      const next: LocalIdentity = previous?.userId === userId ? previous : { id: "current", userId, epoch: crypto.randomUUID() };
+      const next: LocalIdentity = { ...(previous?.userId === userId ? previous : { id: "current" as const, userId, epoch: crypto.randomUUID() }), ...nextConsent(previous) };
       if (previous?.epoch !== next.epoch) t.objectStore("privateSession").clear();
       t.objectStore("privateSession").put(next); const allowed = new Set<string>();
       const rows = t.objectStore("recordings").openCursor(); rows.onsuccess = () => {
         const cursor = rows.result;
         if (cursor) { const row = cursor.value as RecordingMeta;
           if (!row.userId && !legacyOwned.has(row.id) && !previous?.userId && Date.now() - row.createdAt < LOCAL_TTL_MS) allowed.add(row.id);
-          else if ((row.userId && row.userId !== userId) || (row.localEpoch && row.localEpoch !== next.epoch) || Date.now() - row.createdAt >= LOCAL_TTL_MS || (!row.userId && !legacyOwned.has(row.id))) cursor.delete();
-          else { allowed.add(row.id); if (!row.localEpoch || !row.userId) cursor.update({ ...row, userId, localEpoch: next.epoch }); }
+          else if (!next.consentAllowed || (row.consentVersion !== undefined && row.consentVersion !== next.consentVersion) || (row.userId && row.userId !== userId) || (row.localEpoch && row.localEpoch !== next.epoch) || Date.now() - row.createdAt >= LOCAL_TTL_MS || (!row.userId && !legacyOwned.has(row.id))) cursor.delete();
+          else { allowed.add(row.id); if (!row.localEpoch || !row.userId || row.consentVersion === undefined) cursor.update({ ...row, userId, localEpoch: next.epoch, consentVersion: next.consentVersion }); }
           cursor.continue();
         } else {
           const chunks = t.objectStore("chunks").openCursor(); chunks.onsuccess = () => { const chunk = chunks.result; if (chunk) { if (!allowed.has(chunk.value.recId)) chunk.delete(); chunk.continue(); } };
@@ -104,7 +113,30 @@ export async function activateLocalAccount(userId: string, signal?: AbortSignal)
     };
   });
   signal?.throwIfAborted();
-  if (!matches(selected, identity)) invalidateLocalMemory(); identity = selected; memoryIdentity = selected; return selected;
+  if (!matches(selected, identity)) invalidateLocalMemory(); else if (selected.consentVersion !== identity?.consentVersion || !selected.consentAllowed) { memMeta.clear(); memChunks.clear(); } identity = selected; memoryIdentity = selected; return selected;
+}
+/** Monotone consent revisions stop delayed responses from re-enabling an old recording; text scope remains unchanged. */
+export async function syncLocalRecordingConsent(userId: string, consent: RecordingConsentState) {
+  const db = await open();
+  const apply = (previous: LocalIdentity | null | undefined) => {
+    if (!previous || previous.userId !== userId || (previous.consentVersion ?? -1) > consent.version) return previous ?? null;
+    return { ...previous, consentAllowed: consent.allowed, consentVersion: consent.version };
+  };
+  const next = db ? await transaction<LocalIdentity | null>(db, ["privateSession", "recordings", "chunks"], "readwrite", (t, done) => {
+    const request = t.objectStore("privateSession").get("current"); request.onsuccess = () => {
+      const previous = request.result as LocalIdentity | undefined, next = apply(previous);
+      if (next && next !== previous) {
+        if (next.consentVersion !== previous?.consentVersion || !next.consentAllowed) { t.objectStore("recordings").clear(); t.objectStore("chunks").clear(); }
+        t.objectStore("privateSession").put(next);
+      } done(next);
+    };
+  }) : apply(memoryIdentity);
+  if (matches(identity, next)) {
+    if (next?.consentVersion !== identity?.consentVersion || !next?.consentAllowed) { memMeta.clear(); memChunks.clear(); }
+    identity = next;
+  }
+  if (!memoryIdentity || matches(memoryIdentity, next)) memoryIdentity = next;
+  return next;
 }
 /** Revoke only the captured login, protecting a concurrently activated new account. */
 export async function endLocalAccount(expected: LocalIdentity | null) {
@@ -125,13 +157,13 @@ export async function endLocalAccount(expected: LocalIdentity | null) {
     };
   });
 }
-function recordingOwned(meta: RecordingMeta | undefined, scope = identity) { return !!meta && !!scope?.userId && meta.userId === scope.userId && meta.localEpoch === scope.epoch; }
+function recordingOwned(meta: RecordingMeta | undefined, scope = identity) { return !!meta && !!scope?.userId && scope.consentAllowed === true && meta.userId === scope.userId && meta.localEpoch === scope.epoch && meta.consentVersion === scope.consentVersion; }
 export async function saveMeta(meta: RecordingMeta) {
   const scope = localIdentity(); if (!scope || meta.userId !== scope.userId) throw new LocalSessionEnded();
-  meta.localEpoch ??= scope.epoch; if (!recordingOwned(meta, scope)) throw new LocalSessionEnded();
+  meta.localEpoch ??= scope.epoch; if (meta.localEpoch !== scope.epoch) throw new LocalSessionEnded(); meta.consentVersion ??= scope.consentVersion; if (!recordingOwned(meta, scope)) throw new LocalConsentEnded();
   await write(["recordings"], scope, t => { t.objectStore("recordings").put(meta); }); memMeta.set(meta.id, { ...meta });
 }
-export async function updateMeta(id: string, patch: Partial<RecordingMeta>) { const current = await getMeta(id); if (current) await saveMeta({ ...current, ...patch, userId: current.userId, localEpoch: current.localEpoch }); }
+export async function updateMeta(id: string, patch: Partial<RecordingMeta>) { const current = await getMeta(id); if (current) await saveMeta({ ...current, ...patch, userId: current.userId, localEpoch: current.localEpoch, consentVersion: current.consentVersion }); }
 export async function getMeta(id: string): Promise<RecordingMeta | undefined> {
   const memory = memMeta.get(id); if (recordingOwned(memory)) return memory;
   const db = await open(); if (!db || !identity?.userId) return;

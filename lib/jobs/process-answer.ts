@@ -25,6 +25,7 @@ import { metered } from "@/lib/providers/metered";
 import { AppError } from "@/lib/errors";
 import { getAiConfig } from "@/lib/ai/credentials";
 import { resolveUserAi } from "@/lib/ai/runtime";
+import { assertRecordingConsent, recordingConsent } from "@/lib/services/recording-consent";
 
 /** 有效语音少于 3 秒或转写少于 8 个词时，判为"无法充分评价" */
 export const MIN_SPEECH_SECONDS = 3;
@@ -52,6 +53,9 @@ export async function processAnswer(job: ProcessJob, ctx: { finalAttempt: boolea
   const [s] = await db.select().from(practiceSession).where(eq(practiceSession.id, a.sessionId));
   if (!s || s.deletedAt) return { skipped: "deleted" };
   if (a.status === "done") return { skipped: "done" };
+  if (a.status === "failed" && a.processingStage === "consent_wait") return { skipped: "consent_wait" };
+  const consent = await recordingConsent(a.userId);
+  const checkConsent = () => assertRecordingConsent(a.userId, consent.version).then(() => {});
   const personal = (await getAiConfig(a.userId))?.mode === "personal";
   const diagnose = !personal && env().ENABLE_AUDIO_DIAGNOSIS;
   const needsAudio = !a.metrics || a.transcript === null || (diagnose && !a.diagnosis);
@@ -66,11 +70,12 @@ export async function processAnswer(job: ProcessJob, ctx: { finalAttempt: boolea
   const [claimed] = await db
     .update(answer)
     .set({ status: "processing", processingStage: a.transcript === null ? "audio" : "feedback", processAttempts: a.processAttempts + 1, updatedAt: new Date() })
-    .where(and(eq(answer.id, a.id), sql`(${answer.status} <> 'processing' or ${answer.updatedAt} < ${new Date(Date.now() - 15 * 60000)})`))
+    .where(and(eq(answer.id, a.id), sql`${answer.processingStage} is distinct from 'consent_wait'`, sql`(${answer.status} <> 'processing' or ${answer.updatedAt} < ${new Date(Date.now() - 15 * 60000)})`))
     .returning({ id: answer.id });
   if (!claimed) return { skipped: "processing" };
 
   try {
+    await checkConsent();
     // ---------- 阶段 1：音频分析 ----------
     let metrics = a.metrics as AudioMetrics | null;
     let wavPath: string | null = null;
@@ -123,7 +128,7 @@ export async function processAnswer(job: ProcessJob, ctx: { finalAttempt: boolea
           }
         }
         const version = await loadVersion(a.questionVersionId);
-        const r = await metered(`answer:${a.id}`, a.userId).asr({
+        const r = await metered(`answer:${a.id}`, a.userId, checkConsent).asr({
           audio,
           mime,
           durationSec: metrics!.durationSec,
@@ -139,13 +144,14 @@ export async function processAnswer(job: ProcessJob, ctx: { finalAttempt: boolea
       // ---------- 实验性音频诊断（默认关闭） ----------
       if (diagnose && !a.diagnosis && wavPath && providers().omniAudio) {
         try {
-          const r = await metered(`diagnosis:${a.id}`, a.userId).omniAudio({
+          const r = await metered(`diagnosis:${a.id}`, a.userId, checkConsent).omniAudio({
             audio: await fs.readFile(wavPath),
             mime: "audio/wav",
             prompt: "请用中文简要描述这段英语回答中 1–2 个可观察到的发音现象（例如某个单词的重音或元音），只描述你在音频中确实听到的内容；听不清时回答“证据不足”。",
           });
           await db.update(answer).set({ diagnosis: { text: r.text.slice(0, 1000), model: r.model, experimental: true } }).where(eq(answer.id, a.id));
         } catch (e) {
+          if (e instanceof AppError && e.code === "consent_required") throw e;
           await logOps("warn", "omni", a.id, `音频诊断失败：${(e as Error).message}`);
         }
       }
@@ -153,6 +159,7 @@ export async function processAnswer(job: ProcessJob, ctx: { finalAttempt: boolea
       await fs.rm(dir, { recursive: true, force: true }).catch(() => {});
     }
 
+    await checkConsent();
     const useCorrection = a.feedbackUsesCorrection && !!a.correctedTranscript;
     const [fresh] = await db.select().from(answer).where(eq(answer.id, a.id));
     const text = useCorrection ? fresh.correctedTranscript! : fresh.transcript ?? "";
@@ -179,6 +186,7 @@ export async function processAnswer(job: ProcessJob, ctx: { finalAttempt: boolea
         plan,
         itemRule: item?.itemRule ?? "明确回应题目",
         minEffectiveSeconds: a.kind === "main" ? item?.minEffectiveSeconds : undefined,
+        checkConsent,
       });
       if (!ok) {
         await db
@@ -199,6 +207,12 @@ export async function processAnswer(job: ProcessJob, ctx: { finalAttempt: boolea
     await recomputeSessionOutcome(a.sessionId);
     return { status: "done" };
   } catch (e) {
+    if (e instanceof AppError && e.code === "consent_required") {
+      await db.update(answer).set({ status: "failed", processingStage: "consent_wait", error: "录音授权已撤回或改变，后续处理已暂停。重新同意后可手动重试；已完成转写保留，录音仍按原期限保存。", updatedAt: new Date() }).where(eq(answer.id, a.id));
+      await logOps("warn", "answer", a.id, "录音授权改变：暂停后续请求，等待手动恢复", Date.now() - t0);
+      await recomputeSessionOutcome(a.sessionId);
+      return { status: "consent_wait" };
+    }
     if (e instanceof AppError && ["budget_exceeded", "personal_budget_exceeded"].includes(e.code)) {
       await db.update(answer).set({ status: "failed", processingStage: "budget_wait", error: `${e.message} 已上传录音和已完成转写会保留，录音仍按原期限保存。`, updatedAt: new Date() }).where(eq(answer.id, a.id));
       await logOps("warn", "answer", a.id, "预算不足：等待手动恢复，不自动重复请求", Date.now() - t0);
@@ -253,6 +267,7 @@ async function generateFeedback(opts: {
   plan: SessionPlan;
   itemRule: string;
   minEffectiveSeconds?: number;
+  checkConsent: () => Promise<void>;
 }): Promise<boolean> {
   const a = opts.answerRow;
   const m = (a.metrics ?? {}) as AudioMetrics;
@@ -275,7 +290,7 @@ async function generateFeedback(opts: {
     minEffectiveSeconds: opts.minEffectiveSeconds,
   });
   for (let attempt = 0; attempt <= FEEDBACK_MAX_RETRIES; attempt++) {
-    const r = await metered(`feedback:${a.id}`, a.userId).llmJson({
+    const r = await metered(`feedback:${a.id}`, a.userId, opts.checkConsent).llmJson({
       purpose: "feedback",
       ...msgs,
       mockHint: {

@@ -21,6 +21,8 @@ export async function billableCall<T extends { model: string; latencyMs: number 
   monthlyBudgetYuan?: number;
   jobRef: string;
   estimate: UsageUnits;
+  /** A gate that runs before dispatch. A rejected gate sends no request and releases the reservation. */
+  beforeRun?: () => Promise<void>;
   run: () => Promise<T>;
   units: (result: T) => UsageUnits;
 }): Promise<T> {
@@ -42,13 +44,17 @@ export async function billableCall<T extends { model: string; latencyMs: number 
     }).returning({ id: usageEvent.id });
     return row.id;
   });
+  let dispatched = false;
   try {
+    await opts.beforeRun?.();
+    dispatched = true;
     const result = await opts.run();
     const units = opts.units(result);
     await db.update(usageEvent).set({ model: result.model, units: { ...meta(units, result.model), pending: false }, costYuan: billable ? estimateCost(opts.service, units, priceFor(result.model, units)) : 0, ok: true, latencyMs: result.latencyMs }).where(eq(usageEvent.id, id));
     return result;
   } catch (error) {
-    await db.update(usageEvent).set({ units: { ...meta(opts.estimate), estimated: true, pending: false }, ok: false }).where(eq(usageEvent.id, id));
+    const units = dispatched ? opts.estimate : "seconds" in opts.estimate ? { seconds: 0 } : "chars" in opts.estimate ? { chars: 0 } : { inputTokens: 0, outputTokens: 0 };
+    await db.update(usageEvent).set({ units: { ...meta(units), estimated: dispatched, pending: false, cancelledBeforeDispatch: !dispatched, ...(!dispatched ? { cancelledEstimate: opts.estimate } : {}) }, ...(!dispatched ? { costYuan: 0 } : {}), ok: false }).where(eq(usageEvent.id, id));
     throw error;
   }
 }

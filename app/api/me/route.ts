@@ -14,6 +14,7 @@ export const GET = handle(async () => {
       isAdmin: u.isAdmin,
       subtitlePref: u.subtitlePref,
       consentAt: u.consentAt,
+      recordingConsentVersion: u.recordingConsentVersion,
       mustChangePassword: u.mustChangePassword,
     },
     quota: await getQuotaStatus(u.id),

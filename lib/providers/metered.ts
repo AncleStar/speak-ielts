@@ -4,9 +4,9 @@ import { providers } from "./index";
 import type { AsrInput, LlmInput } from "./types";
 import { resolveUserAi } from "@/lib/ai/runtime";
 
-export function metered(jobRef: string, userId?: string) {
+export function metered(jobRef: string, userId?: string, beforeRun?: () => Promise<void>) {
   const p = providers();
-  const common = { jobRef, userId, mock: p.name === "mock" };
+  const common = { jobRef, userId, mock: p.name === "mock", beforeRun };
   return {
     asr: async (input: AsrInput) => {
       const ai = await resolveUserAi(userId);

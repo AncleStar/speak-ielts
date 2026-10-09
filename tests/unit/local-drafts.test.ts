@@ -1,6 +1,6 @@
 import { expect, it } from "vitest";
 import { DRAFT_TTL_MS, validDraft, type ThoughtDraft } from "@/lib/thoughts/draft";
-import { activateLocalAccount, endLocalAccount, getBlob, listRecordings, listThoughtDrafts, localIdentity, putChunk, removeThoughtDrafts, saveMeta, saveThoughtDraft, type RecordingMeta } from "@/lib/client/idb";
+import { activateLocalAccount, endLocalAccount, getBlob, listRecordings, listThoughtDrafts, localIdentity, putChunk, removeThoughtDrafts, saveMeta, saveThoughtDraft, syncLocalRecordingConsent, type RecordingMeta } from "@/lib/client/idb";
 const owner = "local-alice", epoch = crypto.randomUUID(), now = Date.now();
 const draft: ThoughtDraft = { id: crypto.randomUUID(), kind: "edit", userId: owner, localEpoch: epoch, savedAt: now, thoughtId: null, revision: null,
   fields: { sourceText: "我的未完成观点", title: "", simple: "", natural: "", nuanced: "" }, generation: null };
@@ -15,13 +15,13 @@ it("rejects oversized input and inconsistent references; recall cache cannot con
   expect(validDraft({ ...draft, kind: "recall", thoughtId: "thought-a", revision: 0, recalledText: "My attempted expression.", pending: null, audio: "private-audio" }, owner, epoch, now)).not.toHaveProperty("audio");
 });
 it("a logout clears fallback data and old asynchronous writers cannot revive it after relogin", async () => {
-  const scope = await activateLocalAccount(owner);
+  const scope = await activateLocalAccount(owner, undefined, { allowed: true, version: 1 });
   const meta: RecordingMeta = { id: "local-test-recording", userId: owner, sessionId: "local-test-session", planIndex: 0, kind: "main", followUpId: null,
     promptText: "synthetic only", mimeType: "audio/wav", durationMs: 6000, createdAt: now, status: "pending", interrupted: false };
   await saveMeta(meta); await putChunk(meta.id, 0, new Blob(["synthetic-only"]));
   await saveThoughtDraft({ ...draft, localEpoch: scope.epoch });
   expect(await listRecordings()).toHaveLength(1); expect(await listThoughtDrafts()).toHaveLength(1);
-  await endLocalAccount(scope); await activateLocalAccount(owner);
+  await endLocalAccount(scope); await activateLocalAccount(owner, undefined, { allowed: true, version: 1 });
   expect(localIdentity()?.epoch).not.toBe(scope.epoch); expect(await getBlob(meta.id, meta.mimeType)).toBeNull();
   await expect(saveMeta(meta)).rejects.toThrow("当前登录已结束"); await expect(putChunk(meta.id, 1, new Blob(["late chunk"]))).rejects.toThrow("当前登录已结束");
   await expect(saveThoughtDraft({ ...draft, localEpoch: scope.epoch })).rejects.toThrow("当前登录已结束");
@@ -40,4 +40,17 @@ it("a deleted thought's draft cannot be recreated by a stale writer in this logi
   await removeThoughtDrafts("deleted-thought"); expect(await listThoughtDrafts()).toEqual([]);
   await expect(saveThoughtDraft({ ...saved, savedAt: Date.now() })).rejects.toThrow("这份观点已删除");
   expect(await listThoughtDrafts()).toEqual([]); await endLocalAccount(scope);
+});
+it("consent withdrawal clears only audio, denies old writers after re-consent and ignores delayed older grants", async () => {
+  const scope = await activateLocalAccount(owner, undefined, { allowed: true, version: 1 });
+  const meta: RecordingMeta = { id: "consent-audio", userId: owner, sessionId: "synthetic", planIndex: 0, kind: "main", followUpId: null, promptText: "synthetic only", mimeType: "audio/wav", durationMs: 500, createdAt: Date.now(), status: "pending", interrupted: false };
+  await saveMeta(meta); await putChunk(meta.id, 0, new Blob(["synthetic"])); await saveThoughtDraft({ ...draft, localEpoch: scope.epoch });
+  await syncLocalRecordingConsent(owner, { allowed: false, version: 2 });
+  expect(localIdentity()?.epoch).toBe(scope.epoch); expect(await listRecordings()).toEqual([]); expect(await listThoughtDrafts()).toHaveLength(1);
+  await expect(saveMeta(meta)).rejects.toThrow("录音授权已撤回或改变");
+  await syncLocalRecordingConsent(owner, { allowed: true, version: 1 }); expect(localIdentity()?.consentAllowed).toBe(false);
+  await activateLocalAccount(owner, undefined, { allowed: true, version: 1 }); expect(localIdentity()?.consentAllowed).toBe(false);
+  await syncLocalRecordingConsent(owner, { allowed: true, version: 3 }); await expect(saveMeta(meta)).rejects.toThrow("录音授权已撤回或改变");
+  await saveMeta({ ...meta, id: "new-consent-audio", consentVersion: undefined }); expect(await listRecordings()).toHaveLength(1); expect(await listThoughtDrafts()).toHaveLength(1);
+  await endLocalAccount(localIdentity());
 });

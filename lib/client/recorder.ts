@@ -1,6 +1,7 @@
 "use client";
 
-import { LocalSessionEnded, putChunk, saveMeta, updateMeta, type RecordingMeta } from "./idb";
+import { LocalConsentEnded, LocalSessionEnded, putChunk, recordingPermitted, saveMeta, updateMeta, type RecordingMeta } from "./idb";
+import { PRIVATE_SESSION_EVENT, RECORDING_CONSENT_EVENT } from "./private-session";
 
 export type MicErrorKind = "permission" | "no_device" | "busy" | "insecure" | "unsupported" | "unknown";
 
@@ -86,6 +87,8 @@ export class MicRecorder {
   private muteTimer: ReturnType<typeof setTimeout> | null = null;
   private levelBuf: Uint8Array<ArrayBuffer> | null = null;
   onInterrupted: ((reason: "track_ended" | "recorder_error") => void) | null = null;
+  private lifecycle = 0;
+  private detach: (() => void) | null = null;
 
   get recording() {
     return this.mr?.state === "recording";
@@ -101,10 +104,15 @@ export class MicRecorder {
   }
 
   async init(deviceId?: string): Promise<void> {
+    if (!recordingPermitted()) throw new LocalConsentEnded();
     if (typeof window !== "undefined" && !window.isSecureContext) throw new MicError("insecure", MIC_ERROR_TEXT.insecure);
     if (!navigator.mediaDevices?.getUserMedia) throw new MicError("unsupported", MIC_ERROR_TEXT.unsupported);
     if (typeof MediaRecorder === "undefined") throw new MicError("unsupported", MIC_ERROR_TEXT.unsupported);
     this.release();
+    const lifecycle = this.lifecycle;
+    const ended = () => this.release({ discard: true });
+    window.addEventListener(PRIVATE_SESSION_EVENT, ended); window.addEventListener(RECORDING_CONSENT_EVENT, ended);
+    this.detach = () => { window.removeEventListener(PRIVATE_SESSION_EVENT, ended); window.removeEventListener(RECORDING_CONSENT_EVENT, ended); };
     const constraints: MediaTrackConstraints = {
       channelCount: 1,
       echoCancellation: true,
@@ -113,12 +121,15 @@ export class MicRecorder {
     };
     if (deviceId) constraints.deviceId = { exact: deviceId };
     try {
-      this.stream = await navigator.mediaDevices.getUserMedia({ audio: constraints });
+      const stream = await navigator.mediaDevices.getUserMedia({ audio: constraints });
+      if (lifecycle !== this.lifecycle || !recordingPermitted()) { stream.getTracks().forEach(t => t.stop()); throw new LocalConsentEnded(); }
+      this.stream = stream;
     } catch (e) {
       if (deviceId && (e as { name?: string }).name === "OverconstrainedError") {
         // 之前选择的设备已不存在，退回默认设备
         return this.init(undefined);
       }
+      if (e instanceof LocalSessionEnded) throw e;
       throw mapMicError(e);
     }
     const track = this.stream.getAudioTracks()[0];
@@ -254,6 +265,7 @@ export class MicRecorder {
   }
 
   release(options: { discard?: boolean } = {}) {
+    this.lifecycle++; this.detach?.(); this.detach = null;
     if (options.discard) { this.chunks = []; this.interrupted = true; if (this.mr) this.mr.ondataavailable = null; }
     if (this.muteTimer) clearTimeout(this.muteTimer);
     this.muteTimer = null;

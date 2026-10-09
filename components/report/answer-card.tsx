@@ -197,6 +197,7 @@ export function AnswerCard({
   const [busy, setBusy] = useState(false);
   const [msg, setMsg] = useState<{ tone: "success" | "danger"; text: string } | null>(null);
   const processing = ["created", "uploaded", "queued", "processing"].includes(answer.status);
+  const consentWait = answer.status === "failed" && answer.processingStage === "consent_wait";
 
   async function act(fn: () => Promise<unknown>, ok: string) {
     setBusy(true);
@@ -215,9 +216,9 @@ export function AnswerCard({
   return (
     <div className="space-y-3" data-testid="answer-card" data-status={answer.status}>
       <div className="flex flex-wrap items-center gap-2 text-sm">
-        <Badge tone={answer.status === "done" ? "success" : answer.status === "failed" ? "danger" : answer.status === "insufficient" ? "warning" : "muted"}>
+        <Badge tone={consentWait ? "warning" : answer.status === "done" ? "success" : answer.status === "failed" ? "danger" : answer.status === "insufficient" ? "warning" : "muted"}>
           {processing ? <Loader2 className="h-3 w-3 animate-spin" /> : null}
-          {answer.processingStage === "budget_wait" && answer.status === "failed" ? "等待预算恢复" : ANSWER_STATUS_LABEL[answer.status] ?? answer.status}
+          {consentWait ? "等待重新授权" : answer.processingStage === "budget_wait" && answer.status === "failed" ? "等待预算恢复" : ANSWER_STATUS_LABEL[answer.status] ?? answer.status}
         </Badge>
         {answer.attempt > 1 ? <Badge>第 {answer.attempt} 次作答</Badge> : null}
         {answer.interrupted ? (
@@ -239,15 +240,15 @@ export function AnswerCard({
       ) : null}
       {answer.status === "failed" ? (
         <Alert
-          tone={answer.processingStage === "budget_wait" ? "warning" : "danger"}
-          title={answer.processingStage === "budget_wait" ? "等待预算恢复" : "处理失败"}
+          tone={consentWait || answer.processingStage === "budget_wait" ? "warning" : "danger"}
+          title={consentWait ? "等待重新授权" : answer.processingStage === "budget_wait" ? "等待预算恢复" : "处理失败"}
           action={
-            <Button size="sm" variant="outline" disabled={busy} onClick={() => act(() => api(`/api/answers/${answer.id}/retry`, { method: "POST" }), "已重新提交处理")}>
-              <RotateCcw className="h-4 w-4" /> {answer.processingStage === "budget_wait" ? "检查预算并继续" : "重试处理"}
-            </Button>
+            showActions ? <div className="flex flex-wrap gap-2">{consentWait && <Link href="/settings" className="inline-flex min-h-11 items-center text-sm underline">前往设置重新同意</Link>}{(!consentWait || answer.hasAudio || answer.transcript !== null) && <Button size="sm" variant="outline" disabled={busy} onClick={() => act(() => api(`/api/answers/${answer.id}/retry`, { method: "POST" }), "已重新提交处理")}>
+              <RotateCcw className="h-4 w-4" /> {consentWait ? "重新同意后继续处理" : answer.processingStage === "budget_wait" ? "检查预算并继续" : "重试处理"}
+            </Button>}</div> : undefined
           }
         >
-          {answer.error ?? "处理失败，可稍后重试。"} {answer.processingStage !== "budget_wait" && (answer.hasAudio ? "录音可在保留期内回放；处理失败不代表语言水平低。" : "录音当前不可用；处理失败不代表语言水平低。")}
+          {answer.error ?? "处理失败，可稍后重试。"} {!consentWait && answer.processingStage !== "budget_wait" && (answer.hasAudio ? "录音可在保留期内回放；处理失败不代表语言水平低。" : "录音当前不可用；处理失败不代表语言水平低。")}
         </Alert>
       ) : null}
 
