@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { BottomNav, TopNav } from "@/components/nav";
 import { requireAdmin } from "@/lib/auth-server";
+import { PrivateSessionBoundary } from "@/components/account/private-session-boundary";
 
 const TABS = [
   { href: "/admin", label: "服务状态" },
@@ -15,7 +16,7 @@ const TABS = [
 export default async function AdminLayout({ children }: { children: React.ReactNode }) {
   const u = await requireAdmin();
   return (
-    <>
+    <PrivateSessionBoundary userId={u.id}>
       <TopNav isAdmin name={u.name} />
       <main className="mx-auto w-full max-w-6xl px-4 pb-24 pt-5 md:pb-12">
         <nav className="mb-5 flex flex-wrap gap-1.5" aria-label="管理导航">
@@ -28,6 +29,6 @@ export default async function AdminLayout({ children }: { children: React.ReactN
         {children}
       </main>
       <BottomNav />
-    </>
+    </PrivateSessionBoundary>
   );
 }

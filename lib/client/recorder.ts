@@ -1,6 +1,6 @@
 "use client";
 
-import { putChunk, saveMeta, updateMeta, type RecordingMeta } from "./idb";
+import { LocalSessionEnded, putChunk, saveMeta, updateMeta, type RecordingMeta } from "./idb";
 
 export type MicErrorKind = "permission" | "no_device" | "busy" | "insecure" | "unsupported" | "unknown";
 
@@ -184,7 +184,7 @@ export class MicRecorder {
   }
 
   /** 开始录音；返回录音实际开始的时刻（本机时间） */
-  start(meta: Omit<RecordingMeta, "mimeType" | "durationMs" | "createdAt" | "status" | "interrupted">): Promise<number> {
+  async start(meta: Omit<RecordingMeta, "mimeType" | "durationMs" | "createdAt" | "status" | "interrupted">): Promise<number> {
     if (!this.stream || !this.trackLive) return Promise.reject(new MicError("no_device", "麦克风已断开，请返回设备检查"));
     const mimeType = pickMimeType();
     const mr = mimeType ? new MediaRecorder(this.stream, { mimeType, audioBitsPerSecond: 64000 }) : new MediaRecorder(this.stream);
@@ -194,6 +194,7 @@ export class MicRecorder {
     this.interrupted = false;
     this.meta = { ...meta, mimeType: mr.mimeType || mimeType || "audio/webm", durationMs: 0, createdAt: Date.now(), status: "recording", interrupted: false };
     this.pendingWrites = saveMeta(this.meta);
+    await this.pendingWrites;
     mr.ondataavailable = (ev) => {
       if (ev.data && ev.data.size > 0) {
         this.chunks.push(ev.data);
@@ -201,6 +202,7 @@ export class MicRecorder {
           const id = this.meta.id; const seq = this.seq++;
           const elapsed = Math.max(0, Date.now() - this.startAt);
           this.pendingWrites = this.pendingWrites.then(async () => { await putChunk(id, seq, ev.data); await updateMeta(id, { durationMs: elapsed }); });
+          void this.pendingWrites.catch(() => {}); // handled on stop; logout can invalidate a pending write
         }
       }
     };
@@ -216,8 +218,8 @@ export class MicRecorder {
       const type = mr.mimeType || this.meta?.mimeType || "audio/webm";
       const blob = new Blob(this.chunks, { type });
       const meta: RecordingMeta = { ...this.meta!, mimeType: type, durationMs, status: "pending", interrupted: this.interrupted };
-      await this.pendingWrites;
-      await updateMeta(meta.id, { durationMs, status: "pending", interrupted: this.interrupted, mimeType: type });
+      try { await this.pendingWrites; await updateMeta(meta.id, { durationMs, status: "pending", interrupted: this.interrupted, mimeType: type }); }
+      catch (error) { this.interrupted = true; meta.interrupted = true; if (!(error instanceof LocalSessionEnded)) this.onInterrupted?.("recorder_error"); }
       // 无论由谁触发停止（用户、计时、设备失效），结果都通过同一个 Promise 返回
       this.stopResolve?.({ blob, durationMs, mimeType: type, interrupted: this.interrupted, meta });
       this.stopResolve = null;
@@ -251,7 +253,8 @@ export class MicRecorder {
     return p.finally(() => { if (this.stopped === p) this.stopped = null; });
   }
 
-  release() {
+  release(options: { discard?: boolean } = {}) {
+    if (options.discard) { this.chunks = []; this.interrupted = true; if (this.mr) this.mr.ondataavailable = null; }
     if (this.muteTimer) clearTimeout(this.muteTimer);
     this.muteTimer = null;
     try {

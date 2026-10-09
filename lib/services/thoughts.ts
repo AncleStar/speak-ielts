@@ -128,7 +128,8 @@ export async function enrollThought(userId: string, id: string, revision: number
   await db.transaction(async tx => {
     await lock(tx, userId); const row = await owned(tx, userId, id); assertRevision(row.revision, revision);
     if (remove) { await tx.delete(thoughtReview).where(eq(thoughtReview.thoughtId, id)); return; }
-    await tx.insert(thoughtReview).values({ userId, thoughtId: id, naturalText: row.natural }).onConflictDoNothing();
+    // Joining today's review must be immediately due on the same clock used by the queue.
+    await tx.insert(thoughtReview).values({ userId, thoughtId: id, naturalText: row.natural, nextDueAt: new Date() }).onConflictDoNothing();
   });
   return getThought(userId, id);
 }

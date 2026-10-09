@@ -59,6 +59,7 @@ export async function api<T = unknown>(path: string, init: { method?: string; bo
   const data = (await res.json().catch(() => null)) as { error?: { code?: string; message?: string } } | null;
   if (!res.ok) {
     if (res.status === 401) {
+      window.dispatchEvent(new Event("speak-auth-expired"));
       throw new ApiError(401, "unauthorized", "登录已失效，请重新登录", data);
     }
     throw new ApiError(res.status, data?.error?.code ?? "error", data?.error?.message ?? `请求失败（${res.status}）`, data);

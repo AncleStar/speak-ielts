@@ -66,7 +66,7 @@ test("mobile history, vocabulary editing and deletion fit the terminal and prese
   await page.goto("/vocabulary"); await page.getByRole("button", { name: "编辑 practical experience", exact: true }).click();
   await page.getByLabel("中文释义", { exact: true }).fill("我想积累的实践经验"); await page.getByRole("button", { name: "保存词语修改", exact: true }).click(); await expect(page.getByText("词语修改已保存。")).toBeVisible();
   expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
-  await page.goto(`/thoughts?thought=${t.id}`); page.once("dialog", dialog => dialog.accept()); await page.getByRole("button", { name: "删除观点", exact: true }).click(); await expect(page.getByText("观点已删除。")).toBeVisible();
+  await page.goto(`/thoughts?thought=${t.id}`); page.once("dialog", dialog => dialog.accept()); await page.getByRole("button", { name: "删除观点", exact: true }).click(); await expect(page.getByText("观点及其本机草稿已删除。")).toBeVisible();
   expect((await page.request.get(`/api/thoughts/${t.id}`)).status()).toBe(404);
   await page.goto("/vocabulary"); await expect(page.getByText("我想积累的实践经验", { exact: true })).toBeVisible();
 });

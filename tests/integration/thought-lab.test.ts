@@ -19,7 +19,7 @@ beforeAll(async () => {
   await (await import("../../scripts/migrate")).runMigrations(); await (await import("../../scripts/seed")).seed({ tts: false, quiet: true });
   ({ db } = await import("@/lib/db")); s = await import("@/db/schema"); lab = await import("@/lib/services/thoughts");
 }, 120000);
-afterEach(() => vi.unstubAllGlobals());
+afterEach(() => { vi.unstubAllGlobals(); vi.useRealTimers(); });
 afterAll(async () => { await (await import("@/lib/queue")).stopBoss(); await (await import("@/lib/db")).closeDb(); await pg?.stop(); }, 30000);
 
 it("persists three styles and deduplicates a retried or concurrent generation without extra charges", async () => {
@@ -56,7 +56,10 @@ it("rejects stale edits and synchronizes a changed Natural without rewriting pas
 });
 
 it("uses the shared review queue, advances 1/3/7/14 days exactly once and handles recall failures", async () => {
-  const id = await owner(), t = await lab.generateThought(id, request()); await lab.enrollThought(id, t.id, 0); await lab.enrollThought(id, t.id, 0);
+  const id = await owner(), t = await lab.generateThought(id, request());
+  // Simulate the DB being ahead: newly enrolled cards must still be actionable immediately.
+  vi.useFakeTimers({ toFake: ["Date"] }); vi.setSystemTime(new Date(Date.now() - 5000));
+  await lab.enrollThought(id, t.id, 0); await lab.enrollThought(id, t.id, 0);
   const getQueue = (await import("@/lib/services/reviews")).getReviewQueue;
   expect((await getQueue(id)).thoughts.due).toHaveLength(1);
   let now = new Date();

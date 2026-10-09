@@ -1,7 +1,8 @@
 "use client";
 
 import { useActionState } from "react";
-import { changePasswordAction, signOutAction } from "@/app/actions/account";
+import { changePasswordAction } from "@/app/actions/account";
+import { SignOutButton } from "./sign-out-button";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Alert } from "@/components/ui/feedback";
@@ -34,11 +35,7 @@ export function ChangePasswordForm({ forced, email }: { forced: boolean; email: 
             {pending ? "正在保存…" : "保存新密码"}
           </Button>
         </form>
-        <form action={signOutAction} className="mt-3">
-          <Button type="submit" variant="ghost" className="w-full text-muted">
-            退出登录
-          </Button>
-        </form>
+        <div className="mt-3"><SignOutButton /></div>
       </CardContent>
     </Card>
   );

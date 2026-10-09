@@ -1,11 +1,11 @@
-import { ArrowLeft } from "lucide-react";
-import Link from "next/link";
 import { requireUser } from "@/lib/auth-server";
 import { SpeakBrand } from "@/components/nav";
+import { PrivateSessionBoundary } from "@/components/account/private-session-boundary";
 
 export default async function FocusLayout({ children }: { children: React.ReactNode }) {
-  await requireUser();
+  const u = await requireUser();
   return (
+    <PrivateSessionBoundary userId={u.id}>
     <div className="min-h-dvh">
       <header className="terminal-header focus-header">
         <SpeakBrand />
@@ -13,5 +13,6 @@ export default async function FocusLayout({ children }: { children: React.ReactN
       </header>
       {children}
     </div>
+    </PrivateSessionBoundary>
   );
 }

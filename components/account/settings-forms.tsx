@@ -2,7 +2,8 @@
 
 import Link from "next/link";
 import { useActionState } from "react";
-import { deleteAccountAction, signOutAction, updateSettingsAction, withdrawConsentAction } from "@/app/actions/account";
+import { deleteAccountAction, updateSettingsAction, withdrawConsentAction } from "@/app/actions/account";
+import { SignOutButton } from "./sign-out-button";
 import { ConsentNotice } from "@/components/account/consent-notice";
 import { BANDS } from "@/components/account/onboarding-form";
 import { Button, LinkButton } from "@/components/ui/button";
@@ -74,11 +75,8 @@ export function SettingsForms({
           <LinkButton href="/device-check" variant="outline">
             设备检查
           </LinkButton>
-          <form action={signOutAction}>
-            <Button type="submit" variant="ghost">
-              退出登录
-            </Button>
-          </form>
+          <SignOutButton />
+          <p className="w-full text-xs text-muted">退出会清除本机未上传录音与草稿。</p>
         </CardContent>
       </Card>
 

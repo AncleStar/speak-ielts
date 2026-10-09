@@ -63,7 +63,8 @@ describe("rewards, consumable quota and growth", () => {
       const a = await answers.createUploadTicket(owner.id, { sessionId: s.id, planIndex: 0, kind: "main", submissionId: `real-practice-${i}`, clientDurationMs: 10000 });
       await db.update(schema.practiceSession).set({ status: "completed", endedAt: new Date() }).where(eq(schema.practiceSession.id, s.id));
       await rewards.rewardCompletedPractice(s.id);
-      await db.update(schema.answer).set({ durationMs: 10000, metrics: { speechSec: 7 }, storageKey: "test-only", status: "done" }).where(eq(schema.answer.id, a.answerId));
+      // Keep fixtures on the application's clock; DB timestamps can be milliseconds ahead.
+      await db.update(schema.answer).set({ createdAt: new Date(), durationMs: 10000, metrics: { speechSec: 7 }, storageKey: "test-only", status: "done" }).where(eq(schema.answer.id, a.answerId));
       await Promise.all([rewards.rewardCompletedPractice(s.id), rewards.rewardCompletedPractice(s.id)]);
       if (i === 0) { source = a.answerId; firstId = s.id; await rewards.markReviewed(owner.id, source); }
     }

@@ -127,3 +127,15 @@ html[data-theme="dark"] .bg-brand-600:hover { background-color: #1d4ed8; }
 @media (prefers-reduced-motion: reduce) {
   *, *::before { animation: none !important; transition: none !important; scroll-behavior: auto !important; }
 }
+
+.private-session-status { min-height: 30vh; display: grid; place-content: center; gap: 1rem; text-align: center; font-size: .85rem; color: var(--muted, #777); }
+.private-session-status button { text-decoration: underline; }
+.thought-draft-status { padding: .5rem 0; font-size: .75rem; color: var(--muted, #777); }
+.thought-local-drafts { margin: .75rem 0; padding: .8rem; border: 1px solid currentColor; border-radius: 2px; }
+.thought-local-drafts summary { cursor: pointer; font-size: .8rem; letter-spacing: .08em; }
+.thought-local-drafts p, .thought-local-drafts small { font-size: .7rem; opacity: .7; }
+.thought-local-drafts ul { margin-top: .5rem; max-height: 16rem; overflow: auto; }
+.thought-local-drafts li { padding: .6rem 0; border-top: 1px solid color-mix(in srgb, currentColor 15%, transparent); }
+.thought-local-drafts li span { display: block; overflow-wrap: anywhere; font-size: .8rem; }
+.thought-local-drafts li small { display: block; margin-top: .2rem; }
+.thought-local-drafts li button { min-height: 44px; min-width: 44px; padding: .5rem .25rem; margin: .5rem .8rem 0 0; font-size: .75rem; text-decoration: underline; }

@@ -3,6 +3,7 @@ import { useEffect, useRef, useState } from "react";
 import { Mic, Square } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { mapMicError, pickMimeType } from "@/lib/client/recorder";
+import { PRIVATE_SESSION_EVENT } from "@/lib/client/private-session";
 
 /** Thought rehearsal stays in this component's memory, outside the interview upload queue. */
 export function LocalRecording({ onRecorded, onBusy, disabled = false }: { onRecorded: (seconds: number) => void; onBusy: (busy: boolean) => void; disabled?: boolean }) {
@@ -16,8 +17,11 @@ export function LocalRecording({ onRecorded, onBusy, disabled = false }: { onRec
     mounted.current = true;
     const stopInBackground = () => { if (document.hidden && recorder.current?.state === "recording") { interrupted.current = true; recorder.current.stop(); } };
     const warn = (event: BeforeUnloadEvent) => { if (recorder.current?.state === "recording") { event.preventDefault(); event.returnValue = ""; } };
+    const sessionEnded = () => { mounted.current = false; interrupted.current = true; if (recorder.current?.state === "recording") recorder.current.stop(); stream.current?.getTracks().forEach(t => t.stop()); if (url.current) URL.revokeObjectURL(url.current); url.current = ""; delete document.documentElement.dataset.recording; };
+    window.addEventListener(PRIVATE_SESSION_EVENT, sessionEnded);
     document.addEventListener("visibilitychange", stopInBackground); window.addEventListener("beforeunload", warn);
     return () => { mounted.current = false; document.removeEventListener("visibilitychange", stopInBackground); window.removeEventListener("beforeunload", warn);
+      window.removeEventListener(PRIVATE_SESSION_EVENT, sessionEnded);
       if (recorder.current?.state === "recording") recorder.current.stop(); stream.current?.getTracks().forEach(t => t.stop());
       if (url.current) URL.revokeObjectURL(url.current); delete document.documentElement.dataset.recording; busyCallback.current(false); };
   }, []);

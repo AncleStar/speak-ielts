@@ -13,6 +13,7 @@ import { deleteRecording, getBlob, isPersistent, listRecordings, purgeExpired, t
 import { MIC_ERROR_TEXT, MicError, MicRecorder, savedDeviceId, type StopResult } from "@/lib/client/recorder";
 import { uploadQueue } from "@/lib/client/uploader";
 import { ScreenWakeLock } from "@/lib/client/wake-lock";
+import { PRIVATE_SESSION_EVENT } from "@/lib/client/private-session";
 import type { getSessionView } from "@/lib/services/sessions";
 import type { AnswerKind, PlanItem, PromptAudio, SessionPlan } from "@/lib/sessions/plan";
 import { canAskRounding, nextMockStep, p2PrepLimitMs, p2SpeakLimitMs } from "@/lib/timing";
@@ -75,6 +76,7 @@ export function InterviewRoom({ sessionId, subtitlePref, userId }: { sessionId: 
   const stopDiscPlayback = rhine?.stopPlayback;
   const exitBusy = useRef(false);
   const exitMock = useRef(false);
+  const privateEnded = useRef(false);
   useEffect(()=>()=>stopDiscPlayback?.(),[stopDiscPlayback]);
   const [view, setView] = useState<SessionView | null>(null);
   const [phase, setPhase] = useState<Phase>("loading");
@@ -102,10 +104,12 @@ export function InterviewRoom({ sessionId, subtitlePref, userId }: { sessionId: 
     const network = () => setOnline(navigator.onLine);
     const storageLimited = () => setPersistent(false);
     const visibility = () => { if (document.visibilityState === "hidden") rt.current?.recorder.interrupt(); };
+    const sessionEnded = () => { privateEnded.current = true; const r = rt.current; if (!r) return; r.aborted = true; r.waiter?.resolve("exit"); r.waiter = null; r.recorder.release({ discard: true }); r.audio.dispose(); void r.wake.release(); stopDiscPlayback?.(); delete document.documentElement.dataset.recording; };
+    window.addEventListener(PRIVATE_SESSION_EVENT, sessionEnded);
     network(); window.addEventListener("online", network); window.addEventListener("offline", network);
     window.addEventListener("recording-storage-limited", storageLimited);
     document.addEventListener("visibilitychange", visibility);
-    return () => { window.removeEventListener("online", network); window.removeEventListener("offline", network); window.removeEventListener("recording-storage-limited", storageLimited); document.removeEventListener("visibilitychange", visibility); };
+    return () => { window.removeEventListener(PRIVATE_SESSION_EVENT, sessionEnded); window.removeEventListener("online", network); window.removeEventListener("offline", network); window.removeEventListener("recording-storage-limited", storageLimited); document.removeEventListener("visibilitychange", visibility); };
   }, []);
   useEffect(() => { document.documentElement.dataset.recording = String(step === "recording"); return () => { delete document.documentElement.dataset.recording; }; }, [step]);
 
@@ -232,6 +236,7 @@ export function InterviewRoom({ sessionId, subtitlePref, userId }: { sessionId: 
   useEffect(() => {
     if (phase !== "running" && phase !== "finishing" && phase !== "exiting") return;
     const h = (e: BeforeUnloadEvent) => {
+      if (privateEnded.current) return;
       e.preventDefault();
       e.returnValue = "";
     };
