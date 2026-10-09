@@ -39,7 +39,7 @@ export interface TtsResult {
 }
 
 export interface LlmInput {
-  purpose: "feedback" | "followup" | "check";
+  purpose: "feedback" | "followup" | "check" | "thought";
   system: string;
   user: string;
   maxTokens?: number;

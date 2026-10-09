@@ -363,6 +363,50 @@ export const reviewCompletion = pgTable("review_completion", {
   questionId: text("question_id").notNull(),
 }, t => [primaryKey({ columns: [t.sessionId, t.questionId] })]);
 
+// Personal Thought Lab: user material is independent of the published question bank.
+export const personalThought = pgTable("personal_thought", {
+  id: id(), userId: text("user_id").notNull().references(() => user.id, { onDelete: "cascade" }),
+  sourceText: text("source_text").notNull(), title: text("title").notNull(), analysis: text("analysis").notNull(),
+  simple: text("simple").notNull(), natural: text("natural").notNull(), nuanced: text("nuanced").notNull(),
+  vocabulary: jsonb("vocabulary").$type<{ term: string; meaning: string; example: string }[]>().notNull(),
+  model: text("model").notNull(), mock: boolean("mock").notNull(), edited: boolean("edited").notNull().default(false),
+  revision: integer("revision").notNull().default(0),
+  createdAt: ts("created_at").notNull().defaultNow(), updatedAt: ts("updated_at").notNull().defaultNow(),
+}, t => [index("thought_user_updated_idx").on(t.userId, t.updatedAt)]);
+
+export const thoughtGeneration = pgTable("thought_generation", {
+  userId: text("user_id").notNull().references(() => user.id, { onDelete: "cascade" }),
+  requestId: text("request_id").notNull(), sourceHash: text("source_hash").notNull(),
+  status: text("status").notNull().default("pending"),
+  thoughtId: text("thought_id").references(() => personalThought.id, { onDelete: "set null" }),
+  createdAt: ts("created_at").notNull().defaultNow(),
+}, t => [primaryKey({ columns: [t.userId, t.requestId] }), index("thought_generation_rate_idx").on(t.userId, t.createdAt)]);
+
+export const thoughtReview = pgTable("thought_review", {
+  thoughtId: text("thought_id").primaryKey().references(() => personalThought.id, { onDelete: "cascade" }),
+  userId: text("user_id").notNull().references(() => user.id, { onDelete: "cascade" }),
+  naturalText: text("natural_text").notNull(), completedCount: integer("completed_count").notNull().default(0),
+  nextDueAt: ts("next_due_at").notNull().defaultNow(), lastReviewedAt: ts("last_reviewed_at"),
+  createdAt: ts("created_at").notNull().defaultNow(),
+}, t => [index("thought_review_user_due_idx").on(t.userId, t.nextDueAt)]);
+
+export const thoughtPractice = pgTable("thought_practice", {
+  id: id(), userId: text("user_id").notNull().references(() => user.id, { onDelete: "cascade" }),
+  thoughtId: text("thought_id").notNull().references(() => personalThought.id, { onDelete: "cascade" }),
+  requestId: text("request_id").notNull(), thoughtRevision: integer("thought_revision").notNull(),
+  naturalText: text("natural_text").notNull(), recalledText: text("recalled_text").notNull().default(""),
+  outcome: text("outcome").notNull(), durationSeconds: doublePrecision("duration_seconds").notNull().default(0),
+  createdAt: ts("created_at").notNull().defaultNow(),
+}, t => [uniqueIndex("thought_practice_request_uq").on(t.userId, t.requestId), index("thought_practice_thought_idx").on(t.thoughtId, t.createdAt)]);
+
+export const vocabularyEntry = pgTable("vocabulary_entry", {
+  id: id(), userId: text("user_id").notNull().references(() => user.id, { onDelete: "cascade" }),
+  term: text("term").notNull(), normalizedTerm: text("normalized_term").notNull(),
+  meaning: text("meaning").notNull(), example: text("example").notNull().default(""),
+  thoughtId: text("thought_id").references(() => personalThought.id, { onDelete: "set null" }),
+  createdAt: ts("created_at").notNull().defaultNow(), updatedAt: ts("updated_at").notNull().defaultNow(),
+}, t => [uniqueIndex("vocabulary_user_term_uq").on(t.userId, t.normalizedTerm), index("vocabulary_user_updated_idx").on(t.userId, t.updatedAt)]);
+
 export const ttsAsset = pgTable("tts_asset", {
   id: id(),
   hash: text("hash").notNull().unique(),
@@ -487,6 +531,8 @@ export const contentEntitlement = pgTable("content_entitlement", {
 }, t => [primaryKey({ columns: [t.userId, t.packId] })]);
 
 export const schema = {
+  personalThought, thoughtGeneration, thoughtReview, thoughtPractice, vocabularyEntry,
+  reviewSchedule, reviewCompletion,
   userAiConfig,
   rewardLedger, dailyCheckin, minuteCredit, quotaHold, reviewVisit, contentEntitlement,
   user,

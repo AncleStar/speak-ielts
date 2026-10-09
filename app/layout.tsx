@@ -5,6 +5,7 @@ import "./terminal.css";
 import "./rhine-fonts.css";
 import "./rhine.css";
 import "./ai-account.css";
+import "./thought-lab.css";
 import { AppearanceInit } from "@/components/appearance";
 import { RhineProvider } from "@/components/disc/rhine-provider";
 import { TerminalEntryProvider } from "@/components/auth/terminal-entry";

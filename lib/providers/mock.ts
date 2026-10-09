@@ -3,6 +3,7 @@ import path from "node:path";
 import { makeTempDir, makeToneWav, runProcess } from "@/lib/audio";
 import { env } from "@/lib/env";
 import { countWords } from "@/lib/feedback/validate";
+import { mockThought } from "@/lib/thoughts/prompt";
 import type { AsrInput, AsrResult, LlmInput, LlmResult, Providers, TtsResult } from "./types";
 
 /**
@@ -181,6 +182,8 @@ export function createMockProviders(): Providers {
       let json: unknown;
       if (input.purpose === "feedback") {
         json = mockFeedbackJson(input.mockHint ?? {});
+      } else if (input.purpose === "thought") {
+        json = mockThought(String(input.mockHint?.sourceText ?? ""));
       } else if (input.purpose === "followup") {
         const candidates = (input.mockHint?.candidates as string[]) ?? [];
         const transcript = String(input.mockHint?.transcript ?? "");

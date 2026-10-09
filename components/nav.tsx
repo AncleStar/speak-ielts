@@ -1,5 +1,5 @@
 "use client";
-import { Disc3, CalendarDays, Map, Settings, History, Shield, Menu, Coins } from "lucide-react";
+import { Disc3, CalendarDays, Map, Settings, History, Shield, Menu, Coins, FlaskConical } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
@@ -7,13 +7,14 @@ import { cn } from "@/lib/utils";
 import { AmbientToggle } from "@/components/ambient-background";
 const ITEMS = [
   {href:"/practice",label:"训练磁盘",Icon:Disc3},
+  {href:"/thoughts",label:"自由练习",Icon:FlaskConical},
   {href:"/history",label:"学习记录",Icon:History},
   {href:"/growth",label:"成长日历",Icon:CalendarDays},
   {href:"/rewards",label:"积分兑换",Icon:Coins},
   {href:"/levels",label:"关卡",Icon:Map},
   {href:"/settings",label:"设置",Icon:Settings},
 ];
-function isActive(path:string,href:string){return path.startsWith(href) || href==="/history" && (/^\/(answers|sessions)\//.test(path));}
+function isActive(path:string,href:string){return path.startsWith(href) || href==="/thoughts" && path==="/vocabulary" || href==="/history" && (/^\/(answers|sessions)\//.test(path));}
 export function SpeakBrand(){return <span className="speak-brand"><strong>SPEAK</strong><span>ENGLISH PRACTICE</span><span>TRAINING <b>OS</b></span></span>;}
 export function TopNav({isAdmin,name}:{isAdmin:boolean;name:string}){
   const pathname=usePathname();
@@ -33,5 +34,5 @@ export function BottomNav(){
   const path=usePathname();const [keyboardOpen,setKeyboardOpen]=useState(false);
   useEffect(()=>{const vp=window.visualViewport;const update=()=>setKeyboardOpen(!!vp && vp.height<window.innerHeight*.75 && /^(INPUT|TEXTAREA|SELECT)$/.test(document.activeElement?.tagName??""));vp?.addEventListener("resize",update);document.addEventListener("focusin",update);document.addEventListener("focusout",update);return()=>{vp?.removeEventListener("resize",update);document.removeEventListener("focusin",update);document.removeEventListener("focusout",update);};},[]);
   if(keyboardOpen)return null;
-  return <nav className="terminal-bottom" aria-label="底部导航"><ul>{ITEMS.map(({href,label,Icon})=><li key={href}><Link href={href} aria-current={isActive(path,href)?"page":undefined} className={cn(isActive(path,href)&&"active")}><Icon size={20}/>{label}</Link></li>)}</ul></nav>;
+  return <nav className="terminal-bottom" aria-label="底部导航"><ul style={{gridTemplateColumns:`repeat(${ITEMS.length},minmax(0,1fr))`}}>{ITEMS.map(({href,label,Icon})=><li key={href}><Link href={href} aria-current={isActive(path,href)?"page":undefined} className={cn(isActive(path,href)&&"active")}><Icon size={20}/>{label}</Link></li>)}</ul></nav>;
 }

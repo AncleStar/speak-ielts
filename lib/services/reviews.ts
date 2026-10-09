@@ -2,7 +2,9 @@ import { and, desc, eq, isNull, sql } from "drizzle-orm";
 import { answer, feedback, practiceSession, retryItem, reviewCompletion, reviewSchedule } from "@/db/schema";
 import { db } from "@/lib/db";
 import { listPublishedQuestions } from "@/lib/services/content";
-export const reviewIntervalDays = (count: number) => [1, 3, 7, 14][Math.min(Math.max(count - 1, 0), 3)];
+import { getThoughtReviewQueue } from "@/lib/services/thoughts";
+import { reviewIntervalDays } from "./review-intervals";
+export { reviewIntervalDays } from "./review-intervals";
 
 export async function scheduleCompletedReview(sessionId: string) {
   const [s] = await db.select().from(practiceSession).where(eq(practiceSession.id, sessionId));
@@ -31,7 +33,7 @@ export async function scheduleCompletedReview(sessionId: string) {
 }
 
 export async function getReviewQueue(userId: string, now = new Date()) {
-  const [latest, manual, schedules, published] = await Promise.all([
+  const [latest, manual, schedules, published, thoughts] = await Promise.all([
     db.selectDistinctOn([answer.questionId], { a: answer, endedAt: practiceSession.endedAt, fb: feedback }).from(answer)
       .innerJoin(practiceSession, eq(practiceSession.id, answer.sessionId))
       .leftJoin(feedback, and(eq(feedback.answerId, answer.id), eq(feedback.isCurrent, true)))
@@ -41,7 +43,7 @@ export async function getReviewQueue(userId: string, now = new Date()) {
     db.select({ r: retryItem, a: answer }).from(retryItem).innerJoin(answer, eq(answer.id, retryItem.sourceAnswerId))
       .innerJoin(practiceSession, eq(practiceSession.id, answer.sessionId))
       .where(and(eq(retryItem.userId, userId), eq(answer.userId, userId), isNull(retryItem.doneAt), isNull(practiceSession.deletedAt))),
-    db.select().from(reviewSchedule).where(eq(reviewSchedule.userId, userId)), listPublishedQuestions(),
+    db.select().from(reviewSchedule).where(eq(reviewSchedule.userId, userId)), listPublishedQuestions(), getThoughtReviewQueue(userId, now),
   ]);
   const available = new Set(published.map(q => q.id));
   const scheduleBy = new Map(schedules.map(s => [s.questionId, s]));
@@ -63,5 +65,5 @@ export async function getReviewQueue(userId: string, now = new Date()) {
   });
   const ordered = [...items.values()].sort((a,b) => Number(!!b.manualId) - Number(!!a.manualId) || a.dueAt.localeCompare(b.dueAt));
   // Manual choices are immediately actionable, even if DB and app clocks differ slightly.
-  return { due: ordered.filter(i => i.manualId || Date.parse(i.dueAt) <= now.getTime()), upcoming: ordered.filter(i => !i.manualId && Date.parse(i.dueAt) > now.getTime()) };
+  return { due: ordered.filter(i => i.manualId || Date.parse(i.dueAt) <= now.getTime()), upcoming: ordered.filter(i => !i.manualId && Date.parse(i.dueAt) > now.getTime()), thoughts };
 }

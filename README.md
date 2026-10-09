@@ -30,6 +30,23 @@ SPEAK 是面向个人与小范围试用的雅思口语训练 Web 应用。中文
 | --- | --- |
 | <a href="docs/screenshots/mobile-discs.png"><img src="docs/screenshots/mobile-discs.png" alt="手机端训练磁盘库：话题切换与题目选择" width="260"></a> | <a href="docs/screenshots/mobile-interview.png"><img src="docs/screenshots/mobile-interview.png" alt="手机端面试：虚拟考官、录音与结束作答" width="260"></a> |
 
+## Personal Thought Lab · 个人观点实验室
+
+导航中选择 **「自由练习」**，输入中文或英文观点，生成 **Simple / Natural / Nuanced** 三种可编辑英文表达。成功生成会自动保存到个人观点历史，支持搜索、重新修改和重新生成。
+
+隐藏 Natural 后可进行录音回放或尝试写下表达；勾选词语保存到个人词汇库，将 Natural 加入现有「今日复习」，按 1、3、7、14 天积累个人口语素材。编辑 Natural 会同步更新复习卡片，过去的练习保留当时的表达。
+
+生成沿用现有个人 API Key、模型和月预算，并记录 Token 用量；密钥仅在服务端加密保存。练习录音只在当前页面回放，保存时记录时长、自评与可选的尝试文本。模拟模式展示固定示例，不分析或翻译输入。详见 [使用与实现说明](docs/个人观点实验室.md)。
+
+<details>
+<summary>查看观点实验室的电脑与手机界面（测试账号、演示结果）</summary>
+
+| 电脑端 · 三种表达与观点历史 | 手机端 · 编辑与词语收藏 |
+| --- | --- |
+| [![电脑端个人观点实验室](docs/screenshots/thought-lab-desktop.png)](docs/screenshots/thought-lab-desktop.png) | <a href="docs/screenshots/thought-lab-mobile.png"><img src="docs/screenshots/thought-lab-mobile.png" alt="手机端个人观点实验室" width="220"></a> |
+
+</details>
+
 ## 个人 API Key、模型和用量
 
 登录后从「设置 → API Key、模型与用量」进入。支持百炼北京地域的 Qwen3 ASR 稳定版 / 2026-02-10 快照和 Qwen Plus / Qwen Flash 非思考模式。保存个人 Key 后用于后续转写、反馈与追问，考官语音沿用站点配置。
