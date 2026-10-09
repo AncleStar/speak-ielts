@@ -1,10 +1,11 @@
 "use client";
 import Link from "next/link";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { ArrowUpRight, BookOpen, Check, EyeOff, FilePlus2, FlaskConical, Search, Sparkles, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input, Label, Textarea } from "@/components/ui/form";
 import { ApiError, api } from "@/lib/client/api";
+import { useNavigationGuard } from "@/lib/client/use-navigation-guard";
 import { containsTerm, type ThoughtDetail, type ThoughtList, type ThoughtEdit } from "@/lib/thoughts/schema";
 import { formatDateTime } from "@/lib/utils";
 import { ThoughtPracticePanel } from "./practice-panel";
@@ -16,16 +17,17 @@ export function ThoughtLab({ initial, selected, practiceInitially, modelLabel }:
   const [list, setList] = useState(initial), [current, setCurrent] = useState(selected), [draft, setDraft] = useState<Draft>(draftOf(selected));
   const [search, setSearch] = useState(""), [busy, setBusy] = useState(""), [message, setMessage] = useState(""), [error, setError] = useState("");
   const [practice, setPractice] = useState(practiceInitially && !!selected), [practiceBusy, setPracticeBusy] = useState(false), [selectedWords, setWords] = useState<number[]>([]);
+  const [practiceUnsaved, setPracticeUnsaved] = useState(false);
   const [generation, setGeneration] = useState<{ sourceText: string; requestId: string } | null>(null);
   const dirty = current ? JSON.stringify(draft) !== JSON.stringify(draftOf(current)) : !!draft.sourceText.trim();
   const editing = !!current && dirty;
   const blocked = !!busy || practiceBusy;
-  useEffect(() => { const warn = (event: BeforeUnloadEvent) => { if (dirty || busy) { event.preventDefault(); event.returnValue = ""; } }; window.addEventListener("beforeunload", warn); return () => window.removeEventListener("beforeunload", warn); }, [dirty, busy]);
+  useNavigationGuard(dirty || !!busy || practiceBusy || practiceUnsaved, busy ? "当前操作还在进行，离开页面可能看不到结果。确定离开吗？" : "当前输入或练习还未保存，离开会放弃这些内容。确定离开吗？");
   function updateDraft(field: keyof Draft, value: string) { setDraft(old => ({ ...old, [field]: value })); setMessage(""); }
   function useThought(thought: ThoughtDetail | null) { setCurrent(thought); setDraft(draftOf(thought)); setWords([]); setPractice(false); setGeneration(null);
     window.history.replaceState(null, "", thought ? `/thoughts?thought=${thought.id}` : "/thoughts"); }
   async function refreshList(offset = list.offset) { setList(await api<ThoughtList>(`/api/thoughts?q=${encodeURIComponent(search)}&offset=${offset}`)); }
-  function canLeave() { return !dirty || window.confirm("当前输入还未保存，是否放弃这些修改？"); }
+  function canLeave() { return !(dirty || practiceUnsaved) || window.confirm("当前输入或练习还未保存，是否放弃这些内容？"); }
   async function run(label: string, task: () => Promise<void>) { setBusy(label); setError(""); setMessage(""); try { await task(); } catch (e) { setError((e as Error).message); } finally { setBusy(""); } }
   async function open(id: string) { if (!canLeave()) return; await run("open", async () => useThought(await api<ThoughtDetail>(`/api/thoughts/${id}`))); }
   async function generate() {
@@ -64,7 +66,7 @@ export function ThoughtLab({ initial, selected, practiceInitially, modelLabel }:
       <div className="thought-workbench" aria-busy={!!busy}>
         {error && <div role="alert" className="thought-notice is-error">{error}{current && <button onClick={() => { if (canLeave()) void run("open", async () => useThought(await api<ThoughtDetail>(`/api/thoughts/${current.id}`))); }} disabled={blocked}>重新打开已保存版本</button>}</div>}
         {message && <p role="status" className="thought-notice"><Check size={16} />{message}</p>}
-        {practice && current ? <ThoughtPracticePanel key={`${current.id}-${current.revision}`} thought={current} onBusy={setPracticeBusy} onClose={() => setPractice(false)} onSaved={saved => { setCurrent(saved); setPractice(false); setMessage("练习已保存，可在本页查看复习时间与练习记录。"); }} /> : <>
+        {practice && current ? <ThoughtPracticePanel key={`${current.id}-${current.revision}`} thought={current} onBusy={setPracticeBusy} onUnsavedChange={setPracticeUnsaved} onClose={() => { if (canLeave()) setPractice(false); }} onSaved={saved => { setCurrent(saved); setPractice(false); setMessage("练习已保存，可在本页查看复习时间与练习记录。"); }} /> : <>
           <section className="thought-source-panel"><div className="thought-section-heading"><h2><span>01</span> 你的原始观点</h2><small>中文 / ENGLISH</small></div>
             <Label htmlFor="thought-source" className="sr-only">原始观点（中文或英文）</Label><Textarea id="thought-source" value={draft.sourceText} disabled={blocked} onChange={e => updateDraft("sourceText", e.target.value)} maxLength={2000} rows={4} placeholder="例如：我认为大学生应该多参加社会实践，因为这能帮助他们把课堂知识用到真实生活中。" />
             <div className="thought-source-footer"><span>{draft.sourceText.length} / 2000</span><Button onClick={() => void generate()} disabled={blocked || draft.sourceText.trim().length < 3}><Sparkles size={15} />{busy === "generate" ? "正在整理三种表达…" : current ? "重新生成并存为新观点" : "生成三种表达"}</Button></div>

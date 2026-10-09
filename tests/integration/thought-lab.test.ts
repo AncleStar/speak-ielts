@@ -127,3 +127,29 @@ it("cascades personal materials on account purge", async () => {
   expect(await db.select().from(s.thoughtGeneration).where(eq(s.thoughtGeneration.userId, id))).toHaveLength(0);
   expect(await db.select().from(s.thoughtPractice).where(eq(s.thoughtPractice.userId, id))).toHaveLength(0);
 });
+
+it("joins saved viewpoint practice to growth using UTC+8 days without inflating audio or rewards", async () => {
+  const id = await owner(), stranger = await owner(), t = await lab.generateThought(id, request());
+  await lab.enrollThought(id, t.id, 0);
+  const now = new Date("2026-10-09T01:00:00Z");
+  const attempt = (at: string, outcome = "practice", durationSeconds = 0) => lab.recordThoughtPractice(id, t.id, {
+    action: "practice", revision: 0, requestId: crypto.randomUUID(), outcome, durationSeconds, recalledText: "I can express my idea.",
+  }, new Date(at));
+  await attempt("2026-10-08T15:59:59Z"); // October 8 in UTC+8
+  await attempt("2026-10-08T16:00:00Z", "remembered", 30); // October 9
+  await attempt("2026-09-30T16:00:00Z"); // October 1, outside the last week
+  await attempt("2026-09-30T15:59:59Z"); // September 30
+  await attempt("2026-10-11T01:00:00Z"); // Future data must not inflate recent progress
+  const { getGrowth } = await import("@/lib/services/growth");
+  const growth = await getGrowth(id, "2026-10", now);
+  expect(growth.events.filter(e => e.type === "thought" || e.type === "thought_review")).toHaveLength(4);
+  expect(growth.events.find(e => e.type === "thought_review")).toMatchObject({ day: "2026-10-09", selfReported: true, seconds: 30, href: `/thoughts?thought=${t.id}` });
+  expect(growth.week).toMatchObject({ days: 2, thoughtPractices: 2, thoughtReviews: 1, seconds: 0, speechSeconds: 0 });
+  expect(growth.monthStats).toMatchObject({ days: 4, thoughtPractices: 4, thoughtReviews: 1, seconds: 0 });
+  expect(growth.dailySeconds.every(d => d.seconds === 0)).toBe(true);
+  await expect((await import("@/lib/services/rewards")).balance(db, id)).resolves.toBe(0);
+  expect((await getGrowth(stranger, "2026-10", now)).events).toHaveLength(0);
+  await lab.deleteThought(id, t.id);
+  const deleted = await getGrowth(id, "2026-10", now);
+  expect(deleted.events).toHaveLength(0); expect(deleted.monthStats.thoughtPractices).toBe(0);
+});

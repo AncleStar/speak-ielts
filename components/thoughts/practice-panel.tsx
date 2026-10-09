@@ -1,5 +1,5 @@
 "use client";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Eye, EyeOff, ArrowLeft } from "lucide-react";
 import { LocalRecording } from "./local-recording";
 import { Button } from "@/components/ui/button";
@@ -7,11 +7,13 @@ import { Textarea, Label } from "@/components/ui/form";
 import { api } from "@/lib/client/api";
 import type { ThoughtDetail, PracticeInput } from "@/lib/thoughts/schema";
 
-export function ThoughtPracticePanel({ thought, onClose, onSaved, onBusy }: { thought: ThoughtDetail; onClose: () => void; onSaved: (thought: ThoughtDetail) => void; onBusy: (value: boolean) => void }) {
+export function ThoughtPracticePanel({ thought, onClose, onSaved, onBusy, onUnsavedChange }: { thought: ThoughtDetail; onClose: () => void; onSaved: (thought: ThoughtDetail) => void; onBusy: (value: boolean) => void; onUnsavedChange: (value: boolean) => void }) {
   const [reveal, setReveal] = useState(false), [recalledText, setText] = useState(""), [durationSeconds, setDuration] = useState(0);
   const [recording, setRecording] = useState(false), [saving, setSaving] = useState(false), [error, setError] = useState("");
   const [pending, setPending] = useState<PracticeInput | null>(null);
   const ready = durationSeconds >= 1 || recalledText.trim().length >= 3;
+  useEffect(() => { onUnsavedChange(!!recalledText.trim() || durationSeconds > 0 || !!pending); }, [recalledText, durationSeconds, pending, onUnsavedChange]);
+  useEffect(() => () => onUnsavedChange(false), [onUnsavedChange]);
   function busy(value: boolean) { setRecording(value); onBusy(value); }
   async function save(outcome: PracticeInput["outcome"]) {
     const payload: PracticeInput = pending ?? { action: "practice", revision: thought.revision, requestId: crypto.randomUUID(), outcome, recalledText: recalledText.trim(), durationSeconds };

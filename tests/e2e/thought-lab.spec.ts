@@ -70,3 +70,31 @@ test("mobile history, vocabulary editing and deletion fit the terminal and prese
   expect((await page.request.get(`/api/thoughts/${t.id}`)).status()).toBe(404);
   await page.goto("/vocabulary"); await expect(page.getByText("我想积累的实践经验", { exact: true })).toBeVisible();
 });
+
+test("unsaved edits and recall attempts warn before navigation, and saved practice reaches the growth calendar", async ({ page }) => {
+  await login(page);
+  const created = await page.request.post("/api/thoughts", { headers: origin, data: { sourceText: "I believe students should gain experience.", requestId: crypto.randomUUID() } });
+  expect(created.status()).toBe(200); const t = await created.json();
+  t.title = "导航保护与成长记录回归";
+  expect((await page.request.put(`/api/thoughts/${t.id}`, { headers: origin, data: { revision: t.revision, title: t.title, sourceText: t.sourceText, simple: t.simple, natural: t.natural, nuanced: t.nuanced } })).status()).toBe(200);
+  await page.goto(`/thoughts?thought=${t.id}`);
+  const natural = page.locator("#thought-natural"), edited = t.natural + " This is my own addition.";
+  await natural.fill(edited);
+  page.once("dialog", dialog => dialog.dismiss());
+  await page.getByRole("link", { name: /02 \/ 个人词汇库/ }).click();
+  await expect(natural).toHaveValue(edited); await expect(page).toHaveURL(/\/thoughts\?/);
+  page.once("dialog", dialog => dialog.accept());
+  await page.getByRole("link", { name: /02 \/ 个人词汇库/ }).click(); await expect(page).toHaveURL(/\/vocabulary$/);
+  await page.goto(`/thoughts?thought=${t.id}`); await expect(natural).toHaveValue(t.natural);
+  await page.getByRole("button", { name: "隐藏 Natural，开始练习", exact: true }).click();
+  await page.getByLabel("我的尝试表达（可选，也可直接写下来练习）").fill("Students should put their knowledge into practice.");
+  page.once("dialog", dialog => dialog.dismiss());
+  await page.getByRole("button", { name: "返回编辑", exact: true }).click(); await expect(page.getByText("Natural 已隐藏", { exact: true })).toBeVisible();
+  page.once("dialog", dialog => dialog.dismiss());
+  await page.getByRole("link", { name: /03 \/ 今日复习/ }).click(); await expect(page).toHaveURL(/\/thoughts\?/);
+  await page.getByRole("button", { name: "保存本次练习", exact: true }).click(); await expect(page.getByText(/练习已保存，可在本页/)).toBeVisible();
+  await page.goto("/growth");
+  await expect(page.getByRole("link", { name: t.title, exact: true })).toBeVisible();
+  await expect(page.getByText(/观点练习 · 文本练习/)).toBeVisible();
+  await page.getByRole("link", { name: t.title, exact: true }).click(); await expect(natural).toHaveValue(t.natural);
+});

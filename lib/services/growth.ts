@@ -1,10 +1,10 @@
 import { and, eq, gte, isNull, lt, or } from "drizzle-orm";
-import { answer, dailyCheckin, practiceSession, question, reviewVisit, rewardLedger } from "@/db/schema";
+import { answer, dailyCheckin, personalThought, thoughtPractice, practiceSession, question, reviewVisit, rewardLedger } from "@/db/schema";
 import { db } from "@/lib/db";
 import { dayDate, rewardDay } from "@/lib/services/rewards";
 import type { SessionPlan } from "@/lib/sessions/plan";
 
-export interface GrowthEvent { day: string; at: string; points?: number; type: "checkin" | "practice" | "mock" | "retry" | "review" | "points"; title: string; href?: string; seconds?: number; status?: string }
+export interface GrowthEvent { day: string; at: string; points?: number; type: "checkin" | "practice" | "mock" | "retry" | "review" | "points" | "thought" | "thought_review"; title: string; href?: string; seconds?: number; status?: string; selfReported?: boolean }
 export async function getGrowth(userId: string, requestedMonth?: string, now = new Date()) {
   const today = rewardDay(now);
   const month = requestedMonth && /^(20\d{2})-(0[1-9]|1[0-2])$/.test(requestedMonth) ? requestedMonth : today.slice(0, 7);
@@ -13,7 +13,7 @@ export async function getGrowth(userId: string, requestedMonth?: string, now = n
   const recentStart = new Date(dayDate(today).getTime() - 29 * 86400_000);
   const from = start < recentStart ? start : recentStart;
   const until = end > now ? end : new Date(now.getTime() + 1);
-  const [sessions, recordings, checkins, reviews, ledger] = await Promise.all([
+  const [sessions, recordings, checkins, reviews, ledger, thoughts] = await Promise.all([
     db.select().from(practiceSession).where(and(eq(practiceSession.userId, userId), isNull(practiceSession.deletedAt), or(gte(practiceSession.createdAt, from), gte(practiceSession.endedAt, from)), lt(practiceSession.createdAt, until))),
     db.select({ at: answer.createdAt, sessionId: answer.sessionId, duration: answer.durationMs, speech: answer.metrics, topic: question.topic, session: practiceSession }).from(answer)
       .innerJoin(practiceSession, eq(practiceSession.id, answer.sessionId)).innerJoin(question, eq(question.id, answer.questionId))
@@ -22,6 +22,9 @@ export async function getGrowth(userId: string, requestedMonth?: string, now = n
     db.select({ at: reviewVisit.createdAt, id: answer.id, sessionId: answer.sessionId }).from(reviewVisit).innerJoin(answer, eq(answer.id, reviewVisit.answerId))
       .innerJoin(practiceSession, eq(practiceSession.id, answer.sessionId)).where(and(eq(reviewVisit.userId, userId), isNull(practiceSession.deletedAt), gte(reviewVisit.createdAt, from), lt(reviewVisit.createdAt, until))),
     db.select().from(rewardLedger).where(and(eq(rewardLedger.userId, userId), gte(rewardLedger.createdAt, from), lt(rewardLedger.createdAt, until))),
+    db.select({ at: thoughtPractice.createdAt, thoughtId: personalThought.id, title: personalThought.title, outcome: thoughtPractice.outcome, duration: thoughtPractice.durationSeconds }).from(thoughtPractice)
+      .innerJoin(personalThought, eq(personalThought.id, thoughtPractice.thoughtId))
+      .where(and(eq(thoughtPractice.userId, userId), eq(personalThought.userId, userId), gte(thoughtPractice.createdAt, from), lt(thoughtPractice.createdAt, until))),
   ]);
   const visibleSessions = new Map([...sessions, ...recordings.map(a => a.session)].map(s => [s.id, s]));
   const events: GrowthEvent[] = [
@@ -32,14 +35,20 @@ export async function getGrowth(userId: string, requestedMonth?: string, now = n
     ...checkins.map(c => ({ day: c.day, at: c.createdAt.toISOString(), type: "checkin" as const, title: `签到 · 连续 ${c.streak} 天` })),
     ...reviews.map(r => ({ day: rewardDay(r.at), at: r.at.toISOString(), type: "review" as const, title: "回答复盘与同题对比", href: `/answers/${r.id}` })),
     ...ledger.map(l => ({ day: l.day, at: l.createdAt.toISOString(), type: "points" as const, title: l.note, points: l.points, href: "/rewards" })),
+    ...thoughts.map(t => ({ day: rewardDay(t.at), at: t.at.toISOString(), type: t.outcome === "practice" ? "thought" as const : "thought_review" as const,
+      title: `${t.title}${t.outcome === "again" ? " · 还想再练" : t.outcome === "remembered" ? " · 已想起来" : ""}`, href: `/thoughts?thought=${t.thoughtId}`, seconds: t.duration, selfReported: true })),
   ];
   const stats = (days: number) => {
     const since = new Date(dayDate(today).getTime() - (days - 1) * 86400_000);
-    const actual = recordings.filter(a => a.at >= since && a.duration !== null && a.duration > 0);
-    return { days: new Set(actual.map(a => rewardDay(a.at))).size, seconds: Math.round(actual.reduce((n, a) => n + (a.duration ?? 0) / 1000, 0)), speechSeconds: Math.round(actual.reduce((n, a) => n + Number((a.speech as { speechSec?: number })?.speechSec ?? 0), 0)), topics: new Set(actual.map(a => a.topic)).size, retries: sessions.filter(s => s.endedAt && s.endedAt >= since && s.mode === "retry" && s.status === "completed").length };
+    const actual = recordings.filter(a => a.at >= since && a.at <= now && a.duration !== null && a.duration > 0);
+    const attempts = thoughts.filter(t => t.at >= since && t.at <= now);
+    return { days: new Set([...actual.map(a => rewardDay(a.at)), ...attempts.map(t => rewardDay(t.at))]).size,
+      seconds: Math.round(actual.reduce((n, a) => n + (a.duration ?? 0) / 1000, 0)), speechSeconds: Math.round(actual.reduce((n, a) => n + Number((a.speech as { speechSec?: number })?.speechSec ?? 0), 0)), topics: new Set(actual.map(a => a.topic)).size,
+      retries: sessions.filter(s => s.endedAt && s.endedAt >= since && s.endedAt <= now && s.mode === "retry" && s.status === "completed").length,
+      thoughtPractices: attempts.length, thoughtReviews: attempts.filter(t => t.outcome !== "practice").length };
   };
   return { month, today, events: events.filter(e => e.day.startsWith(month)), week: stats(7), monthStats: stats(30), dailySeconds: Array.from({ length: 30 }, (_, i) => {
     const day = rewardDay(new Date(recentStart.getTime() + i * 86400_000));
-    return { day, seconds: Math.round(recordings.filter(a => rewardDay(a.at) === day).reduce((n, a) => n + (a.duration ?? 0) / 1000, 0)) };
+    return { day, seconds: Math.round(recordings.filter(a => a.at <= now && rewardDay(a.at) === day).reduce((n, a) => n + (a.duration ?? 0) / 1000, 0)) };
   }) };
 }

@@ -31,7 +31,13 @@ export const reviewActionSchema = z.union([
 export const saveVocabularySchema = z.object({ thoughtId: z.string().uuid(), revision: z.number().int().nonnegative(), indices: z.array(z.number().int().min(0).max(7)).min(1).max(8) }).strict();
 export const editVocabularySchema = z.object({ term: englishText(100), meaning: z.string().trim().min(1).max(300), example: z.string().trim().max(800) }).strict();
 export function normalizeTerm(term: string) { return term.normalize("NFKC").toLowerCase().replace(/[’]/g, "'").replace(/\s+/g, " ").trim(); }
-export function containsTerm(text: string, term: string) { return normalizeTerm(text).includes(normalizeTerm(term)); }
+export function containsTerm(text: string, term: string) {
+  const phrase = normalizeTerm(term);
+  if (!phrase) return false;
+  const escaped = phrase.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+  const wordChar = /[\p{L}\p{N}_]/u;
+  return new RegExp(`${wordChar.test(phrase[0]) ? "(?<![\\p{L}\\p{N}_])" : ""}${escaped}${wordChar.test(phrase.at(-1)!) ? "(?![\\p{L}\\p{N}_])" : ""}`, "u").test(normalizeTerm(text));
+}
 
 export type ThoughtOutput = z.infer<typeof thoughtOutputSchema>;
 export type ThoughtEdit = z.infer<typeof editThoughtSchema>;
