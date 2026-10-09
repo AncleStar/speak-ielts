@@ -100,6 +100,8 @@ npm run dev:all -- --production
 
 手机访问需要 HTTPS；电脑上的 `localhost` 可直接使用麦克风。不能在手机里用 `localhost` 访问电脑。
 
+长期使用建议定期备份。Windows 首次运行 `npm run setup:backup`，随后用 `npm run backup` 保存数据库、私有音频和删除日志。`npm run restore -- 备份目录` 仅恢复到新的独立空库与新目录，详细配置见 [备份恢复与回滚](docs/备份恢复与回滚.md)。备份含个人数据，需私密保管并复制到独立介质。
+
 ## 已实现的功能
 
 - 6 章 30 关：Part 1 基础回答 → 理由与追问 → Part 2 陈述 → Part 3 讨论 → 完整模考。
@@ -155,11 +157,14 @@ TIME_SCALE=1
 | `npm run test:e2e` | 用生产构建运行浏览器全流程；请先 build |
 | `npm run check:providers` | 检查当前配置下 FFmpeg、TTS、ASR、LLM |
 | `npm run check:practice -- --real` | 合成人声与静音走实际上传、转写、反馈服务；沿用现有预算，不算真人质量验收 |
+| `npm run check:recovery` | 新建隔离数据库，完整备份恢复后启动实际网页和 worker，验证登录、回放与继续练习；先 build，全部使用模拟服务 |
 | `npm run db:migrate` / `npm run db:seed -- --no-tts` | 独立迁移 / 初始化 |
-| `npm run backup` | 本机数据库备份，需 PostgreSQL 17 的 pg_dump |
+| `npm run setup:backup` | Windows 准备 PostgreSQL 17 便携备份客户端，约 334 MB 首次下载 |
+| `npm run backup` | 本机完整备份：数据库、私有音频、删除日志和逐文件 SHA-256 |
+| `npm run restore -- 备份目录` | 恢复到新建独立空库与新目录；先按恢复文档设置目标，禁止覆盖业务库 |
 | `npm run replay-deletions` | 恢复旧备份后重放外部删除日志 |
 
-集成测试使用端口 5544，浏览器测试使用 5545 和网页端口 3100，均创建新的 `data/verification/` 数据目录，不使用 `.env` 的业务数据库。Windows 浏览器测试使用已安装的 Microsoft Edge；其他平台需先 `npx playwright install chromium`。测试虚拟麦克风是合成信号，只验证录音链路；测试专用短提示音不用于正常试用。
+全量集成测试需要 FFmpeg 和 PostgreSQL 17 的 `pg_dump` / `pg_restore`；Windows 先运行 `npm run setup:backup`，其他系统安装对应客户端或配置客户端路径。仅运行纯单元检查可用 `npm run test:unit`。集成测试各自使用独立数据库端口，浏览器测试使用 5545 和网页端口 3100，恢复上线演练使用 5553 和网页端口 3101；均创建新的 `data/verification/` 数据目录，不使用 `.env` 的业务数据库。端口被占用时先确认正在运行的测试，不要停止业务服务。Windows 浏览器测试使用已安装的 Microsoft Edge；其他平台需先 `npx playwright install chromium`。测试虚拟麦克风是合成信号，只验证录音链路；测试专用短提示音不用于正常试用。
 
 ## 交付资料
 

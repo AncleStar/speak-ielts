@@ -1,5 +1,7 @@
 import path from "node:path";
+import fs from "node:fs";
 import { z } from "zod";
+import { AppError } from "@/lib/errors";
 
 const bool = (def: boolean) =>
   z
@@ -63,13 +65,16 @@ let cached: Env | null = null;
 
 /** 读取并校验环境变量（惰性，首次调用时解析）。 */
 export function env(): Env {
-  if (cached) return cached;
-  const parsed = schema.safeParse(process.env);
-  if (!parsed.success) {
-    const msg = parsed.error.issues.map((i) => `${i.path.join(".")}: ${i.message}`).join("; ");
-    throw new Error(`环境变量配置错误：${msg}`);
+  if (!cached) {
+    const parsed = schema.safeParse(process.env);
+    if (!parsed.success) {
+      const msg = parsed.error.issues.map((i) => `${i.path.join(".")}: ${i.message}`).join("; ");
+      throw new Error(`环境变量配置错误：${msg}`);
+    }
+    cached = parsed.data;
   }
-  cached = parsed.data;
+  if (process.env.RESTORE_FINALIZE !== "true" && fs.existsSync(path.resolve(cached.DATA_DIR, "restore-pending.json")))
+    throw new AppError(503, "restore_incomplete", "数据恢复尚未完成，服务暂不可用，请联系部署者检查恢复结果。");
   return cached;
 }
 

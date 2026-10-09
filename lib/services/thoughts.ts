@@ -1,10 +1,11 @@
-import { createHash } from "node:crypto";
+import { createHash, randomUUID } from "node:crypto";
 import { and, desc, eq, gte, ilike, or, sql } from "drizzle-orm";
-import { personalThought, thoughtGeneration, thoughtPractice, thoughtReview, user, vocabularyEntry } from "@/db/schema";
+import { deletionLog, personalThought, thoughtGeneration, thoughtPractice, thoughtReview, user, vocabularyEntry } from "@/db/schema";
 import { db } from "@/lib/db";
 import { AppError, badRequest, conflict, notFound } from "@/lib/errors";
 import { metered } from "@/lib/providers/metered";
 import { reviewIntervalDays } from "@/lib/services/review-intervals";
+import { appendDeletionLog } from "@/lib/services/deletion";
 import { THOUGHT_SYSTEM } from "@/lib/thoughts/prompt";
 import { containsTerm, editThoughtSchema, editVocabularySchema, generateThoughtSchema, normalizeTerm, practiceSchema, saveVocabularySchema, thoughtOutputSchema,
   type ThoughtDetail, type ThoughtList, type VocabularyList } from "@/lib/thoughts/schema";
@@ -113,7 +114,13 @@ export async function editThought(userId: string, id: string, input: unknown) {
 }
 
 export async function deleteThought(userId: string, id: string) {
-  await db.transaction(async tx => { await lock(tx, userId); await owned(tx, userId, id); await tx.delete(personalThought).where(eq(personalThought.id, id)); });
+  await db.transaction(async tx => {
+    await lock(tx, userId); await owned(tx, userId, id);
+    const intent = { id: randomUUID(), kind: "thought" as const, targetId: id, userId, at: new Date().toISOString() };
+    await appendDeletionLog(intent);
+    await tx.delete(personalThought).where(eq(personalThought.id, id));
+    await tx.insert(deletionLog).values({ id: intent.id, kind: intent.kind, targetId: id, userId, requestedBy: userId, completedAt: new Date(), createdAt: new Date(intent.at) });
+  });
   return { ok: true };
 }
 
@@ -203,6 +210,14 @@ export async function editVocabulary(userId: string, id: string, input: unknown)
   });
 }
 export async function deleteVocabulary(userId: string, id: string) {
-  const rows = await db.delete(vocabularyEntry).where(and(eq(vocabularyEntry.userId, userId), eq(vocabularyEntry.id, id))).returning({ id: vocabularyEntry.id });
-  if (!rows.length) throw notFound("词语"); return { ok: true };
+  await db.transaction(async tx => {
+    await lock(tx, userId);
+    const [row] = await tx.select({ id: vocabularyEntry.id }).from(vocabularyEntry).where(and(eq(vocabularyEntry.userId, userId), eq(vocabularyEntry.id, id)));
+    if (!row) throw notFound("词语");
+    const intent = { id: randomUUID(), kind: "vocabulary" as const, targetId: id, userId, at: new Date().toISOString() };
+    await appendDeletionLog(intent);
+    await tx.delete(vocabularyEntry).where(eq(vocabularyEntry.id, id));
+    await tx.insert(deletionLog).values({ id: intent.id, kind: intent.kind, targetId: id, userId, requestedBy: userId, completedAt: new Date(), createdAt: new Date(intent.at) });
+  });
+  return { ok: true };
 }

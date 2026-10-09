@@ -51,6 +51,7 @@ const g = globalThis as unknown as { __auth?: Auth };
 
 /** 惰性创建认证实例（构建阶段不需要数据库连接）。 */
 export function getAuth(): Auth {
+  env(); // A failed restore must not reopen old login sessions through a cached auth instance.
   if (!g.__auth) g.__auth = createAuth();
   return g.__auth;
 }

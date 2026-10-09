@@ -2,7 +2,7 @@ import fs from "node:fs/promises";
 import path from "node:path";
 import crypto from "node:crypto";
 import { and, eq, isNotNull, isNull, lt, or, sql } from "drizzle-orm";
-import { answer, deletionLog, practiceSession, signupInvite, usageEvent, user, userAiConfig } from "@/db/schema";
+import { answer, deletionLog, personalThought, vocabularyEntry, practiceSession, signupInvite, usageEvent, user, userAiConfig } from "@/db/schema";
 import { db } from "@/lib/db";
 import { dataDir } from "@/lib/env";
 import { notFound } from "@/lib/errors";
@@ -13,16 +13,10 @@ import { storage } from "@/lib/storage";
 import { startOfDayShanghai } from "@/lib/timing";
 import { settleQuotaHolds } from "@/lib/quota";
 import { walletLock } from "@/lib/services/rewards";
+import { parseDeletionLog, type DeletionEntry } from "@/lib/deletion-log";
+export type { DeletionEntry } from "@/lib/deletion-log";
 
 export const DELETION_LOG_FILE = () => path.join(dataDir(), "deletion-log.jsonl");
-
-export interface DeletionEntry {
-  id: string;
-  kind: "session" | "user";
-  targetId: string;
-  userId: string | null;
-  at: string;
-}
 
 /** 删除记录同时追加写入数据库之外的日志文件（恢复旧备份后可重放） */
 export async function appendDeletionLog(entry: DeletionEntry) {
@@ -34,14 +28,7 @@ export async function appendDeletionLog(entry: DeletionEntry) {
 export async function readDeletionLog(): Promise<DeletionEntry[]> {
   try {
     const text = await fs.readFile(DELETION_LOG_FILE(), "utf8");
-    return text
-      .split(/\r?\n/)
-      .filter(Boolean)
-      .map((l) => {
-        const entry = JSON.parse(l) as DeletionEntry;
-        if (!["session", "user"].includes(entry.kind) || !entry.targetId || !Number.isFinite(Date.parse(entry.at))) throw new Error("删除日志损坏，禁止继续恢复");
-        return entry;
-      });
+    return parseDeletionLog(text);
   } catch (error) {
     if ((error as NodeJS.ErrnoException).code === "ENOENT") return [];
     throw error;
@@ -140,6 +127,8 @@ export async function replayDeletions() {
   const entries = await readDeletionLog();
   let sessions = 0;
   let users = 0;
+  let thoughts = 0;
+  let vocabulary = 0;
   for (const e of entries) {
     if (e.kind === "session") {
       const [s] = await db.select({ id: practiceSession.id }).from(practiceSession).where(eq(practiceSession.id, e.targetId));
@@ -155,9 +144,15 @@ export async function replayDeletions() {
         await purgeUser(e.targetId);
         users++;
       }
+    } else if (e.kind === "thought") {
+      const removed = await db.delete(personalThought).where(and(eq(personalThought.id, e.targetId), e.userId ? eq(personalThought.userId, e.userId) : undefined)).returning({ id: personalThought.id });
+      thoughts += removed.length;
+    } else if (e.kind === "vocabulary") {
+      const removed = await db.delete(vocabularyEntry).where(and(eq(vocabularyEntry.id, e.targetId), e.userId ? eq(vocabularyEntry.userId, e.userId) : undefined)).returning({ id: vocabularyEntry.id });
+      vocabulary += removed.length;
     }
   }
-  return { entries: entries.length, sessions, users };
+  return { entries: entries.length, sessions, users, thoughts, vocabulary };
 }
 
 /**

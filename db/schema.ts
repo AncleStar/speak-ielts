@@ -465,7 +465,7 @@ export const appSetting = pgTable("app_setting", {
 
 export const deletionLog = pgTable("deletion_log", {
   id: id(),
-  /** session | user | answer_audio */
+  /** session | user | thought | vocabulary | answer_audio */
   kind: text("kind").notNull(),
   targetId: text("target_id").notNull(),
   userId: text("user_id"),
