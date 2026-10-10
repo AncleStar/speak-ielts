@@ -17,7 +17,9 @@ export function QuotaCard({ quota }: { quota: QuotaStatus }) {
           </span>
         </div>
         <Progress value={pct} tone={quota.exceeded ? "danger" : quota.warn ? "warning" : "brand"} />
-        {quota.exceeded ? (
+        {(quota.uncoveredSeconds ?? 0) > 0 ? (
+          <p className="text-xs text-amber-800" role="status">已有录音还有 {quota.uncoveredSeconds} 秒未覆盖。请兑换分钟券后继续；原录音保留，新练习暂不可开始。</p>
+        ) : quota.exceeded ? (
           <p className="text-xs text-red-700">可用额度已用完，基础额度于 UTC+8 零点恢复。也可兑换分钟券继续练习。</p>
         ) : quota.warn ? (
           <p className="text-xs text-amber-800">今日额度已使用 80% 以上，请合理安排练习。</p>

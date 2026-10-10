@@ -139,7 +139,7 @@ async function createSessionLocked(u: UserLite, input: CreateSessionInput): Prom
   if (!u.consentAt) throw forbidden("请先在入门设置中阅读并同意录音说明", "consent_required");
   const built = await buildPlan(u, input);
 
-  // 同一关卡已有未完成的会话时继续该会话（已完成题目保留）；当天因无活动被标记放弃的会话可恢复
+  // 同一关卡的暂停或无活动会话可继续；重新准入在用户点击开始时执行。
   if (!input.fresh && built.plan.mode === "level" && built.levelId) {
     const [existing] = await db
       .select({ id: practiceSession.id, status: practiceSession.status, reservedSeconds: practiceSession.reservedSeconds })
@@ -470,7 +470,7 @@ async function finishSession(s: SessionRow, plan: SessionPlan, now: Date, patch:
     patch.endedAt = now;
     return { finished: patch.status === "completed", missing: [] };
   }
-  const missing = requiredSlots(plan).filter((slot) => !saved.some((a) => a.planIndex === slot.index && a.kind === slot.kind));
+  const missing = requiredSlots(plan).filter((slot) => !saved.some((a) => a.planIndex === slot.index && a.kind === slot.kind && !a.interrupted));
   if (missing.length === 0) {
     patch.status = "completed";
     patch.endedAt = now;

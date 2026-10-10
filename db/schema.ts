@@ -519,6 +519,9 @@ export const minuteCredit = pgTable("minute_credit", {
 export const quotaHold = pgTable("quota_hold", {
   id: id(), userId: text("user_id").notNull().references(() => user.id, { onDelete: "cascade" }),
   sessionId: text("session_id").notNull(), day: text("day").notNull(), baseSeconds: integer("base_seconds").notNull(),
+  baseLimitSeconds: integer("base_limit_seconds").notNull().default(0),
+  usedSeconds: integer("used_seconds").notNull().default(0),
+  uncoveredSeconds: integer("uncovered_seconds").notNull().default(0),
   credits: jsonb("credits").$type<{ id: string; seconds: number }[]>().notNull(),
   settled: boolean("settled").notNull().default(false), createdAt: ts("created_at").notNull().defaultNow(),
 }, t => [uniqueIndex("quota_hold_session_day_uq").on(t.sessionId, t.day)]);

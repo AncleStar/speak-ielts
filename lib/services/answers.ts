@@ -12,7 +12,7 @@ import { slotLimitSeconds, type AnswerKind, type SessionPlan } from "@/lib/sessi
 import { recordingKey, storage } from "@/lib/storage";
 import { isDurationWithinLimit } from "@/lib/timing";
 import { questionVersion } from "@/db/schema";
-import { reserveSessionQuota, settleQuotaHolds } from "@/lib/quota";
+import { assertCoveredQuota, reconcileAnswerQuota, reserveSessionQuota, settleQuotaHolds } from "@/lib/quota";
 import { startOfDayShanghai } from "@/lib/timing";
 import { assertUserAiBudget } from "@/lib/ai/runtime";
 import { withRecordingConsent } from "@/lib/services/recording-consent";
@@ -277,6 +277,7 @@ async function retryProcessingLocked(userId: string, answerId: string) {
   if (a.status === "uploaded") return submitAnswerLocked(userId, answerId);
   if (a.status !== "failed") throw conflict("只有处理失败的回答可以重试", "not_failed");
   if (a.processingStage === "budget_wait") await assertUserAiBudget(userId);
+  if (a.processingStage === "quota_wait") assertCoveredQuota((await reconcileAnswerQuota(a.id)).uncoveredSeconds);
   if (a.transcript === null && (!a.storageKey || a.audioDeletedAt || a.createdAt.getTime() + 30 * 86400_000 <= Date.now())) {
     throw new AppError(410, "audio_expired", "录音未上传或已到期，无法重新识别，请重新作答。");
   }

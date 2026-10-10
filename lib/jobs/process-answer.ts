@@ -26,6 +26,7 @@ import { AppError } from "@/lib/errors";
 import { getAiConfig } from "@/lib/ai/credentials";
 import { resolveUserAi } from "@/lib/ai/runtime";
 import { assertRecordingConsent, recordingConsent } from "@/lib/services/recording-consent";
+import { assertCoveredQuota, reconcileAnswerQuota } from "@/lib/quota";
 
 /** 有效语音少于 3 秒或转写少于 8 个词时，判为"无法充分评价" */
 export const MIN_SPEECH_SECONDS = 3;
@@ -95,16 +96,14 @@ export async function processAnswer(job: ProcessJob, ctx: { finalAttempt: boolea
           // 服务端复核：实测时长超过上限 + 容差时做标记（计费按实测时长）
           const overLimit = !!a.limitSeconds && measured.durationSec > a.limitSeconds + DURATION_TOLERANCE_SECONDS + 1;
           metrics = { ...measured, overLimit } as AudioMetrics;
-          await db
-            .update(answer)
-            .set({ metrics, durationMs: Math.round(measured.durationSec * 1000) })
-            .where(eq(answer.id, a.id));
         }
       }
 
+      const reconciled = await reconcileAnswerQuota(a.id, { metrics, durationMs: Math.round(metrics!.durationSec * 1000) });
       if (metrics!.durationSec > 300 || (a.limitSeconds && metrics!.durationSec > a.limitSeconds + DURATION_TOLERANCE_SECONDS + 1)) {
         throw new FatalJobError("实测录音超过题目或语音服务时长上限，请重新作答");
       }
+      assertCoveredQuota(reconciled.uncoveredSeconds);
       if (metrics!.speechSec < MIN_SPEECH_SECONDS * scale) {
         await markInsufficient(a.id, metrics!.durationSec < 0.3 ? "no_audio" : "too_short");
         await recomputeSessionOutcome(a.sessionId);
@@ -213,11 +212,12 @@ export async function processAnswer(job: ProcessJob, ctx: { finalAttempt: boolea
       await recomputeSessionOutcome(a.sessionId);
       return { status: "consent_wait" };
     }
-    if (e instanceof AppError && ["budget_exceeded", "personal_budget_exceeded"].includes(e.code)) {
-      await db.update(answer).set({ status: "failed", processingStage: "budget_wait", error: `${e.message} 已上传录音和已完成转写会保留，录音仍按原期限保存。`, updatedAt: new Date() }).where(eq(answer.id, a.id));
-      await logOps("warn", "answer", a.id, "预算不足：等待手动恢复，不自动重复请求", Date.now() - t0);
+    if (e instanceof AppError && ["budget_exceeded", "personal_budget_exceeded", "quota_exceeded"].includes(e.code)) {
+      const stage = e.code === "quota_exceeded" ? "quota_wait" : "budget_wait";
+      await db.update(answer).set({ status: "failed", processingStage: stage, error: `${e.message} 已上传录音和已完成转写会保留，录音仍按原期限保存。`, updatedAt: new Date() }).where(eq(answer.id, a.id));
+      await logOps("warn", "answer", a.id, "可用额度不足：等待手动恢复，不自动重复请求", Date.now() - t0);
       await recomputeSessionOutcome(a.sessionId);
-      return { status: "budget_wait" };
+      return { status: stage };
     }
     const fatal = e instanceof FatalJobError || e instanceof AppError || (e instanceof ProviderError && !e.retryable);
     const msg = (e as Error).message.slice(0, 300);

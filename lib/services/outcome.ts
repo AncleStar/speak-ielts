@@ -43,6 +43,7 @@ type AnswerLite = {
   durationMs: number | null;
   clientDurationMs: number | null;
   metrics: unknown;
+  interrupted?: boolean;
 };
 type FeedbackLite = { answerId: string; goalMet: boolean; goalReason: string; mock?: boolean };
 
@@ -57,7 +58,7 @@ export function summarize(plan: SessionPlan, status: string, answers: AnswerLite
   const applicable = !!goal && plan.mode !== "mock" && goal.of > 0;
   if (applicable) {
     for (const item of plan.items) {
-      const attempts = uploaded.filter((a) => a.planIndex === item.index && goal!.countKinds.includes(a.kind as never));
+      const attempts = uploaded.filter((a) => a.planIndex === item.index && !a.interrupted && goal!.countKinds.includes(a.kind as never));
       const evaluated = attempts.filter((a) => fbByAnswer.has(a.id));
       const metAttempt = evaluated.find((a) => fbByAnswer.get(a.id)!.goalMet);
       const last = evaluated.at(-1);
@@ -75,7 +76,7 @@ export function summarize(plan: SessionPlan, status: string, answers: AnswerLite
               ? "有效语音过短，无法充分评价"
               : attempts.length
                 ? "尚无真实反馈可评价（处理中、演示或生成失败）"
-                : "未作答",
+                : uploaded.some(a => a.planIndex === item.index && a.interrupted) ? "录音中断，请完整作答后再评价目标" : "未作答",
       });
     }
   }
@@ -120,6 +121,7 @@ export async function recomputeSessionOutcome(sessionId: string): Promise<Sessio
       durationMs: answer.durationMs,
       clientDurationMs: answer.clientDurationMs,
       metrics: answer.metrics,
+      interrupted: answer.interrupted,
     })
     .from(answer)
     .where(eq(answer.sessionId, sessionId))
