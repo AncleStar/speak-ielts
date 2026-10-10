@@ -2,10 +2,8 @@ import path from "node:path";
 import type { KokoroTTS } from "kokoro-js";
 import { dataDir, env } from "@/lib/env";
 import { ProviderError, type TtsResult } from "./types";
+import { ensureNaturalVoiceCache, NATURAL_MODEL_ID, NATURAL_MODEL_TAG, NATURAL_REVISION, VoiceCacheError, type VoiceCacheOptions } from "./natural-voice-cache";
 
-const MODEL_ID = "onnx-community/Kokoro-82M-v1.0-ONNX";
-const REVISION = "1939ad2a8e416c0acfeecc08a694d14ef25f2231";
-const MODEL_TAG = "kokoro-82m-v1-q8-1939ad2";
 const VOICE_LABELS = {
   bf_emma: "Emma · 英式女声", bf_isabella: "Isabella · 英式女声",
   bm_george: "George · 英式男声", af_heart: "Heart · 美式女声",
@@ -13,30 +11,33 @@ const VOICE_LABELS = {
 
 export function naturalVoiceIdentity() {
   const e = env();
-  return { model: MODEL_TAG, voice: `${e.LOCAL_TTS_VOICE}@${e.LOCAL_TTS_SPEED.toFixed(2)}-v1`, label: VOICE_LABELS[e.LOCAL_TTS_VOICE] };
+  return { model: NATURAL_MODEL_TAG, voice: `${e.LOCAL_TTS_VOICE}@${e.LOCAL_TTS_SPEED.toFixed(2)}-v1`, label: VOICE_LABELS[e.LOCAL_TTS_VOICE] };
 }
 
 let engine: Promise<KokoroTTS> | undefined;
 
 /** 模型只在显式 setup:voice 时联网下载；面试期间完全从本机缓存加载。 */
-export function prepareNaturalVoice(allowDownload = false): Promise<KokoroTTS> {
+export function prepareNaturalVoice(allowDownload = false, options: Omit<VoiceCacheOptions, "allowDownload" | "files" | "fetchFile"> = {}): Promise<KokoroTTS> {
   if (!engine) {
     engine = (async () => {
+      const cache = path.join(dataDir(), "models");
+      await ensureNaturalVoiceCache(cache, { ...options, allowDownload });
       const [{ KokoroTTS }, { AutoTokenizer, StyleTextToSpeech2Model }] = await Promise.all([
         import("kokoro-js"), import("@huggingface/transformers"),
       ]);
-      const options = { revision: REVISION, cache_dir: path.join(dataDir(), "models"), local_files_only: !allowDownload };
+      const loadOptions = { revision: NATURAL_REVISION, cache_dir: cache, local_files_only: true };
       const [model, tokenizer] = await Promise.all([
-        StyleTextToSpeech2Model.from_pretrained(MODEL_ID, {
-          ...options, dtype: "q8", device: "cpu",
+        StyleTextToSpeech2Model.from_pretrained(NATURAL_MODEL_ID, {
+          ...loadOptions, dtype: "q8", device: "cpu",
           session_options: { intraOpNumThreads: 2, interOpNumThreads: 1 },
         }),
-        AutoTokenizer.from_pretrained(MODEL_ID, options),
+        AutoTokenizer.from_pretrained(NATURAL_MODEL_ID, loadOptions),
       ]);
       return new KokoroTTS(model, tokenizer);
     })().catch((error) => {
       engine = undefined;
-      throw new ProviderError(`自然语音模型加载失败，请先运行 npm run setup:voice。${(error as Error).message}`, true);
+      if (error instanceof VoiceCacheError) throw error;
+      throw new ProviderError("自然语音模型加载失败，请部署者检查缓存、依赖和配置后重新运行 npm run setup:voice。", true);
     });
   }
   return engine;

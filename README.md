@@ -132,7 +132,7 @@ LOCAL_TTS_VOICE=bf_emma
 LOCAL_TTS_SPEED=0.95
 ```
 
-首次运行 `npm run setup:voice` 下载固定版本的约 93 MB 模型到 `data/models/`，并生成 `data/voice-preview/examiner.wav`。面试期间只读取本机模型，不发送题目或录音到云端，不产生语音 API 费用。音频预生成后缓存，首次遇到未缓存的问题可能需等待几秒。
+首次运行 `npm run setup:voice` 下载固定版本的约 93 MB 模型到 `data/models/`，并生成 `data/voice-preview/examiner.wav`。命令显示下载进度；完整缓存按大小与 SHA-256 校验后复用，残缺缓存可以重新准备。连接、传输与总等待均有上限，下载期间可用 Ctrl+C 取消；详见 [自然考官语音](docs/自然考官语音.md)。面试期间只读取本机模型，不发送题目或录音到云端，不产生语音 API 费用。音频预生成后缓存，首次遇到未缓存的问题可能需等待几秒。
 
 可选音色：`bf_emma`、`bf_isabella`（英式女声）、`bm_george`（英式男声）、`af_heart`（美式女声）。速度范围 `0.8–1.2`。修改后重启网页和 worker，刷新练习页面；已保存的题目和倒计时不会被重置。模型、音色、速度均区分缓存，旧队列不会混入新声音。
 
