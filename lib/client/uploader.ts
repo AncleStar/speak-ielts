@@ -2,6 +2,7 @@
 
 import { ApiError, api } from "./api";
 import { deleteRecording, getBlob, localIdentity, LocalSessionEnded, updateMeta, type RecordingMeta } from "./idb";
+import { prepareRetainedUpload } from "./retained-upload";
 
 export interface UploadResult {
   answerId: string;
@@ -70,14 +71,15 @@ class UploadQueue {
     return this.pending.has(id);
   }
 
-  enqueue(meta: RecordingMeta, blob?: Blob): Promise<UploadResult> {
+  enqueue(meta: RecordingMeta, blob?: Blob, options: { prepareInactive?: boolean } = {}): Promise<UploadResult> {
+    if (meta.status === "recording") return Promise.reject(new Error("这段录音尚未结束，请先停止或恢复中断片段。"));
     const scope = localIdentity();
     if (!scope || scope.consentAllowed !== true || meta.userId !== scope.userId || meta.localEpoch !== scope.epoch || meta.consentVersion !== scope.consentVersion) return Promise.reject(new LocalSessionEnded());
     const existing = this.pending.get(meta.id);
     if (existing) return existing;
     this.failed.delete(meta.id);
     const controller = new AbortController(); this.controllers.set(meta.id, controller);
-    const p = this.run(meta, blob, controller.signal).finally(() => {
+    const p = this.run(meta, blob, controller.signal, options.prepareInactive !== false).finally(() => {
       this.pending.delete(meta.id);
       this.controllers.delete(meta.id);
       this.emit();
@@ -87,9 +89,10 @@ class UploadQueue {
     return p;
   }
 
-  private async run(meta: RecordingMeta, blobIn: Blob | undefined, signal: AbortSignal): Promise<UploadResult> {
+  private async run(meta: RecordingMeta, blobIn: Blob | undefined, signal: AbortSignal, prepareInactive: boolean): Promise<UploadResult> {
     const delays = [1000, 3000, 8000];
     let lastErr: unknown;
+    let prepared = false;
     for (let attempt = 0; attempt <= delays.length; attempt++) {
       try {
         if (signal.aborted) throw new LocalSessionEnded();
@@ -122,6 +125,10 @@ class UploadQueue {
         return { answerId: t.answerId, status: s.status };
       } catch (e) {
         if (signal.aborted || e instanceof LocalSessionEnded) throw new LocalSessionEnded();
+        if (e instanceof ApiError && e.code === "session_closed" && !prepared && prepareInactive) {
+          prepared = true;
+          try { if (await prepareRetainedUpload(meta, signal)) { attempt--; continue; } } catch (error) { e = error; }
+        }
         lastErr = e;
         if (!navigator.onLine) break;
         // 4xx（除 408/429）为不可重试错误

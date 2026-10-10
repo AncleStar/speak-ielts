@@ -7,9 +7,10 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { Badge, DraftBadge } from "@/components/ui/badge";
 import { Button, LinkButton } from "@/components/ui/button";
 import { Alert, Progress, Spinner } from "@/components/ui/feedback";
+import { PendingUploads } from "@/components/pending-uploads";
 import { ApiError, api, randomId, serverNow } from "@/lib/client/api";
 import { ExaminerAudio } from "@/lib/client/examiner-audio";
-import { deleteRecording, getBlob, isPersistent, listRecordings, localIdentity, purgeExpired, type PendingSessionPause, type RecordingMeta } from "@/lib/client/idb";
+import { deleteRecording, getBlob, isPersistent, listRecordings, localIdentity, purgeExpired, recordingRecoveryState, type PendingSessionPause, type RecordingMeta } from "@/lib/client/idb";
 import { announceSessionState, PAUSE_SYNC_EVENT, requestSessionPause, SESSION_STATE_SIGNAL } from "@/lib/client/session-pause";
 import { canResumeSession } from "@/lib/sessions/lifecycle";
 import { MIC_ERROR_TEXT, MicError, MicRecorder, savedDeviceId, type StopResult } from "@/lib/client/recorder";
@@ -196,14 +197,22 @@ export function InterviewRoom({ sessionId, subtitlePref, userId }: { sessionId: 
         if (cancelled || r.aborted) return;
         setView(v);
         versionRef.current = v.session.stateVersion;
-        setLocalPending(await listRecordings(sessionId));
+        const retained = await listRecordings(sessionId);
+        setLocalPending(retained);
         if (!canResumeSession(v.session)) {
           setPhase("closed");
           return;
         }
         if (v.plan.mode === "mock" && v.session.status === "active" && v.session.startedAt) {
+          const states = await Promise.all(retained.map(recordingRecoveryState));
+          if (states.includes("live")) {
+            setPhase("closed"); setMessage("本次模考仍在另一页面录音或保存，请回到原页面操作。"); return;
+          }
           // 模考进行中被刷新或关闭：不能伪装成完整模考
-          await api(`/api/sessions/${sessionId}/events`, { body: { eventId: randomId("ev"), type: "interrupt", reason: "reloaded" } }).catch(() => {});
+          if (retained.length && states.every(state => state === "ready" || state === "recoverable")) {
+            await api(`/api/sessions/${sessionId}/events`, { body: { eventId: randomId("ev"), type: "pause", expectedVersion: v.session.stateVersion, pendingUploads: retained.map(meta => ({ submissionId: meta.id, planIndex: meta.planIndex, kind: meta.kind, followUpId: meta.followUpId, consentVersion: meta.consentVersion })) } });
+            announceSessionState();
+          } else await api(`/api/sessions/${sessionId}/events`, { body: { eventId: randomId("ev"), type: "interrupt", reason: "reloaded" } }).catch(() => {});
           setPhase("interrupted");
           setMessage("本次模考在进行中被刷新或关闭，已标记为“中断”。已录内容仍可复盘，你可以重新开始一次模考。");
           return;
@@ -452,6 +461,7 @@ export function InterviewRoom({ sessionId, subtitlePref, userId }: { sessionId: 
   async function startInterview() {
     if (!view || phase !== "ready") return;
     const r = rt.current!;
+    let latestView = view;
     const expectedVersion = versionRef.current, eventId = randomId("ev"); startEventRef.current = eventId;
     void r.audio.unlock(); // 必须在点击事件中同步调用（iOS 音频解锁）
     setPhase("starting");
@@ -470,13 +480,19 @@ export function InterviewRoom({ sessionId, subtitlePref, userId }: { sessionId: 
     try {
       check();
       // Account for retained finalized fragments before reserving time for the next complete answer.
-      const pending = (await listRecordings(sessionId)).filter(meta => meta.status !== "recording");
-      const uploaded = await Promise.allSettled(pending.map(meta => uploadQueue.enqueue(meta)));
+      const retained = await listRecordings(sessionId);
+      if (retained.some(meta => meta.status === "recording")) throw new Error("有未结束的本机录音。请先恢复或丢弃中断片段；若另一页面仍在录音，请先在该页面停止。");
+      const pending = retained.filter(meta => meta.status !== "recording");
+      const uploaded = await Promise.allSettled(pending.map(meta => uploadQueue.enqueue(meta, undefined, { prepareInactive: false })));
       check();
       if (uploaded.some(result => result.status === "rejected")) throw new Error("有已录片段尚未上传。请联网后重试上传，再继续练习；本机录音仍保留。");
       const started = await sendEvent("start", { eventId, expectedVersion });
       check();
       if (started.status !== "active" || started.activationId !== eventId) throw new ApiError(409, "session_changed", "练习状态已改变，请重新载入后继续。");
+      latestView = await api<SessionView>(`/api/sessions/${sessionId}`);
+      check();
+      if (latestView.session.status !== "active" || latestView.session.activationId !== eventId) throw new ApiError(409, "session_changed", "练习状态已改变，请重新载入后继续。");
+      setView(latestView);
       announceSessionState();
     } catch (e) {
       await r.wake.release();
@@ -488,8 +504,8 @@ export function InterviewRoom({ sessionId, subtitlePref, userId }: { sessionId: 
     }
     setPhase("running");
     try {
-      if (view.plan.mode === "mock") await runMock(view);
-      else await runTraining(view);
+      if (latestView.plan.mode === "mock") await runMock(latestView);
+      else await runTraining(latestView);
     } catch (e) {
       if (e instanceof Aborted) return;
       if (e instanceof MicError) {
@@ -979,18 +995,23 @@ export function InterviewRoom({ sessionId, subtitlePref, userId }: { sessionId: 
         <section className="recording-content">
           {phase==="exiting"&&<Alert tone={error?"warning":"info"}>{error??"声音与动画已暂停，正在保留已录内容并返回当前磁盘。"}</Alert>}
           <div className="recording-communication"><p className="terminal-kicker">{step === "recording" ? "RECORDING / 正在记录" : step === "speaking" ? "PLAYING / 播放提问" : phase === "done" ? "SAVED / 已保存" : "TRAINING / 训练终端"}</p><ExaminerAvatar state={examiner}/></div>
+          {(phase === "interrupted" || phase === "closed") && <PendingUploads userId={userId} sessionId={sessionId} onChange={setLocalPending} />}
           {phase === "ready" || phase === "starting" ? (
             <ReadyPanel
               plan={plan}
               preload={preload}
               localPending={localPending}
+              userId={userId}
+              sessionId={sessionId}
+              onLocalChange={setLocalPending}
+              onUploaded={async () => {
+                const scope = localIdentity(), latest = await api<SessionView>(`/api/sessions/${sessionId}`);
+                if (privateEnded.current || consentEnded.current || localIdentity()?.epoch !== scope?.epoch) return;
+                versionRef.current = latest.session.stateVersion; setView(latest);
+              }}
               error={error}
               starting={phase === "starting"}
               onStart={startInterview}
-              onDiscardLocal={async (id) => {
-                await deleteRecording(id);
-                setLocalPending(await listRecordings(sessionId));
-              }}
             />
           ) : null}
 
@@ -1122,20 +1143,27 @@ function ReadyPanel({
   plan,
   preload,
   localPending,
+  userId,
+  sessionId,
+  onLocalChange,
+  onUploaded,
   error,
   starting,
   onStart,
-  onDiscardLocal,
 }: {
   plan: SessionPlan;
   preload: { done: number; total: number; failed: number } | null;
   localPending: RecordingMeta[];
+  userId: string;
+  sessionId: string;
+  onLocalChange: (items: RecordingMeta[]) => void;
+  onUploaded: () => Promise<void>;
   error: string | null;
   starting: boolean;
   onStart: () => void;
-  onDiscardLocal: (id: string) => void;
 }) {
   const isMock = plan.mode === "mock";
+  const [uploadBusy, setUploadBusy] = useState(false);
   return (
     <div className="flex flex-1 flex-col gap-4" data-testid="ready-panel">
       <div className="space-y-2">
@@ -1151,30 +1179,14 @@ function ReadyPanel({
       {preload && preload.failed > 0 ? (
         <Alert tone="warning"><p>有 {preload.failed} 条考官音频暂时不可用，播放失败时会显示题目文字。</p><Button variant="outline" size="sm" className="mt-2" onClick={() => location.reload()}>重试准备语音</Button></Alert>
       ) : null}
-      {localPending.length > 0 ? (
-        <Alert tone="warning" title={`本机有 ${localPending.length} 段未上传的录音`}>
-          <p>开始后会自动重试上传。也可以删除它们：</p>
-          <ul className="mt-1 space-y-1">
-            {localPending.map((m) => (
-              <li key={m.id} className="flex items-center justify-between gap-2">
-                <span className="truncate">
-                  第 {m.planIndex + 1} 题 · {Math.round(m.durationMs / 1000)} 秒
-                </span>
-                <Button size="sm" variant="ghost" onClick={() => onDiscardLocal(m.id)}>
-                  删除
-                </Button>
-              </li>
-            ))}
-          </ul>
-        </Alert>
-      ) : null}
+      <PendingUploads userId={userId} sessionId={sessionId} onChange={onLocalChange} onUploaded={onUploaded} onBusyChange={setUploadBusy} disabled={starting} />
       {error ? (
         <Alert tone="danger" title="无法开始" action={<LinkButton href="/device-check" size="sm" variant="outline">去设备检查</LinkButton>}>
           {error}
         </Alert>
       ) : null}
       <div className="mt-auto">
-        <Button size="lg" className="w-full sm:w-auto" onClick={onStart} disabled={starting} data-testid="start-interview">
+        <Button size="lg" className="w-full sm:w-auto" onClick={onStart} disabled={starting || uploadBusy || localPending.some(meta => meta.status === "recording" || uploadQueue.isPending(meta.id))} data-testid="start-interview">
           <Mic className="h-5 w-5" />
           {starting ? "正在连接麦克风…" : "开始面试"}
         </Button>

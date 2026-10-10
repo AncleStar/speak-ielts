@@ -1,12 +1,14 @@
 "use client";
 import { validDraft, type ThoughtDraft } from "@/lib/thoughts/draft";
 import type { PausedUpload } from "@/lib/sessions/lifecycle";
+import { RECORDING_GUARD, withStoppedRecording } from "./recording-owner";
 
 /** Every private write checks its login epoch in the same IndexedDB transaction. */
 export interface RecordingMeta {
   userId?: string; localEpoch?: string; consentVersion?: number; id: string; sessionId: string; planIndex: number;
   kind: "main" | "followup" | "rounding"; followUpId: string | null; promptText: string; mimeType: string;
   durationMs: number; createdAt: number; status: "recording" | "pending" | "failed"; interrupted: boolean; lastError?: string;
+  recordingGuard?: typeof RECORDING_GUARD;
 }
 export interface RecordingConsentState { allowed: boolean; version: number }
 export interface LocalIdentity { id: "current"; userId: string | null; epoch: string; consentAllowed?: boolean; consentVersion?: number }
@@ -176,9 +178,10 @@ export async function saveMeta(meta: RecordingMeta) {
 }
 export async function updateMeta(id: string, patch: Partial<RecordingMeta>) { const current = await getMeta(id); if (current) await saveMeta({ ...current, ...patch, userId: current.userId, localEpoch: current.localEpoch, consentVersion: current.consentVersion }); }
 export async function getMeta(id: string): Promise<RecordingMeta | undefined> {
-  const memory = memMeta.get(id); if (recordingOwned(memory)) return memory;
-  const db = await open(); if (!db || !identity?.userId) return;
-  const row = await transaction<RecordingMeta | undefined>(db, ["recordings"], "readonly", (t, done) => { const request = t.objectStore("recordings").get(id); request.onsuccess = () => done(request.result); }).catch(() => undefined);
+  const memory = memMeta.get(id), db = await open();
+  if (!db || !persistent) return recordingOwned(memory) ? memory : undefined;
+  if (!identity?.userId) return;
+  const row = await transaction<RecordingMeta | undefined>(db, ["recordings"], "readonly", (t, done) => { const request = t.objectStore("recordings").get(id); request.onsuccess = () => done(request.result); }).catch(() => { limited(); return recordingOwned(memory) ? memory : undefined; });
   return recordingOwned(row) ? row : undefined;
 }
 export async function putChunk(recId: string, seq: number, blob: Blob) {
@@ -188,8 +191,8 @@ export async function putChunk(recId: string, seq: number, blob: Blob) {
 }
 export async function getBlob(recId: string, mimeType: string): Promise<Blob | null> {
   if (!await getMeta(recId)) return null;
-  const memory = memChunks.get(recId); if (memory?.length) return new Blob(memory.filter(Boolean), { type: mimeType });
-  const db = await open(); if (!db) return null;
+  const memory = memChunks.get(recId), db = await open();
+  if (!db || !persistent) return memory?.length ? new Blob(memory.filter(Boolean), { type: mimeType }) : null;
   const rows = await transaction<{ seq: number; blob: Blob }[]>(db, ["chunks"], "readonly", (t, done) => { const request = t.objectStore("chunks").index("recId").getAll(IDBKeyRange.only(recId)); request.onsuccess = () => done(request.result); });
   rows.sort((a, b) => a.seq - b.seq);
   return rows.length ? new Blob(rows.map(row => row.blob), { type: mimeType }) : null;
@@ -197,7 +200,7 @@ export async function getBlob(recId: string, mimeType: string): Promise<Blob | n
 export async function listRecordings(sessionId?: string) {
   if (!identity?.userId) return [];
   const rows = new Map<string, RecordingMeta>(); for (const row of await all<RecordingMeta>("recordings")) rows.set(row.id, row);
-  for (const row of memMeta.values()) rows.set(row.id, row);
+  if (!persistent) for (const row of memMeta.values()) rows.set(row.id, row);
   return [...rows.values()].filter(row => recordingOwned(row) && (!sessionId || row.sessionId === sessionId)).sort((a, b) => a.createdAt - b.createdAt);
 }
 export async function deleteRecording(id: string) {
@@ -208,6 +211,38 @@ export async function deleteRecording(id: string) {
   }); memMeta.delete(id); memChunks.delete(id);
 }
 export async function purgeExpired(now = Date.now()) { for (const meta of await listRecordings()) if (now - meta.createdAt >= LOCAL_TTL_MS) await deleteRecording(meta.id); }
+
+export type RecordingRecoveryState = "ready" | "recoverable" | "live" | "unverified";
+export async function recordingRecoveryState(meta: RecordingMeta): Promise<RecordingRecoveryState> {
+  if (meta.status !== "recording") return "ready";
+  if (meta.recordingGuard !== RECORDING_GUARD || typeof navigator === "undefined" || !navigator.locks) return "unverified";
+  try { return await withStoppedRecording(meta.id, async () => true) ? "recoverable" : "live"; }
+  catch { return "unverified"; }
+}
+/** The exclusive owner lock covers finalization, so two recovery pages cannot race a live recorder. */
+export async function recoverRecording(id: string) {
+  const before = await getMeta(id);
+  if (!before || before.status !== "recording" || before.recordingGuard !== RECORDING_GUARD) throw new Error("录音状态已改变，请重新载入。" );
+  const result = await withStoppedRecording(id, async () => {
+    const meta = await getMeta(id);
+    if (!meta || meta.status !== "recording") throw new Error("片段已被另一页面处理，请重新载入。");
+    if (Date.now() - meta.createdAt >= LOCAL_TTL_MS) throw new Error("片段已超过 24 小时保留期。");
+    const blob = await getBlob(id, meta.mimeType);
+    if (!blob?.size) throw new Error("没有已写入的录音分片，可以丢弃后重新回答。");
+    await updateMeta(id, { status: "pending", interrupted: true, lastError: undefined });
+    return { meta: (await getMeta(id))!, blob };
+  });
+  if (!result) throw new Error("另一页面仍在录音，暂不能恢复或丢弃。");
+  return result;
+}
+/** Only UI deletion uses this guard; completed uploads use the internal delete after saving. */
+export async function discardStoppedRecording(id: string) {
+  const meta = await getMeta(id); if (!meta) return;
+  if (meta.status !== "recording") { await deleteRecording(id); return; }
+  if (meta.recordingGuard !== RECORDING_GUARD) throw new Error("无法确认旧录音是否仍被占用，请先关闭旧页面。");
+  const deleted = await withStoppedRecording(id, async () => { await deleteRecording(id); return true; });
+  if (!deleted) throw new Error("另一页面仍在录音，暂不能恢复或丢弃。");
+}
 function validPause(row: PendingSessionPause | undefined, scope: LocalIdentity | null) {
   return !!row && row.kind === "session-pause" && matches(row, scope) && scope?.consentAllowed === true && row.consentVersion === scope.consentVersion && Number.isSafeInteger(row.expectedVersion) && row.expectedVersion >= 0 && typeof row.sessionId === "string" && row.sessionId.length <= 60 && row.id === `pause:${row.sessionId}` && typeof row.eventId === "string" && row.eventId.length >= 8 && row.eventId.length <= 100 && Number.isFinite(row.savedAt) && row.savedAt <= Date.now() + 60_000 && Date.now() - row.savedAt < LOCAL_TTL_MS && Array.isArray(row.pendingUploads) && row.pendingUploads.length <= 100;
 }
