@@ -1,6 +1,6 @@
 import { expect, it } from "vitest";
 import { DRAFT_TTL_MS, validDraft, type ThoughtDraft } from "@/lib/thoughts/draft";
-import { activateLocalAccount, endLocalAccount, getBlob, listRecordings, listThoughtDrafts, localIdentity, putChunk, removeThoughtDrafts, saveMeta, saveThoughtDraft, syncLocalRecordingConsent, type RecordingMeta } from "@/lib/client/idb";
+import { activateLocalAccount, endLocalAccount, getBlob, listRecordings, listThoughtDrafts, localIdentity, putChunk, readLocalIdentity, removeThoughtDrafts, saveMeta, saveThoughtDraft, syncLocalRecordingConsent, type RecordingMeta } from "@/lib/client/idb";
 const owner = "local-alice", epoch = crypto.randomUUID(), now = Date.now();
 const draft: ThoughtDraft = { id: crypto.randomUUID(), kind: "edit", userId: owner, localEpoch: epoch, savedAt: now, thoughtId: null, revision: null,
   fields: { sourceText: "我的未完成观点", title: "", simple: "", natural: "", nuanced: "" }, generation: null };
@@ -40,6 +40,19 @@ it("a deleted thought's draft cannot be recreated by a stale writer in this logi
   await removeThoughtDrafts("deleted-thought"); expect(await listThoughtDrafts()).toEqual([]);
   await expect(saveThoughtDraft({ ...saved, savedAt: Date.now() })).rejects.toThrow("这份观点已删除");
   expect(await listThoughtDrafts()).toEqual([]); await endLocalAccount(scope);
+});
+it("a delayed initial identity response cannot activate its old account or erase a new account's fallback drafts", async () => {
+  const alice = await activateLocalAccount(owner), observedBeforeRequest = await readLocalIdentity();
+  const bob = await activateLocalAccount("local-bob");
+  await saveThoughtDraft({ ...draft, userId: "local-bob", localEpoch: bob.epoch });
+  await expect(activateLocalAccount(owner, undefined, { allowed: true, version: 1 }, observedBeforeRequest)).rejects.toThrow("当前登录已结束");
+  expect(localIdentity()).toEqual(bob); expect(await listThoughtDrafts()).toHaveLength(1);
+  await endLocalAccount(bob);
+  await expect(activateLocalAccount(owner, undefined, { allowed: true, version: 1 }, alice)).rejects.toThrow("当前登录已结束");
+  // The same account's new login has a different epoch; an older initialization cannot adopt it.
+  const fresh = await activateLocalAccount(owner);
+  await expect(activateLocalAccount(owner, undefined, { allowed: true, version: 1 }, alice)).rejects.toThrow("当前登录已结束");
+  expect(localIdentity()).toEqual(fresh); await endLocalAccount(fresh);
 });
 it("consent withdrawal clears only audio, denies old writers after re-consent and ignores delayed older grants", async () => {
   const scope = await activateLocalAccount(owner, undefined, { allowed: true, version: 1 });

@@ -1,6 +1,6 @@
 "use client";
 import { useEffect, useState } from "react";
-import { activateLocalAccount, localIdentity, readLocalIdentity } from "@/lib/client/idb";
+import { activateLocalAccount, localIdentity, LocalSessionEnded, readLocalIdentity, type LocalIdentity } from "@/lib/client/idb";
 import { announcePrivateSession, clearPrivateSession, isSigningOut, PRIVATE_SESSION_SIGNAL, RECORDING_CONSENT_SIGNAL, stopPrivateWork, stopRecordingWork, syncRecordingConsent } from "@/lib/client/private-session";
 
 /** Confirm identity before showing private recovery data. Old tabs stop immediately on a login change. */
@@ -8,6 +8,7 @@ export function PrivateSessionBoundary({ userId, children }: { userId: string; c
   const [readyFor, setReadyFor] = useState<string | null>(null), [error, setError] = useState("");
   useEffect(() => {
     let live = true, ending = false, checking = false, queued = false;
+    let initialIdentity: LocalIdentity | null | undefined;
     const controller = new AbortController();
     async function finish(revoke: boolean) {
       if (!live || ending) return; ending = true; const captured = localIdentity(); controller.abort(); setReadyFor(null); stopPrivateWork();
@@ -29,6 +30,8 @@ export function PrivateSessionBoundary({ userId, children }: { userId: string; c
     }
     void (async () => {
       try {
+        initialIdentity = await readLocalIdentity();
+        if (!live || ending) return;
         const response = await fetch("/api/me", { cache: "no-store", signal: AbortSignal.any([controller.signal, AbortSignal.timeout(10_000)]) });
         if (!live || ending) return;
         if (response.status === 401) { await finish(true); return; }
@@ -36,15 +39,16 @@ export function PrivateSessionBoundary({ userId, children }: { userId: string; c
         const u = (await response.json()).user;
         if (u.id !== userId) { await finish(false); return; }
         if (!live || ending) return;
-        await activateLocalAccount(userId, controller.signal, { allowed: !!u.consentAt, version: u.recordingConsentVersion }); if (!live || ending) return;
+        await activateLocalAccount(userId, controller.signal, { allowed: !!u.consentAt, version: u.recordingConsentVersion }, initialIdentity); if (!live || ending) return;
         announcePrivateSession(); setReadyFor(userId);
-      } catch { if (live && !ending) setError("暂时无法确认账号或恢复本机资料，请检查连接后重新载入；浏览器限制存储时可使用其他浏览器。"); }
+      } catch (error) { if (error instanceof LocalSessionEnded) { await finish(false); return; } if (live && !ending) setError("暂时无法确认账号或恢复本机资料，请检查连接后重新载入；浏览器限制存储时可使用其他浏览器。"); }
     })();
     const changed = () => {
       if (!live || ending || isSigningOut()) return;
       // A pending network check must not delay a local logout or account-switch notification.
       void (async () => { const scope = localIdentity(), current = await readLocalIdentity();
         if (scope && current && (scope.epoch !== current.epoch || current.userId !== userId)) await finish(false);
+        else if (!scope && initialIdentity !== undefined && (initialIdentity ? !current || initialIdentity.epoch !== current.epoch || initialIdentity.userId !== current.userId : current && current.userId !== userId)) await finish(false);
         else { if (current?.userId === userId) await syncRecordingConsent(userId, { allowed: current.consentAllowed === true, version: current.consentVersion ?? 0 }); await verify(); }
       })().catch(() => { void verify(); });
     }, visible = () => { if (!document.hidden) changed(); };

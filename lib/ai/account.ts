@@ -6,9 +6,9 @@ import { AppError, badRequest } from "@/lib/errors";
 import { getQuotaStatus } from "@/lib/quota";
 import { providers, ProviderError } from "@/lib/providers";
 import { metered } from "@/lib/providers/metered";
-import { withLock } from "@/lib/lock";
+import { withLocks } from "@/lib/lock";
 import { monthCostYuan } from "@/lib/usage";
-import { getAiConfig, publicAiConfig } from "./credentials";
+import { aiSettingsLock, getAiConfig, publicAiConfig } from "./credentials";
 
 export function usageMonthRange(month: string) {
   if (!/^20\d{2}-(0[1-9]|1[0-2])$/.test(month)) throw badRequest("月份格式应为 YYYY-MM。");
@@ -37,7 +37,8 @@ export async function getAiAccount(userId: string, month = new Date(Date.now() +
 export type AiAccountView = Awaited<ReturnType<typeof getAiAccount>>;
 
 export async function testPersonalConnection(userId: string) {
-  return withLock(`ai-check:${userId}`, async () => {
+  // Declare nested billing locks once. Hold settings consistently so a personal check cannot switch to site billing.
+  return withLocks([`ai-check:${userId}`, `ai-budget:${userId}`, aiSettingsLock(userId)], async () => {
     const config = await getAiConfig(userId);
     if (config?.mode !== "personal" || !config.keyCiphertext) throw badRequest("请先保存个人 API Key 模式。");
     const jobRef = `connection-check:${userId}`;

@@ -1,6 +1,9 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
+  // Each checkout uses its own dependencies, including nested clean-install verification copies.
+  turbopack: { root: process.cwd() },
+  outputFileTracingRoot: process.cwd(),
   // pg / pg-boss / ali-oss 为 Node 专用依赖，不参与打包
   serverExternalPackages: ["pg", "pg-boss", "ali-oss", "kokoro-js", "@huggingface/transformers", "onnxruntime-node"],
   poweredByHeader: false,

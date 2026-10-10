@@ -18,7 +18,7 @@ await (await import("./seed")).seed({ tts: false, quiet: true });
 const { createAccount } = await import("@/lib/auth");
 const { db, closeDb } = await import("@/lib/db");
 const { user } = await import("@/db/schema"); const { eq } = await import("drizzle-orm");
-for (const name of ["onboarding", "learner", "outsider", "admin", "privacy-idea", "privacy-conflict", "privacy-recall", "privacy-upload", "privacy-denial", "privacy-recorder", "privacy-quota", "privacy-delete", "consent-interview", "consent-thought", "consent-device", "consent-pending-mic", "consent-upload"]) {
+for (const name of ["onboarding", "learner", "outsider", "admin", "privacy-idea", "privacy-conflict", "privacy-recall", "privacy-upload", "privacy-denial", "privacy-recorder", "privacy-quota", "privacy-delete", "consent-interview", "consent-thought", "consent-device", "consent-pending-mic", "consent-upload", "identity-alice", "identity-bob", "identity-silent-alice", "identity-silent-bob", "identity-parallel"]) {
   const u = await createAccount({ email: `${name}@example.test`, password: "Browser-test-123!", name, role: name === "admin" ? "admin" : "user" });
   if (name !== "onboarding") await db.update(user).set({ mustChangePassword: false, consentAt: new Date(), onboardedAt: new Date(), dailyQuotaMinutes: 1000 }).where(eq(user.id, u.id));
 }

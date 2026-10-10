@@ -6,6 +6,8 @@ import { randomUUID } from "node:crypto";
 import { spawn, type ChildProcess } from "node:child_process";
 import pg from "pg";
 import { sourceFingerprint } from "./build-fingerprint";
+import { ensureLocalEnv } from "./local-env";
+import { writeRuntimeState } from "./runtime-state";
 
 // A supervisor only stops and restarts children that it created in this checkout.
 const root = process.cwd(), runDir = path.resolve("data/run");
@@ -29,9 +31,7 @@ const startedAt = new Date().toISOString();
 const appUrl = new URL(process.env.BETTER_AUTH_URL ?? "http://localhost:3000");
 const port = Number(process.env.PORT || appUrl.port || 3000);
 function state() {
-  const temp = `${statePath}.${process.pid}.tmp`;
-  fs.writeFileSync(temp, JSON.stringify({ pid: process.pid, instance, root, startedAt, updatedAt: new Date().toISOString(), status: stage, message, url: appUrl.origin, children: Object.fromEntries([...children].map(([k,v]) => [k,v.pid])) }));
-  fs.renameSync(temp, statePath);
+  writeRuntimeState(statePath, { pid: process.pid, instance, root, startedAt, updatedAt: new Date().toISOString(), status: stage, message, url: appUrl.origin, children: Object.fromEntries([...children].map(([k,v]) => [k,v.pid])) });
 }
 async function killChild(child: ChildProcess) {
   if (!child.pid || child.exitCode !== null) return;
@@ -69,13 +69,7 @@ function startService(name: string, args: string[]) {
   child.once("error", exited); child.once("exit", exited);
 }
 try {
-  if (!fs.existsSync(".env")) {
-    const { randomBytes } = await import("node:crypto");
-    const template = fs.readFileSync(".env.example", "utf8").replace(/^BETTER_AUTH_SECRET=.*$/m, `BETTER_AUTH_SECRET=${randomBytes(32).toString("hex")}`).replace(/^ADMIN_INITIAL_PASSWORD=.*$/m, `ADMIN_INITIAL_PASSWORD=${randomBytes(18).toString("base64url")}`);
-    fs.writeFileSync(".env", template, { flag: "wx", mode: 0o600 });
-    (await import("./_env")).loadDotEnv();
-    console.log("已创建本机 .env，初始账号与密码请在文件中查看。");
-  }
+  if (ensureLocalEnv()) console.log("已创建本机 .env，初始账号与密码请在文件中查看。");
   await new Promise<void>((resolve, reject) => { const probe = net.createServer(); probe.once("error", () => reject(new Error(`端口 ${port} 已被占用；未停止其他程序。请使用状态入口检查。`))); probe.listen(port, "127.0.0.1", () => probe.close(() => resolve())); });
   const connectionString = process.env.DATABASE_URL;
   if (!connectionString) throw new Error("请在 .env 配置 DATABASE_URL");

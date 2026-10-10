@@ -80,20 +80,21 @@ export async function readLocalIdentity(): Promise<LocalIdentity | null> {
   const db = await open(); if (!db) return memoryIdentity;
   return transaction<LocalIdentity | null>(db, ["privateSession"], "readonly", (t, done) => { const request = t.objectStore("privateSession").get("current"); request.onsuccess = () => done(request.result ?? null); });
 }
-export async function activateLocalAccount(userId: string, signal?: AbortSignal, consent: RecordingConsentState = { allowed: false, version: 0 }) {
+export async function activateLocalAccount(userId: string, signal?: AbortSignal, consent: RecordingConsentState = { allowed: false, version: 0 }, expectedIdentity?: LocalIdentity | null) {
   const db = await open(); let selected: LocalIdentity;
-  const observed = db ? await readLocalIdentity() : null;
+  const observed = expectedIdentity === undefined ? await readLocalIdentity() : expectedIdentity;
+  const unchanged = (previous: LocalIdentity | undefined | null) => observed ? matches(observed, previous) : !previous || previous.userId === userId;
   const legacyOwned = new Set<string>();
   if (db) for (const row of await all<RecordingMeta>("recordings")) if (!row.userId && Date.now() - row.createdAt < LOCAL_TTL_MS) {
     try { const response = await fetch(`/api/sessions/${encodeURIComponent(row.sessionId)}`, { cache: "no-store", signal: signal ?? AbortSignal.timeout(5000) }); if (response.ok) legacyOwned.add(row.id); } catch { /* keep unidentified old recordings hidden until ownership can be checked */ }
   }
   signal?.throwIfAborted();
   const nextConsent = (previous: LocalIdentity | undefined | null) => previous?.userId === userId && (previous.consentVersion ?? -1) > consent.version ? { consentAllowed: previous.consentAllowed, consentVersion: previous.consentVersion } : { consentAllowed: consent.allowed, consentVersion: consent.version };
-  if (!db) selected = { ...(memoryIdentity?.userId === userId ? memoryIdentity : { id: "current" as const, userId, epoch: crypto.randomUUID() }), ...nextConsent(memoryIdentity) };
+  if (!db) { if (expectedIdentity !== undefined && !unchanged(memoryIdentity)) throw new LocalSessionEnded(); selected = { ...(memoryIdentity?.userId === userId ? memoryIdentity : { id: "current" as const, userId, epoch: crypto.randomUUID() }), ...nextConsent(memoryIdentity) }; }
   else selected = await transaction<LocalIdentity>(db, PRIVATE_STORES, "readwrite", (t, done, fail) => {
     const request = t.objectStore("privateSession").get("current"); request.onsuccess = () => {
       const previous = request.result as LocalIdentity | undefined;
-      if (observed ? !matches(observed, previous) : !!previous && previous.userId !== userId) { fail(new LocalSessionEnded()); return; }
+      if (!unchanged(previous)) { fail(new LocalSessionEnded()); return; }
       const next: LocalIdentity = { ...(previous?.userId === userId ? previous : { id: "current" as const, userId, epoch: crypto.randomUUID() }), ...nextConsent(previous) };
       if (previous?.epoch !== next.epoch) t.objectStore("privateSession").clear();
       t.objectStore("privateSession").put(next); const allowed = new Set<string>();
