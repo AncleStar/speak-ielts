@@ -10,5 +10,5 @@ try {
   const result = await restoreBackup({ bundle, databaseUrl, dataDirectory, currentDatabaseUrl: config.DATABASE_URL,
     currentDataDirectory: config.DATA_DIR, currentStorageDirectory: config.LOCAL_STORAGE_DIR,
     latestDeletionLog: process.env.RESTORE_LATEST_DELETION_LOG || path.join(config.DATA_DIR, "deletion-log.jsonl"), noLaterDeletions: process.env.RESTORE_NO_LATER_DELETIONS === "true" });
-  console.log(`恢复完成：${result.directory}；合并 ${result.deletionEntries} 条删除记录。未启动网页或 worker，请先完成恢复检查。`);
+  console.log(`数据恢复完成：${result.directory}；合并 ${result.deletionEntries} 条删除记录。旧密码已停用，服务保持关闭；请运行 restore:review 核对账号、费用与部署配置后再开放。`);
 } catch (error) { console.error("恢复未完成：", (error as Error).message); process.exitCode = 1; }

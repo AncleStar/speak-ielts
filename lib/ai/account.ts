@@ -24,7 +24,7 @@ export async function getAiAccount(userId: string, month = new Date(Date.now() +
   const [config, quota, totals, rows, personalMonthCost] = await Promise.all([
     getAiConfig(userId), getQuotaStatus(userId),
     db.select({ source: usageEvent.billingSource, cost: sql<number>`coalesce(sum(${usageEvent.costYuan}),0)::float8`,
-      calls: sql<number>`count(*) filter (where ${usageEvent.units}->>'cancelledBeforeDispatch' is distinct from 'true')::int`, seconds: sql<number>`coalesce(sum((${usageEvent.units}->>'seconds')::float8),0)::float8`,
+      calls: sql<number>`count(*) filter (where ${usageEvent.service} <> 'recovery-adjustment' and ${usageEvent.units}->>'cancelledBeforeDispatch' is distinct from 'true')::int`, seconds: sql<number>`coalesce(sum((${usageEvent.units}->>'seconds')::float8),0)::float8`,
       inputTokens: sql<number>`coalesce(sum((${usageEvent.units}->>'inputTokens')::float8),0)::float8`,
       outputTokens: sql<number>`coalesce(sum((${usageEvent.units}->>'outputTokens')::float8),0)::float8` }).from(usageEvent).where(condition).groupBy(usageEvent.billingSource),
     db.select({ id: usageEvent.id, service: usageEvent.service, model: usageEvent.model, source: usageEvent.billingSource, units: usageEvent.units, cost: usageEvent.costYuan, mock: usageEvent.mock, ok: usageEvent.ok, createdAt: usageEvent.createdAt }).from(usageEvent).where(condition).orderBy(desc(usageEvent.createdAt), desc(usageEvent.id)).limit(31).offset(offset),

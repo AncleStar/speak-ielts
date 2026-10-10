@@ -6,11 +6,17 @@ import { user } from "@/db/schema";
 import { getAuth } from "@/lib/auth";
 import { db } from "@/lib/db";
 import { AppError } from "@/lib/errors";
+import { assertRecoveryReady } from "@/lib/recovery-state";
 
 export type CurrentUser = typeof user.$inferSelect & { isAdmin: boolean };
 
 /** 服务端读取当前登录用户（封禁、已删除的账号视为未登录）。 */
 export async function getCurrentUser(): Promise<CurrentUser | null> {
+  try { await assertRecoveryReady(); }
+  catch (error) {
+    if (error instanceof AppError && ["restore_incomplete", "restore_review_required"].includes(error.code)) redirect("/maintenance");
+    throw error;
+  }
   const h = await headers();
   const s = await getAuth().api.getSession({ headers: h });
   if (!s) return null;
@@ -61,6 +67,7 @@ export function json(data: unknown, init: { status?: number; headers?: Record<st
 export function handle<A extends unknown[]>(fn: (...args: A) => Promise<Response>) {
   return async (...args: A): Promise<Response> => {
     try {
+      await assertRecoveryReady();
       return await fn(...args);
     } catch (e) {
       if (e instanceof AppError) {

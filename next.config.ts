@@ -4,6 +4,10 @@ const nextConfig: NextConfig = {
   // Each checkout uses its own dependencies, including nested clean-install verification copies.
   turbopack: { root: process.cwd() },
   outputFileTracingRoot: process.cwd(),
+  // Runtime backups, credentials and data are mounted/configured separately, never shipped in traces.
+  outputFileTracingExcludes: { "/*": ["./data/**/*", "./backups/**/*", "./.env", "./.env.*", "./.git/**/*", "./release/**/*"] },
+  // A stale broad filesystem trace made cache shutdown retain ~14 GB on Windows. Build without that cache.
+  experimental: { turbopackFileSystemCacheForBuild: false },
   // pg / pg-boss / ali-oss 为 Node 专用依赖，不参与打包
   serverExternalPackages: ["pg", "pg-boss", "ali-oss", "kokoro-js", "@huggingface/transformers", "onnxruntime-node"],
   poweredByHeader: false,

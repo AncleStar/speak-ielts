@@ -8,6 +8,7 @@ import { spawn, type ChildProcess } from "node:child_process";
 import { eq } from "drizzle-orm";
 import { createBackup, restoreBackup } from "@/lib/backup";
 import { pcmFixture } from "./make-fixtures";
+import { approveRestoreReview, exportRecoveryLedger, prepareRestoreReview } from "@/lib/restore-review";
 
 const root = path.resolve(`data/verification/recovery-${Date.now()}-${randomUUID().slice(0, 8)}`);
 const source = path.join(root, "source"), restored = path.join(root, "restored"), origin = "http://127.0.0.1:3101";
@@ -16,6 +17,7 @@ const password = "Recovery-test-only-123!", audio = pcmFixture(6), children: Chi
 const checks: string[] = [];
 let database: Awaited<ReturnType<typeof import("./local-db").startLocalPostgres>> | undefined;
 let cookie = "";
+let browser: Awaited<ReturnType<typeof import("@playwright/test").chromium.launch>> | undefined;
 // Set every private/paid-service option before any module loads .env. FFmpeg and backup client paths may be reused.
 Object.assign(process.env, {
   DATABASE_URL: sourceUrl, BETTER_AUTH_SECRET: "recovery-test-only-secret-000000000000000", USER_API_KEY_SECRET: "", BETTER_AUTH_URL: origin,
@@ -80,7 +82,7 @@ try {
   database = await (await import("./local-db")).startLocalPostgres({ dir: path.join(root, "pg"), port: 5553, dbName: "recovery_source", quiet: true });
   await database.createDatabase("recovery_target");
   await (await import("./migrate")).runMigrations(); await (await import("./seed")).seed({ tts: false, quiet: true });
-  const { db } = await import("@/lib/db"), schema = await import("@/db/schema"), { createAccount, getAuth } = await import("@/lib/auth");
+  const { db } = await import("@/lib/db"), schema = await import("@/db/schema"), { createAccount, getAuth, resetPassword } = await import("@/lib/auth");
   const lab = await import("@/lib/services/thoughts"), sessions = await import("@/lib/services/sessions"), answers = await import("@/lib/services/answers");
   const deletion = await import("@/lib/services/deletion");
   const owner = await createAccount({ email: "recovery-owner@example.test", password, name: "Recovery owner" });
@@ -102,14 +104,65 @@ try {
   const oldLogin = await getAuth().api.signInEmail({ body: { email: "recovery-owner@example.test", password }, asResponse: true });
   const oldCookie = oldLogin.headers.getSetCookie().map(value => value.split(";")[0]).join("; ");
   assert.equal((await getAuth().api.getSession({ headers: new Headers({ Cookie: oldCookie }) }))?.user.id, owner.id, "源环境旧会话需先验证有效");
+  await (await import("@/lib/ai/credentials")).saveAiConfig(owner.id, { mode: "personal", apiKey: "synthetic_recovery_key_never_dispatched", asrModel: "qwen3-asr-flash-2026-02-10", llmModel: "qwen-flash", monthlyBudgetYuan: 20, consent: true });
   const backup = await createBackup({ databaseUrl: sourceUrl, dataDirectory: source, storageDirectory: path.join(source, "storage"), backupDirectory: path.join(root, "backups"), storageDriver: "local" });
+  const laterPassword = "Later-recovery-test-only-123!";
+  await resetPassword(owner.id, laterPassword);
+  // Monetary fixtures are ledger entries only; no real or synthetic provider request is dispatched here.
+  await db.insert(schema.usageEvent).values({ userId: owner.id, billingSource: "personal", service: "asr", model: "synthetic-no-dispatch", units: { seconds: 10000 }, costYuan: 2.2, mock: false });
+  await db.insert(schema.usageEvent).values({ billingSource: "platform", service: "tts", model: "synthetic-no-dispatch", units: { chars: 1000 }, costYuan: 0.5, mock: false });
   await lab.deleteThought(owner.id, goneThought.id); await lab.deleteVocabulary(owner.id, goneWord.id);
   await deletion.deleteSession(owner.id, goneSession.id, owner.id); await deletion.deleteUserAccount(removed.id, removed.id);
   await restoreBackup({ bundle: backup.directory, databaseUrl: targetUrl, dataDirectory: restored, currentDatabaseUrl: sourceUrl,
     currentDataDirectory: source, currentStorageDirectory: path.join(source, "storage"), latestDeletionLog: path.join(source, "deletion-log.jsonl") });
   check("实际备份、隔离恢复与最新删除日志重放");
   await (await import("@/lib/queue")).stopBoss(); await (await import("@/lib/db")).closeDb();
+  const ledgerFile = path.join(root, "latest-costs.json");
+  await exportRecoveryLedger(sourceUrl, ledgerFile);
+  const prepared = await prepareRestoreReview(targetUrl, restored, ledgerFile);
   const environment = { ...process.env, DATABASE_URL: targetUrl, DATA_DIR: restored, LOCAL_STORAGE_DIR: path.join(restored, "storage") };
+  await startChild(["node_modules/next/dist/bin/next", "start", "-p", "3101", "-H", "127.0.0.1"], "pending-web", environment);
+  let pendingReady = false;
+  for (const deadline = Date.now() + 120000; Date.now() < deadline;) {
+    const response = await fetch(`${origin}/maintenance`, { signal: AbortSignal.timeout(2500) }).catch(() => null);
+    if (response?.status === 200) { pendingReady = true; break; }
+    await new Promise(resolve => setTimeout(resolve, 500));
+  }
+  assert.ok(pendingReady, "恢复检查提示页未启动");
+  for (const route of ["/api/me", "/api/auth/get-session"]) assert.equal((await (await api(route, {}, 503, false)).json()).error.code, "restore_review_required");
+  await api("/api/auth/sign-in/email", jsonBody({ email: "recovery-owner@example.test", password }), 503, false);
+  await api("/api/sessions", jsonBody({ mode: "practice", questionId: "P1-HOME-1" }), 503, false);
+  await api("/api/health", {}, 503, false);
+  const { chromium } = await import("@playwright/test");
+  browser = await chromium.launch({ channel: process.platform === "win32" ? "msedge" : "chromium", headless: true });
+  const context = await browser.newContext({ viewport: { width: 1440, height: 1000 } });
+  const page = await context.newPage(); await page.goto(`${origin}/login`);
+  assert.equal(new URL(page.url()).pathname, "/maintenance"); await page.getByRole("heading", { name: "资料恢复检查中" }).waitFor();
+  await page.screenshot({ path: path.join(root, "maintenance-desktop.png") });
+  await page.setViewportSize({ width: 320, height: 740 });
+  assert.ok(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth));
+  await page.screenshot({ path: path.join(root, "maintenance-mobile.png") });
+  check("未核对恢复拒绝登录、私有 API、新训练与健康检查，桌面和 320px 提示页可访问");
+  // Losing the file does not bypass the independent database gate, even in the already running process.
+  const reviewMarker = path.join(restored, "restore-review-pending.json"), markerBytes = await fs.readFile(reviewMarker);
+  await fs.rm(reviewMarker);
+  try {
+    assert.equal((await (await api("/api/auth/get-session", {}, 503, false)).json()).error.code, "restore_review_required");
+    await api("/api/health", {}, 503, false);
+    await page.goto(`${origin}/login`); assert.equal(new URL(page.url()).pathname, "/maintenance");
+  } finally { await fs.writeFile(reviewMarker, markerBytes, { flag: "wx", mode: 0o600, flush: true }); }
+  check("丢失文件标记和缓存连接不会绕过数据库中的恢复检查");
+  await context.close(); await stopChildren(); children.length = 0;
+  const worksheet = JSON.parse(await fs.readFile(prepared.file, "utf8"));
+  worksheet.accounts.forEach((account: { access: string }) => { account.access = "admin"; });
+  worksheet.costs.forEach((cost: { totalYuan: number; minimumKnownYuan: number }) => { cost.totalYuan = cost.minimumKnownYuan; });
+  worksheet.checks = { accountsAndPermissions: true, costsIncludingPendingCalls: true, deploymentAndSecrets: true };
+  worksheet.evidence = "Synthetic stopped-source cost export; no paid API dispatch; isolated ports and mock providers"; worksheet.openNewSessions = true;
+  await fs.writeFile(prepared.file, JSON.stringify(worksheet));
+  const approval = await approveRestoreReview(targetUrl, restored, prepared.file);
+  assert.equal((await approveRestoreReview(targetUrl, restored, prepared.file)).alreadyApproved, true);
+  const credentials = JSON.parse(await fs.readFile(approval.credentialsFile, "utf8")), temporaryPassword = credentials.accounts.find((account: { userId: string }) => account.userId === owner.id).temporaryPassword;
+  check("逐一核对权限、后续费用和配置后开放，重复审批不重复补记费用");
   await startChild(["--import", "tsx", "worker/index.ts"], "worker", environment);
   await startChild(["node_modules/next/dist/bin/next", "start", "-p", "3101", "-H", "127.0.0.1"], "web", environment);
   await waitForReady(); check("恢复环境实际 web / worker 健康检查");
@@ -118,9 +171,29 @@ try {
   assert.equal(await revoked.json(), null); check("匿名录音拒绝访问，旧登录会话不可使用");
   await api("/api/auth/sign-in/email", jsonBody({ email: "recovery-deleted@example.test", password }), 401, false);
   check("删除的账号不能登录");
-  const login = await api("/api/auth/sign-in/email", jsonBody({ email: "recovery-owner@example.test", password }), 200, false);
+  await api("/api/auth/sign-in/email", jsonBody({ email: "recovery-owner@example.test", password }), 401, false);
+  await api("/api/auth/sign-in/email", jsonBody({ email: "recovery-owner@example.test", password: laterPassword }), 401, false);
+  const login = await api("/api/auth/sign-in/email", jsonBody({ email: "recovery-owner@example.test", password: temporaryPassword }), 200, false);
   cookie = login.headers.getSetCookie().map(value => value.split(";")[0]).join("; "); assert.ok(cookie);
-  assert.equal((await (await api("/api/me")).json()).user.id, owner.id); check("保留账号重新登录，确认为隔离测试身份");
+  const pendingProfile = (await (await api("/api/me")).json()).user; assert.equal(pendingProfile.id, owner.id); assert.equal(pendingProfile.mustChangePassword, true);
+  assert.equal((await (await api("/api/sessions", jsonBody({ mode: "practice", questionId: "P1-HOME-1" }), 403)).json()).error.code, "must_change_password");
+  const changedContext = await browser.newContext();
+  await changedContext.addCookies(cookie.split("; ").map(value => { const index = value.indexOf("="); return { name: value.slice(0, index), value: value.slice(index + 1), url: origin }; }));
+  const changedPage = await changedContext.newPage(); await changedPage.goto(`${origin}/change-password`);
+  await changedPage.getByLabel("当前密码", { exact: true }).fill(temporaryPassword);
+  await changedPage.getByLabel("新密码", { exact: true }).fill("Reviewed-recovery-test-only-123!");
+  await changedPage.getByLabel("确认新密码", { exact: true }).fill("Reviewed-recovery-test-only-123!");
+  await changedPage.getByRole("button", { name: "保存新密码", exact: true }).click();
+  await changedPage.waitForURL(url => url.pathname === "/", { timeout: 30000 });
+  cookie = (await changedContext.cookies(origin)).map(value => `${value.name}=${value.value}`).join("; ");
+  assert.equal((await (await api("/api/me")).json()).user.mustChangePassword, false);
+  const accountView = await (await api("/api/ai-settings")).json();
+  assert.equal(accountView.personalMonthCost, 2.2); assert.equal(accountView.config.hasKey, false); assert.equal(accountView.config.monthlyBudgetYuan, 20);
+  assert.equal(accountView.totals.find((total: { source: string }) => total.source === "personal").calls, 0);
+  await changedContext.close(); await browser.close(); browser = undefined;
+  // The restored user explicitly selects the site's mock service; never dispatch the snapshot's revoked personal key.
+  await api("/api/ai-settings", { method: "PUT", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ mode: "platform", asrModel: "qwen3-asr-flash-2026-02-10", llmModel: "qwen-flash", monthlyBudgetYuan: 20, consent: false }) });
+  check("旧密码与源库后来密码不能登录，实际浏览器强制改密；费用保留、预算不提高、个人 Key 需重新配置");
   const loaded = await (await api(`/api/thoughts/${thought.id}`)).json(); assert.equal(loaded.natural, thought.natural); assert.equal(loaded.review.completedCount, 1);
   const vocabulary = await (await api("/api/vocabulary")).json(); assert.ok(vocabulary.items.some((word: { id: string }) => word.id === keptWord.id)); assert.ok(!vocabulary.items.some((word: { id: string }) => word.id === goneWord.id));
   await api(`/api/thoughts/${goneThought.id}`, {}, 404); await api(`/api/sessions/${goneSession.id}`, {}, 404);
@@ -160,12 +233,13 @@ try {
   await waitForReady(); assert.equal((await (await api("/api/me")).json()).user.id, owner.id);
   check("即使已缓存连接和登录，恢复未完成仍拒绝服务并返回明确 503");
   await fs.writeFile(path.join(root, "acceptance.json"), JSON.stringify({ passed: true, checkedAt: new Date().toISOString(), checks,
-    sourceDatabase: "fresh-synthetic-only", externalApiCalls: 0, actualWebAndWorker: true, browserVisualReview: false, realVoiceQualityReview: false }, null, 2));
+    sourceDatabase: "fresh-synthetic-only", externalApiCalls: 0, actualWebAndWorker: true, browserChecks: ["maintenance-desktop", "maintenance-320px", "forced-password-change"], browserVisualReview: false, realVoiceQualityReview: false }, null, 2));
   console.log(`恢复演练完成。报告：${path.join(root, "acceptance.json")}`);
 } catch (error) {
   console.error(error instanceof assert.AssertionError ? `恢复验收失败：${error.message}` : error instanceof Error ? error.message : "恢复演练失败");
   process.exitCode = 1;
 } finally {
+  await browser?.close().catch(() => {});
   await stopChildren();
   await (await import("@/lib/queue")).stopBoss().catch(() => {});
   await (await import("@/lib/db")).closeDb().catch(() => {});

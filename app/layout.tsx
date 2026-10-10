@@ -1,5 +1,6 @@
 import type { Metadata, Viewport } from "next";
 import { env } from "@/lib/env";
+import { AppError } from "@/lib/errors";
 import "./globals.css";
 import "./terminal.css";
 import "./rhine-fonts.css";
@@ -32,7 +33,8 @@ function StatusBanners() {
     const e = env();
     mock = e.AI_PROVIDER === "mock";
     scale = e.TIME_SCALE;
-  } catch {
+  } catch (error) {
+    if (error instanceof AppError && ["restore_incomplete", "restore_review_required"].includes(error.code)) return null;
     /* 构建阶段可能没有完整环境变量 */
   }
   return (

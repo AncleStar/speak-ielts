@@ -90,6 +90,10 @@ it("restores the complete archive to a new database and replays newer deletion i
   expect((await query(restoreUrl, "SELECT revoked_at FROM signup_invite WHERE id=$1", [inviteId])).rows[0].revoked_at).toBeTruthy();
   const report = JSON.parse(await fs.readFile(path.join(restored.directory, "restore-complete.json"), "utf8"));
   expect(report.deletions).toMatchObject({ entries: 5, sessions: 1, users: 1, thoughts: 1, vocabulary: 1 }); expect(report.servicesStarted).toBe(false);
+  expect(report.oldPasswordsDisabled).toBe(true); expect(report.openingReviewRequired).toBe(true);
+  expect((await query(restoreUrl, "SELECT password FROM account WHERE user_id=$1", [ownerId])).rows[0].password).toBeNull();
+  expect((await query(restoreUrl, "SELECT value FROM app_setting WHERE key='pauseNewSessions'")).rows[0].value).toBe(true);
+  expect(await fs.stat(path.join(restored.directory, "restore-review-pending.json"))).toBeTruthy();
   expect((await query(sourceUrl, 'SELECT count(*)::int AS n FROM "session"')).rows[0].n).toBe(1);
   expect((await query(sourceUrl, "SELECT revoked_at FROM signup_invite WHERE id=$1", [inviteId])).rows[0].revoked_at).toBeNull();
   await fs.writeFile(path.join(root, "acceptance.json"), JSON.stringify({ realPgDumpRestore: true, audioBytesVerified: true, personalKeyDecryptVerified: true, laterDeletionReplay: report.deletions,
@@ -135,3 +139,56 @@ it("does not publish an incomplete backup when audio or the journal is missing o
   await expect(createBackup({ ...options(), storageDriver: "oss" })).rejects.toThrow("OSS");
   await expect(createBackup({ ...options(), backupDirectory: path.join(root, "storage", "backups") })).rejects.toThrow("相互包含");
 });
+
+it("requires complete permissions and cost review, then rotates credentials and carries later fees without changing source budgets", async () => {
+  const review = await import("@/lib/restore-review"), directory = path.join(root, "restored"), ledger = path.join(root, "latest-costs.json");
+  await db.insert(s.usageEvent).values({ userId: ownerId, service: "asr", model: "synthetic-no-dispatch", billingSource: "personal", costYuan: 2.2, mock: false, units: { seconds: 10000 } });
+  await db.insert(s.usageEvent).values({ service: "tts", model: "synthetic-no-dispatch", billingSource: "platform", costYuan: 0.5, mock: false, units: { chars: 1000 } });
+  await (await import("@/lib/queue")).stopBoss(); await (await import("@/lib/db")).closeDb();
+  await review.exportRecoveryLedger(sourceUrl, ledger);
+  expect(await fs.readFile(ledger, "utf8")).not.toContain(key);
+  await expect(review.prepareRestoreReview(sourceUrl, directory, ledger)).rejects.toThrow("不匹配");
+  const prepared = await review.prepareRestoreReview(restoreUrl, directory, ledger);
+  const input = JSON.parse(await fs.readFile(prepared.file, "utf8"));
+  expect(input.costs.find((cost: { source: string }) => cost.source === "personal").minimumKnownYuan).toBe(2.2);
+  await expect(review.approveRestoreReview(restoreUrl, directory, prepared.file)).rejects.toThrow();
+  input.checks = { accountsAndPermissions: true, costsIncludingPendingCalls: true, deploymentAndSecrets: true }; input.evidence = "Synthetic stopped-source ledger; no real provider calls";
+  input.accounts[0].access = "admin";
+  input.costs.forEach((cost: { totalYuan: number; minimumKnownYuan: number }) => { cost.totalYuan = cost.minimumKnownYuan; });
+  const valid = structuredClone(input);
+  for (const accounts of [[], [input.accounts[0], input.accounts[0]], [{ ...input.accounts[0], access: "user" }]]) {
+    await fs.writeFile(prepared.file, JSON.stringify({ ...valid, accounts }));
+    await expect(review.approveRestoreReview(restoreUrl, directory, prepared.file)).rejects.toThrow();
+  }
+  const floorFile = path.join(directory, "restore-cost-floor.json"), floorBytes = await fs.readFile(floorFile), floor = JSON.parse(floorBytes.toString());
+  floor.totals.forEach((cost: { totalYuan: number }) => { cost.totalYuan = 0; });
+  await fs.writeFile(floorFile, JSON.stringify(floor)); await fs.writeFile(prepared.file, JSON.stringify(valid));
+  await expect(review.approveRestoreReview(restoreUrl, directory, prepared.file)).rejects.toThrow("被修改");
+  await fs.writeFile(floorFile, floorBytes);
+  const held = new pg.Client({ connectionString: restoreUrl }); await held.connect();
+  try { await expect(review.approveRestoreReview(restoreUrl, directory, prepared.file)).rejects.toThrow("停止"); }
+  finally { await held.end(); }
+  expect((await query(restoreUrl, "SELECT value FROM app_setting WHERE key='recovery:opening-review'")).rows[0].value.status).toBe("pending");
+  expect(await fs.stat(path.join(directory, "restore-credentials.json")).catch(() => null)).toBeNull();
+  input.costs.find((cost: { source: string }) => cost.source === "personal").totalYuan = 0;
+  await fs.writeFile(prepared.file, JSON.stringify(input));
+  await expect(review.approveRestoreReview(restoreUrl, directory, prepared.file)).rejects.toThrow("低于");
+  Object.assign(input, valid);
+  await fs.writeFile(prepared.file, JSON.stringify(input));
+  const approved = await review.approveRestoreReview(restoreUrl, directory, prepared.file);
+  expect((await query(restoreUrl, "SELECT sum(cost_yuan)::float8 AS cost FROM usage_event WHERE billing_source='personal' AND mock=false")).rows[0].cost).toBe(2.2);
+  expect((await query(restoreUrl, "SELECT sum(cost_yuan)::float8 AS cost FROM usage_event WHERE billing_source='platform' AND mock=false")).rows[0].cost).toBe(0.5);
+  expect((await query(restoreUrl, "SELECT value FROM app_setting WHERE key='pauseNewSessions'")).rows[0].value).toBe(true);
+  expect((await query(restoreUrl, "SELECT key_ciphertext,monthly_budget_yuan FROM user_ai_config WHERE user_id=$1", [ownerId])).rows[0]).toMatchObject({ key_ciphertext: null, monthly_budget_yuan: 20 });
+  const credentials = JSON.parse(await fs.readFile(approved.credentialsFile, "utf8"));
+  const hash = (await query(restoreUrl, "SELECT password FROM account WHERE user_id=$1", [ownerId])).rows[0].password;
+  const { verifyPassword } = await import("better-auth/crypto");
+  expect(await verifyPassword({ hash, password: credentials.accounts[0].temporaryPassword })).toBe(true);
+  expect(await verifyPassword({ hash, password: "Backup-test-only-123!" })).toBe(false);
+  expect((await query(restoreUrl, 'SELECT must_change_password FROM "user" WHERE id=$1', [ownerId])).rows[0].must_change_password).toBe(true);
+  expect((await query(sourceUrl, "SELECT key_ciphertext FROM user_ai_config WHERE user_id=$1", [ownerId])).rows[0].key_ciphertext).toBeTruthy();
+  expect((await query(sourceUrl, "SELECT value FROM app_setting WHERE key='pauseNewSessions'")).rows[0].value).toBe(false);
+  expect((await review.approveRestoreReview(restoreUrl, directory, prepared.file)).alreadyApproved).toBe(true);
+  expect((await query(restoreUrl, "SELECT count(*)::int AS n FROM usage_event WHERE service='recovery-adjustment'")).rows[0].n).toBe(2);
+  expect(await fs.stat(path.join(directory, "restore-review-pending.json")).catch(() => null)).toBeNull();
+}, 60000);

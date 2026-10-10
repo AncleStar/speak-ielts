@@ -104,7 +104,7 @@ npm run dev:all -- --production
 
 手机访问需要 HTTPS；电脑上的 `localhost` 可直接使用麦克风。不能在手机里用 `localhost` 访问电脑。
 
-长期使用建议定期备份。Windows 首次运行 `npm run setup:backup`，随后用 `npm run backup` 保存数据库、私有音频和删除日志。`npm run restore -- 备份目录` 仅恢复到新的独立空库与新目录，详细配置见 [备份恢复与回滚](docs/备份恢复与回滚.md)。备份含个人数据，需私密保管并复制到独立介质。
+长期使用建议定期备份。Windows 首次运行 `npm run setup:backup`，随后用 `npm run backup` 保存数据库、私有音频和删除日志。恢复仅允许新空库与新目录，默认保持关闭、停用旧密码；通过 `restore:review` 核对账号、后续费用和配置后，使用新的临时凭据强制改密。个人 Key 需重新填写。详细步骤见 [备份恢复与回滚](docs/备份恢复与回滚.md)。备份和恢复凭据含个人数据，须私密保管，不能上传 GitHub。
 
 ## 已实现的功能
 
@@ -164,8 +164,12 @@ TIME_SCALE=1
 | `npm run check:recovery` | 新建隔离数据库，完整备份恢复后启动实际网页和 worker，验证登录、回放与继续练习；先 build，全部使用模拟服务 |
 | `npm run db:migrate` / `npm run db:seed -- --no-tts` | 独立迁移 / 初始化 |
 | `npm run setup:backup` | Windows 准备 PostgreSQL 17 便携备份客户端，约 334 MB 首次下载 |
+| `npm run check:build-isolation` | 构建后核对全部部署追踪清单，拒绝私有配置、运行数据和工作区外文件 |
 | `npm run backup` | 本机完整备份：数据库、私有音频、删除日志和逐文件 SHA-256 |
 | `npm run restore -- 备份目录` | 恢复到新建独立空库与新目录；先按恢复文档设置目标，禁止覆盖业务库 |
+| `npm run restore:ledger -- 私有文件` | 停止源环境服务后，只读导出费用合计供恢复对账，不覆盖已有文件 |
+| `npm run restore:review -- prepare [最新账本文件]` | 生成私有账号、费用及部署检查表，保留默认关闭状态 |
+| `npm run restore:review -- approve [检查表文件]` | 通过完整核对后重置登录凭据并补记费用；首次改密，个人 Key 需重填 |
 | `npm run replay-deletions` | 恢复旧备份后重放外部删除日志 |
 
 全量集成测试需要 FFmpeg 和 PostgreSQL 17 的 `pg_dump` / `pg_restore`；Windows 先运行 `npm run setup:backup`，其他系统安装对应客户端或配置客户端路径。仅运行纯单元检查可用 `npm run test:unit`。集成测试各自使用独立数据库端口，浏览器测试使用 5545 和网页端口 3100，恢复上线演练使用 5553 和网页端口 3101；均创建新的 `data/verification/` 数据目录，不使用 `.env` 的业务数据库。端口被占用时先确认正在运行的测试，不要停止业务服务。Windows 浏览器测试使用已安装的 Microsoft Edge；其他平台需先 `npx playwright install chromium`。测试虚拟麦克风是合成信号，只验证录音链路；测试专用短提示音不用于正常试用。

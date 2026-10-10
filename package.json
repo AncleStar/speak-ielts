@@ -28,6 +28,8 @@
     "replay-deletions": "tsx scripts/replay-deletions.ts",
     "backup": "tsx scripts/backup.ts",
     "restore": "tsx scripts/restore.ts",
+    "restore:ledger": "tsx scripts/restore-ledger.ts",
+    "restore:review": "tsx scripts/restore-review.ts",
     "setup:backup": "powershell -NoProfile -ExecutionPolicy Bypass -File scripts/setup-backup-tools.ps1",
     "fixtures": "tsx scripts/make-fixtures.ts",
     "test": "vitest run",
@@ -36,6 +38,7 @@
     "test:e2e": "playwright test",
     "dev:all": "tsx scripts/dev-all.ts",
     "check:release": "tsx scripts/release-source.ts",
+    "check:build-isolation": "tsx scripts/check-build-isolation.ts",
     "export:source": "tsx scripts/release-source.ts --export"
   },
   "dependencies": {

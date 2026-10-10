@@ -73,8 +73,10 @@ export function env(): Env {
     }
     cached = parsed.data;
   }
-  if (process.env.RESTORE_FINALIZE !== "true" && fs.existsSync(path.resolve(cached.DATA_DIR, "restore-pending.json")))
+  if (process.env.RESTORE_FINALIZE !== "true" && fs.existsSync(/* turbopackIgnore: true */ path.resolve(/* turbopackIgnore: true */ cached.DATA_DIR, "restore-pending.json")))
     throw new AppError(503, "restore_incomplete", "数据恢复尚未完成，服务暂不可用，请联系部署者检查恢复结果。");
+  if (process.env.RESTORE_FINALIZE !== "true" && fs.existsSync(/* turbopackIgnore: true */ path.resolve(/* turbopackIgnore: true */ cached.DATA_DIR, "restore-review-pending.json")))
+    throw new AppError(503, "restore_review_required", "资料恢复检查尚未完成，暂时无法登录或训练，请等待部署者完成检查。");
   return cached;
 }
 

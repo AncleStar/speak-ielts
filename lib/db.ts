@@ -22,6 +22,7 @@ export function getPool(): pg.Pool {
 }
 
 export function getDb(): DB {
+  env(); // Recheck restore gates even after this process cached a database connection.
   if (!globalForDb.__db) {
     globalForDb.__db = drizzle(getPool(), { schema }) as DB;
   }

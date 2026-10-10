@@ -7,7 +7,7 @@ import { usageOverview } from "@/lib/services/admin";
 
 export const metadata: Metadata = { title: "管理 · 用量与预算" };
 
-const SERVICE_LABEL: Record<string, string> = { asr: "语音识别", tts: "考官语音", llm: "反馈与追问", omni: "音频诊断（实验）" };
+const SERVICE_LABEL: Record<string, string> = { asr: "语音识别", tts: "考官语音", llm: "反馈与追问", omni: "音频诊断（实验）", "recovery-adjustment": "恢复费用补记" };
 
 export default async function AdminUsage() {
   const u = await usageOverview();
@@ -51,7 +51,7 @@ export default async function AdminUsage() {
               <tbody>
                 {u.byService.map((s) => {
                   const un = s.units as { seconds: number; chars: number; inputTokens: number; outputTokens: number };
-                  const usage = s.service === "asr" ? `${Math.round(un.seconds)} 秒` : s.service === "tts" ? `${Math.round(un.chars)} 字符` : `${Math.round(un.inputTokens)} / ${Math.round(un.outputTokens)} token`;
+                  const usage = s.service === "recovery-adjustment" ? "核对补记 · 不代表新调用" : s.service === "asr" ? `${Math.round(un.seconds)} 秒` : s.service === "tts" ? `${Math.round(un.chars)} 字符` : `${Math.round(un.inputTokens)} / ${Math.round(un.outputTokens)} token`;
                   return (
                     <tr key={`${s.service}-${s.mock}`} className="border-t border-line">
                       <td className="py-1">

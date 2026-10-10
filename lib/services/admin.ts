@@ -75,7 +75,7 @@ export async function usageOverview() {
       service: usageEvent.service,
       mock: usageEvent.mock,
       cost: sql<number>`coalesce(sum(${usageEvent.costYuan}), 0)::float8`,
-      n: sql<number>`count(*) filter (where ${usageEvent.units}->>'cancelledBeforeDispatch' is distinct from 'true')::int`,
+      n: sql<number>`count(*) filter (where ${usageEvent.service} <> 'recovery-adjustment' and ${usageEvent.units}->>'cancelledBeforeDispatch' is distinct from 'true')::int`,
       units: sql<unknown>`jsonb_build_object(
         'seconds', coalesce(sum((${usageEvent.units}->>'seconds')::float8), 0),
         'chars', coalesce(sum((${usageEvent.units}->>'chars')::float8), 0),

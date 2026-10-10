@@ -6,6 +6,7 @@ import { startOfMonthShanghai } from "@/lib/timing";
 import { withLock } from "@/lib/lock";
 import { AppError } from "@/lib/errors";
 import { AI_CATALOG, personalPrice } from "@/lib/ai/catalog";
+import { assertRecoveryReady } from "@/lib/recovery-state";
 
 /** 调用前持久化预算预留，防止并发任务在记账前穿透预算。
  * 超时等未知计费结果保留预估金额，成功后按服务返回用量结算。
@@ -26,6 +27,7 @@ export async function billableCall<T extends { model: string; latencyMs: number 
   run: () => Promise<T>;
   units: (result: T) => UsageUnits;
 }): Promise<T> {
+  await assertRecoveryReady();
   const settings = await getSettings();
   const source = opts.billingSource ?? "platform";
   if (source === "personal" && (!opts.userId || opts.monthlyBudgetYuan === undefined)) throw new Error("Missing personal billing owner");

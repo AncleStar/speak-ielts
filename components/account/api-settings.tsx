@@ -9,8 +9,9 @@ import { Field, Input, Select, Checkbox } from "@/components/ui/form";
 import { Alert } from "@/components/ui/feedback";
 
 const money = (n: number) => `¥${n.toFixed(6)}`;
-const services: Record<string,string> = { asr: "语音识别", llm: "反馈 / 追问", tts: "语音合成", omni: "音频诊断" };
+const services: Record<string,string> = { asr: "语音识别", llm: "反馈 / 追问", tts: "语音合成", omni: "音频诊断", "recovery-adjustment": "恢复费用补记" };
 function unitText(units: Record<string,unknown>) {
+  if (units.recoveryAdjustment) return "已核对费用补记 · 不代表新调用";
   if (units.cancelledBeforeDispatch) return "未发出 · 用量 0";
   if ("seconds" in units) return `${Number(units.seconds).toLocaleString()} 秒`;
   if ("chars" in units) return `${Number(units.chars).toLocaleString()} 字符`;
@@ -65,7 +66,7 @@ export function ApiSettings({ initial }: { initial: AiAccountView }) {
     </div>
     <section className="ai-account-panel"><div className="ai-usage-heading"><div><p className="terminal-kicker">03 / 调用明细</p><h2><BarChart3 size={21}/> 用量账本</h2></div><div className="ai-actions"><Input type="month" aria-label="用量月份" value={month} onChange={e => setMonth(e.target.value)} min="2000-01" max="2099-12"/><Button variant="outline" disabled={busy || !month} onClick={() => run(() => reload())}><RefreshCw size={15}/>查询</Button></div></div>
       <div className="ai-usage-totals"><span>所选月个人估算 <b>{money(personal?.cost ?? 0)}</b></span><span>站点承担估算 <b>{money(platform?.cost ?? 0)}</b></span><span>共 <b>{view.totals.reduce((n,t) => n+t.calls,0)}</b> 次调用</span></div>
-      <p className="ai-explanation">当前展示 {view.month}，仅包含你的调用；公共题目语音缓存的站点开销不分摊到个人明细。</p>
+      <p className="ai-explanation">当前展示 {view.month}，仅包含你的调用与恢复费用补记；补记会计入预算，不增加调用次数。公共题目语音缓存的站点开销不分摊到个人明细。</p>
       {view.rows.length === 0 ? <p className="ai-empty">该月还没有调用记录。完成一次练习或测试连接后，可在这里查看。</p> : <div className="ai-usage-table" tabIndex={0} aria-label="可横向滚动的调用明细"><table><thead><tr><th>时间 / 模型</th><th>服务 / 计费来源</th><th>用量</th><th>估算费用</th><th>状态</th></tr></thead><tbody>{view.rows.map(row => <tr key={row.id}><td>{new Date(row.createdAt).toLocaleString("zh-CN", {timeZone:"Asia/Shanghai",hour12:false})}<small>{row.model}</small></td><td>{services[row.service] ?? row.service}<small>{row.source === "personal" ? "个人 Key" : "站点服务"}{row.mock ? " · 模拟" : ""}</small></td><td>{unitText(row.units)}<small>{row.units.cancelledBeforeDispatch ? "预留已释放" : row.units.estimated ? "预留 / 估算用量" : "服务返回用量"}</small></td><td>{money(row.cost)}</td><td>{row.units.cancelledBeforeDispatch ? "已取消 · 未计费" : row.units.pending ? "处理中" : row.ok ? "成功" : "失败 · 待对账"}</td></tr>)}</tbody></table></div>}
       <div className="ai-pagination"><Button variant="outline" disabled={busy || view.offset === 0} onClick={() => run(() => reload(Math.max(0,view.offset-30),view.month))}>上一页</Button><span>第 {view.offset/30+1} 页</span><Button variant="outline" disabled={busy || !view.hasMore} onClick={() => run(() => reload(view.offset+30,view.month))}>下一页</Button></div>
     </section>

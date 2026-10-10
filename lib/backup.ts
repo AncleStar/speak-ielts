@@ -8,7 +8,7 @@ import { z } from "zod";
 import { mergeDeletionLogs, parseDeletionLog } from "@/lib/deletion-log";
 
 const fileSchema = z.object({ path: z.string().min(1).max(600), bytes: z.number().int().nonnegative(), sha256: z.string().regex(/^[a-f0-9]{64}$/) });
-const manifestSchema = z.object({ format: z.literal("speak-backup-v1"), createdAt: z.string(), databaseMajor: z.literal(17),
+const manifestSchema = z.object({ format: z.literal("speak-backup-v1"), createdAt: z.string().datetime(), databaseMajor: z.literal(17),
   storageDriver: z.literal("local"), files: z.array(fileSchema).min(2).max(1_000_000) });
 export type BackupManifest = z.infer<typeof manifestSchema>;
 export interface BackupOptions { databaseUrl: string; dataDirectory: string; storageDirectory: string; backupDirectory: string; storageDriver: "local" | "oss" }
@@ -174,7 +174,7 @@ export async function restoreBackup(options: RestoreOptions) {
   } finally { await client.end().catch(() => {}); }
   await fs.mkdir(path.dirname(target), { recursive: true, mode: 0o700 });
   await fs.mkdir(target, { mode: 0o700 });
-  await fs.writeFile(path.join(target, "restore-pending.json"), JSON.stringify({ startedAt: new Date().toISOString(), format: manifest.format }), { flag: "wx", mode: 0o600 });
+  await fs.writeFile(path.join(target, "restore-pending.json"), JSON.stringify({ startedAt: new Date().toISOString(), backupCreatedAt: manifest.createdAt, format: manifest.format }), { flag: "wx", mode: 0o600, flush: true });
   await fs.mkdir(path.join(target, "storage"));
   for (const file of manifest.files.filter(f => f.path.startsWith("storage/"))) {
     const destinationFile = path.join(target, file.path);

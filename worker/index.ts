@@ -13,9 +13,11 @@ import { QUEUES, getBoss, stopBoss } from "@/lib/queue";
 import { purgeSession, purgeUser } from "@/lib/services/deletion";
 import { generateTtsAsset, pregenerateAll } from "@/lib/services/tts";
 import { startWorkerHeartbeat } from "@/lib/worker-health";
+import { assertRecoveryReady } from "@/lib/recovery-state";
 
 async function main() {
   const e = env();
+  await assertRecoveryReady();
   console.log(`[worker] 启动：AI_PROVIDER=${e.AI_PROVIDER} STORAGE_DRIVER=${e.STORAGE_DRIVER}`);
   if (e.TIME_SCALE !== 1) {
     console.warn(`[worker] ⚠️ TIME_SCALE=${e.TIME_SCALE}（仅用于自动化测试，生产必须为 1）`);
