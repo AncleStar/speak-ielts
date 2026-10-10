@@ -9,7 +9,9 @@ import { Button, LinkButton } from "@/components/ui/button";
 import { Alert, Progress, Spinner } from "@/components/ui/feedback";
 import { ApiError, api, randomId, serverNow } from "@/lib/client/api";
 import { ExaminerAudio } from "@/lib/client/examiner-audio";
-import { deleteRecording, getBlob, isPersistent, listRecordings, purgeExpired, type RecordingMeta } from "@/lib/client/idb";
+import { deleteRecording, getBlob, isPersistent, listRecordings, localIdentity, purgeExpired, type PendingSessionPause, type RecordingMeta } from "@/lib/client/idb";
+import { announceSessionState, PAUSE_SYNC_EVENT, requestSessionPause, SESSION_STATE_SIGNAL } from "@/lib/client/session-pause";
+import { canResumeSession } from "@/lib/sessions/lifecycle";
 import { MIC_ERROR_TEXT, MicError, MicRecorder, savedDeviceId, type StopResult } from "@/lib/client/recorder";
 import { uploadQueue } from "@/lib/client/uploader";
 import { ScreenWakeLock } from "@/lib/client/wake-lock";
@@ -75,12 +77,14 @@ export function InterviewRoom({ sessionId, subtitlePref, userId }: { sessionId: 
   const rhine = useRhine();
   const stopDiscPlayback = rhine?.stopPlayback;
   const exitBusy = useRef(false);
-  const exitMock = useRef(false);
+  const versionRef = useRef<number | null>(null), startEventRef = useRef<string | undefined>(undefined), exitPauseRef = useRef<PendingSessionPause | null>(null);
+  const retryExitRef = useRef<() => void>(() => {});
   const privateEnded = useRef(false);
   const consentEnded = useRef(false);
   useEffect(()=>()=>stopDiscPlayback?.(),[stopDiscPlayback]);
   const [view, setView] = useState<SessionView | null>(null);
   const [phase, setPhase] = useState<Phase>("loading");
+  const phaseRef = useRef(phase); phaseRef.current = phase;
   const [step, setStep] = useState<Step>("idle");
   const [examiner, setExaminer] = useState<ExaminerState>("waiting");
   const [itemIndex, setItemIndex] = useState<number | null>(null);
@@ -191,12 +195,13 @@ export function InterviewRoom({ sessionId, subtitlePref, userId }: { sessionId: 
         const v = await api<SessionView>(`/api/sessions/${sessionId}`);
         if (cancelled || r.aborted) return;
         setView(v);
+        versionRef.current = v.session.stateVersion;
         setLocalPending(await listRecordings(sessionId));
-        if (v.session.status !== "active") {
+        if (!canResumeSession(v.session)) {
           setPhase("closed");
           return;
         }
-        if (v.plan.mode === "mock" && Object.keys(v.session.partStarts ?? {}).length > 0) {
+        if (v.plan.mode === "mock" && v.session.status === "active" && v.session.startedAt) {
           // 模考进行中被刷新或关闭：不能伪装成完整模考
           await api(`/api/sessions/${sessionId}/events`, { body: { eventId: randomId("ev"), type: "interrupt", reason: "reloaded" } }).catch(() => {});
           setPhase("interrupted");
@@ -230,10 +235,39 @@ export function InterviewRoom({ sessionId, subtitlePref, userId }: { sessionId: 
   useEffect(() => {
     if (phase !== "running") return;
     const t = setInterval(() => {
-      void api(`/api/sessions/${sessionId}/events`, { body: { eventId: randomId("hb"), type: "heartbeat" } }).catch(() => {});
+      void api(`/api/sessions/${sessionId}/events`, { body: { eventId: randomId("hb"), type: "heartbeat", expectedVersion: versionRef.current } }).catch(error => { if (error instanceof ApiError && ["session_changed", "session_closed"].includes(error.code)) window.dispatchEvent(new Event(SESSION_STATE_SIGNAL)); });
     }, 60_000);
     return () => clearInterval(t);
   }, [phase, sessionId]);
+
+  useEffect(() => {
+    let live = true, checking = false;
+    const ended = () => !live || privateEnded.current || consentEnded.current || phaseRef.current === "exiting";
+    const changed = async () => {
+      if (checking || ended()) return;
+      checking = true;
+      try {
+        const latest = await api<SessionView>(`/api/sessions/${sessionId}`);
+        if (ended()) return;
+        if (latest.session.stateVersion < (versionRef.current ?? 0)) return;
+        const ownPendingStart = phaseRef.current === "starting" && (latest.session.stateVersion === versionRef.current || latest.session.activationId === startEventRef.current);
+        if (["starting", "running", "finishing"].includes(phaseRef.current) && (latest.session.status !== "active" || !ownPendingStart && latest.session.activationId !== startEventRef.current)) {
+          const r = rt.current!; r.aborted = true; r.audio.stop(); stopDiscPlayback?.(); r.waiter?.resolve("exit"); r.waiter = null;
+          setStep("idle"); setTimer(null); setPartInfo(null); setActions([]); setExaminer("waiting");
+          const recording = await r.recorder.stop({ interrupted: true }); r.recorder.release(); await r.wake.release();
+          if (recording) void upload(recording).catch(() => {});
+          setPhase("closed"); setMessage("本次练习已在另一页面暂停或继续，当前麦克风与播放已停止。已录片段保留；重新载入后可查看当前进度。");
+        }
+        versionRef.current = latest.session.stateVersion; setView(latest);
+      } catch { /* Offline state is checked again on reconnect or the next heartbeat. */ }
+      finally { checking = false; }
+    };
+    const synced = (event: Event) => { if ((event as CustomEvent).detail?.eventId === exitPauseRef.current?.eventId && phaseRef.current === "exiting" && !exitBusy.current) retryExitRef.current(); };
+    const storage = (event: StorageEvent) => { if (event.key === SESSION_STATE_SIGNAL) void changed(); };
+    let channel: BroadcastChannel | undefined; try { channel = new BroadcastChannel(SESSION_STATE_SIGNAL); channel.onmessage = () => void changed(); } catch { /* focus and heartbeat also check */ }
+    window.addEventListener(SESSION_STATE_SIGNAL, changed); window.addEventListener("storage", storage); window.addEventListener("focus", changed); window.addEventListener(PAUSE_SYNC_EVENT, synced);
+    return () => { live = false; channel?.close(); window.removeEventListener(SESSION_STATE_SIGNAL, changed); window.removeEventListener("storage", storage); window.removeEventListener("focus", changed); window.removeEventListener(PAUSE_SYNC_EVENT, synced); };
+  }, [sessionId, stopDiscPlayback]);
 
   // 离开页面前提醒
   useEffect(() => {
@@ -407,15 +441,18 @@ export function InterviewRoom({ sessionId, subtitlePref, userId }: { sessionId: 
   }
 
   async function sendEvent(type: string, extra: Record<string, unknown> = {}) {
-    return api<{ partDeadlines?: Record<string, string>; finished?: boolean; missing?: unknown[]; status?: string }>(`/api/sessions/${sessionId}/events`, {
-      body: { eventId: randomId("ev"), type, ...extra },
+    const result = await api<{ partDeadlines?: Record<string, string>; finished?: boolean; missing?: unknown[]; status?: string; stateVersion?: number; activationId?: string }>(`/api/sessions/${sessionId}/events`, {
+      body: { eventId: randomId("ev"), type, expectedVersion: versionRef.current, ...extra },
     });
+    if (result.stateVersion !== undefined && result.stateVersion >= (versionRef.current ?? 0)) versionRef.current = result.stateVersion;
+    return result;
   }
 
   // ---------- 开始面试（用户手势） ----------
   async function startInterview() {
     if (!view || phase !== "ready") return;
     const r = rt.current!;
+    const expectedVersion = versionRef.current, eventId = randomId("ev"); startEventRef.current = eventId;
     void r.audio.unlock(); // 必须在点击事件中同步调用（iOS 音频解锁）
     setPhase("starting");
     setError(null);
@@ -432,12 +469,20 @@ export function InterviewRoom({ sessionId, subtitlePref, userId }: { sessionId: 
     setWakeLockOk(await r.wake.request());
     try {
       check();
-      await sendEvent("start");
+      // Account for retained finalized fragments before reserving time for the next complete answer.
+      const pending = (await listRecordings(sessionId)).filter(meta => meta.status !== "recording");
+      const uploaded = await Promise.allSettled(pending.map(meta => uploadQueue.enqueue(meta)));
       check();
+      if (uploaded.some(result => result.status === "rejected")) throw new Error("有已录片段尚未上传。请联网后重试上传，再继续练习；本机录音仍保留。");
+      const started = await sendEvent("start", { eventId, expectedVersion });
+      check();
+      if (started.status !== "active" || started.activationId !== eventId) throw new ApiError(409, "session_changed", "练习状态已改变，请重新载入后继续。");
+      announceSessionState();
     } catch (e) {
       await r.wake.release();
       if(e instanceof Aborted||r.aborted)return;
-      setError(e instanceof ApiError ? e.message : "网络错误");
+      setError(e instanceof Error ? e.message : "网络错误");
+      r.recorder.release();
       setPhase("ready");
       return;
     }
@@ -470,11 +515,11 @@ export function InterviewRoom({ sessionId, subtitlePref, userId }: { sessionId: 
   async function runTraining(v: SessionView) {
     const plan = v.plan;
     const saved = new Set(v.answers.filter((a) => a.status !== "created"&&!a.interrupted).map((a) => `${a.planIndex}:${a.kind}`));
-    for (const m of localPending) if(!m.interrupted)saved.add(`${m.planIndex}:${m.kind}`);
+    for (const m of localPending) if(m.status !== "recording"&&!m.interrupted)saved.add(`${m.planIndex}:${m.kind}`);
     // 本地未上传的录音先补传
     for (const m of localPending) {
       const blob = await getBlob(m.id, m.mimeType);
-      if (blob) void uploadQueue.enqueue(m, blob).catch(() => {});
+      if (blob && m.status !== "recording") void uploadQueue.enqueue(m, blob).catch(() => {});
     }
     const slotDone = (i: number, k: AnswerKind) => saved.has(`${i}:${k}`);
     const first = plan.items.findIndex((it) => !slotDone(it.index, "main") || (it.followUp && !slotDone(it.index, "followup")));
@@ -821,8 +866,6 @@ export function InterviewRoom({ sessionId, subtitlePref, userId }: { sessionId: 
     if(exitBusy.current)return;
     exitBusy.current=true;
     const r=rt.current!;
-    exitMock.current ||= view?.plan.mode==="mock"&&["starting","running","finishing"].includes(phase);
-    const interruptMock=exitMock.current;
     r.aborted=true;r.audio.stop();stopDiscPlayback?.();
     r.waiter?.resolve("exit");r.waiter=null;
     setPhase("exiting");setStep("idle");setTimer(null);setPartInfo(null);setActions([]);setExaminer("waiting");setError(null);
@@ -830,15 +873,22 @@ export function InterviewRoom({ sessionId, subtitlePref, userId }: { sessionId: 
       const res=await r.recorder.stop({interrupted:true});
       r.recorder.release();await r.wake.release();
       const jobs:Promise<unknown>[]=[];
+      const recordings = await listRecordings(sessionId);
+      if (!exitPauseRef.current) {
+        const current = versionRef.current === null ? await api<SessionView>(`/api/sessions/${sessionId}`) : null;
+        const scope = localIdentity(); if (!scope?.userId || !scope.consentAllowed || scope.consentVersion === undefined) throw new Error("无法确认当前录音授权，请刷新或重新登录。");
+        exitPauseRef.current = { id: `pause:${sessionId}`, kind: "session-pause", userId: scope.userId, epoch: scope.epoch, consentVersion: scope.consentVersion, sessionId, eventId: randomId("ev"), expectedVersion: versionRef.current ?? current!.session.stateVersion, startEventId: startEventRef.current, pendingUploads: recordings.map(m => ({ submissionId: m.id, planIndex: m.planIndex, kind: m.kind, followUpId: m.followUpId, consentVersion: m.consentVersion! })), savedAt: Date.now() };
+      }
+      const paused = await requestSessionPause(exitPauseRef.current);
+      if (!paused.synced) throw new Error(paused.persistent ? "退出请求与录音已在本机保留；尚未确认服务端暂停，预留额度暂未释放。请联网后重试，恢复连接时会自动同步。" : "尚未确认服务端暂停，本机存储也不可用。请保持页面打开，联网后重试退出，以免丢失录音。");
       if(res)jobs.push(upload(res));
       // Include earlier pending fragments and retry a failed exit without losing them.
-      for(const meta of await listRecordings(sessionId)){
-        if(meta.id===res?.meta.id)continue;
+      for(const meta of recordings){
+        // Another page owns a live recorder. Its stop callback publishes the final interrupted metadata.
+        if(meta.id===res?.meta.id || meta.status === "recording")continue;
         const job=uploadQueue.enqueue(meta);job.catch(()=>{});jobs.push(job);
       }
-      // Mock uploads must obtain their tickets before the session is closed.
-      if(interruptMock||!persistent){const results=await Promise.allSettled(jobs);if(results.some(r=>r.status==="rejected"))throw new Error("有录音尚未上传，请联网后重试退出；已录内容仍保留在本机。");}
-      if(interruptMock)await sendEvent("interrupt",{reason:"user_exit"});
+      if(!persistent){const results=await Promise.allSettled(jobs);if(results.some(r=>r.status==="rejected"))throw new Error("有录音尚未上传，请联网后重试退出；当前只有内存副本，请保持页面打开。");}
       router.push(returnToDiscs);
     }catch(e){
       r.recorder.release();await r.wake.release();
@@ -846,6 +896,7 @@ export function InterviewRoom({ sessionId, subtitlePref, userId }: { sessionId: 
       exitBusy.current=false;
     }
   }
+  retryExitRef.current = () => { void exitInterview(); };
 
   // ---------- 渲染 ----------
   if (phase === "loading" || !view) {
@@ -1029,7 +1080,7 @@ export function InterviewRoom({ sessionId, subtitlePref, userId }: { sessionId: 
             <EndPanel tone="warning" title="本次模考已中断" text={message ?? "已录内容仍可复盘。"} sessionId={sessionId} />
           ) : null}
           {phase === "closed" ? (
-            <div className="space-y-3"><EndPanel tone="info" title={consentEnded.current ? "录音授权已改变，面试已停止" : "这次练习已经结束"} text={message ?? "可以在报告中回听录音、查看反馈，或重新开始。"} sessionId={sessionId} />{consentEnded.current && <LinkButton href="/settings" variant="outline">前往设置与录音授权</LinkButton>}</div>
+            <div className="space-y-3"><EndPanel tone="info" title={consentEnded.current ? "录音授权已改变，面试已停止" : "当前练习已停止"} text={message ?? "可以在报告中回听录音、查看反馈，或重新开始。"} sessionId={sessionId} />{consentEnded.current ? <LinkButton href="/settings" variant="outline">前往设置与录音授权</LinkButton> : canResumeSession(view.session) && <Button variant="outline" onClick={() => location.reload()}>重新载入并继续</Button>}</div>
           ) : null}
           {phase === "error" ? (
             <div className="space-y-3">

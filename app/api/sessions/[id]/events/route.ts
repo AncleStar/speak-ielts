@@ -7,7 +7,10 @@ export const dynamic = "force-dynamic";
 
 const schema = z.object({
   eventId: z.string().min(8).max(100),
-  type: z.enum(["start", "part_start", "position", "skip", "finish", "interrupt", "heartbeat"]),
+  type: z.enum(["start", "pause", "part_start", "position", "skip", "finish", "interrupt", "heartbeat"]),
+  expectedVersion: z.number().int().min(0).optional(),
+  startEventId: z.string().min(8).max(100).optional(),
+  pendingUploads: z.array(z.object({ submissionId: z.string().regex(/^[A-Za-z0-9_-]{8,80}$/), planIndex: z.number().int().min(0), kind: z.enum(["main", "followup", "rounding"]), followUpId: z.string().max(60).nullish(), consentVersion: z.number().int().min(0) })).max(100).optional(),
   part: z.number().int().optional(),
   position: z.number().int().optional(),
   planIndex: z.number().int().optional(),

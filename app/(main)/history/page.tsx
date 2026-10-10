@@ -8,6 +8,7 @@ import { requireUser } from "@/lib/auth-server";
 import type { SessionSummary } from "@/lib/services/outcome";
 import { listSessions, totalTrainingSeconds } from "@/lib/services/sessions";
 import { cn, formatDateTime, formatDuration, MODE_LABEL, SESSION_STATUS_LABEL } from "@/lib/utils";
+import { canResumeSession } from "@/lib/sessions/lifecycle";
 
 export const metadata: Metadata = { title: "学习记录" };
 
@@ -48,11 +49,11 @@ export default async function HistoryPage({ searchParams }: { searchParams: Prom
             const r = s.report as SessionSummary | null;
             return (
               <li key={s.id} className="record-shelf-item" data-testid={`history-${s.id}`}>
-                <Link href={s.status === "active" ? `/interview/${s.id}` : `/sessions/${s.id}`} className="record-disc-artwork" aria-label={`打开记录盘 ${s.title}`}>
+                <Link href={canResumeSession(s) ? `/interview/${s.id}` : `/sessions/${s.id}`} className="record-disc-artwork" aria-label={`打开记录盘 ${s.title}`}>
                   <img src="/models/rhine/record-disc.webp" alt="" width="900" height="900" loading="lazy" />
-                  <span><i data-active={s.status==="active"}/>{s.status==="active"?"IN PROGRESS":"PERSONAL RECORD"}</span>
+                  <span><i data-active={s.status==="active"}/>{s.status==="paused"?"PAUSED · RESUME":s.status==="active"?"IN PROGRESS":"PERSONAL RECORD"}</span>
                 </Link>
-                <Link href={s.status === "active" ? `/interview/${s.id}` : `/sessions/${s.id}`} className="flex min-w-0 flex-1 flex-col gap-1">
+                <Link href={canResumeSession(s) ? `/interview/${s.id}` : `/sessions/${s.id}`} className="flex min-w-0 flex-1 flex-col gap-1">
                   <span className="flex flex-wrap items-center gap-1.5">
                     <Badge tone="brand">{MODE_LABEL[s.mode]}</Badge>
                     <Badge tone={s.status === "completed" ? "success" : s.status === "active" ? "brand" : "warning"}>{SESSION_STATUS_LABEL[s.status]}</Badge>
@@ -65,6 +66,7 @@ export default async function HistoryPage({ searchParams }: { searchParams: Prom
                   <span className="text-xs text-muted">
                     {formatDateTime(s.createdAt)} · {s.answerCount} 段回答 · {formatDuration(s.durationMs / 1000)}
                   </span>
+                  {s.status === "paused" && <span className="text-xs text-muted">点击继续原题 · 未用预留已释放，继续时重新检查额度</span>}
                 </Link>
                 <DeleteSessionButton id={s.id} />
               </li>

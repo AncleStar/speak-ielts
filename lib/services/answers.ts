@@ -12,7 +12,7 @@ import { slotLimitSeconds, type AnswerKind, type SessionPlan } from "@/lib/sessi
 import { recordingKey, storage } from "@/lib/storage";
 import { isDurationWithinLimit } from "@/lib/timing";
 import { questionVersion } from "@/db/schema";
-import { reserveSessionQuota } from "@/lib/quota";
+import { reserveSessionQuota, settleQuotaHolds } from "@/lib/quota";
 import { startOfDayShanghai } from "@/lib/timing";
 import { assertUserAiBudget } from "@/lib/ai/runtime";
 import { withRecordingConsent } from "@/lib/services/recording-consent";
@@ -77,7 +77,9 @@ async function createUploadTicketLocked(userId: string, input: TicketInput, vers
     return { answerId: existing.id, status: existing.status, ticket: signUploadTicket(existing.id, userId, Date.now(), version) };
   }
 
-  if (s.status !== "active") throw conflict("本次练习已结束，不能再提交新的回答", "session_closed");
+  const paused = (s.status === "paused" || s.status === "interrupted" && s.interruptReason === "user_exit") && s.endedAt && Date.now() - s.endedAt.getTime() < 24 * 3600_000;
+  const allowed = paused && s.pausedUploads.some(p => p.submissionId === input.submissionId && p.planIndex === input.planIndex && p.kind === input.kind && (p.followUpId ?? null) === (input.followUpId ?? null) && p.consentVersion === version && input.consentVersion === version);
+  if (s.status !== "active" && !allowed) throw conflict("本次练习已暂停或结束；只有退出前保留的录音可补传，新录音请先继续练习。", "session_closed");
   const item = plan.items[input.planIndex];
   if (!item) throw badRequest("无效的题目位置");
   const kind = input.kind;
@@ -106,7 +108,7 @@ async function createUploadTicketLocked(userId: string, input: TicketInput, vers
     .from(answer)
     .where(and(eq(answer.sessionId, s.id), eq(answer.planIndex, input.planIndex), eq(answer.kind, kind)));
   const row = await db.transaction(async tx => {
-  const reserve = Math.ceil(Math.max(s.reservedSeconds, Number(usedInSession.seconds) + dur / 1000));
+  const reserve = Math.ceil(Math.max(paused ? 0 : s.reservedSeconds, Number(usedInSession.seconds) + dur / 1000));
   await reserveSessionQuota(tx, userId, s.id, reserve);
   const inserted = await tx
     .insert(answer)
@@ -131,7 +133,8 @@ async function createUploadTicketLocked(userId: string, input: TicketInput, vers
   const row =
     inserted[0] ??
     (await tx.select().from(answer).where(and(eq(answer.sessionId, s.id), eq(answer.submissionId, input.submissionId))))[0];
-  await tx.update(practiceSession).set({ reservedSeconds: reserve, lastActivityAt: new Date() }).where(eq(practiceSession.id, s.id));
+  if (paused) await settleQuotaHolds(tx, userId);
+  else await tx.update(practiceSession).set({ reservedSeconds: reserve, lastActivityAt: new Date() }).where(eq(practiceSession.id, s.id));
   return row;
   });
   return { answerId: row.id, status: row.status, ticket: signUploadTicket(row.id, userId, Date.now(), version) };

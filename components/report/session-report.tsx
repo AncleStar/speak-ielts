@@ -12,6 +12,7 @@ import { ApiError, api } from "@/lib/client/api";
 import type { getSessionReport } from "@/lib/services/reports";
 import { formatDateTime, formatDuration, MODE_LABEL, SESSION_STATUS_LABEL } from "@/lib/utils";
 import { AnswerCard, type AnswerView, type FeedbackView } from "./answer-card";
+import { canResumeSession } from "@/lib/sessions/lifecycle";
 
 type Report = Awaited<ReturnType<typeof getSessionReport>>;
 
@@ -74,7 +75,7 @@ export function SessionReport({ initial }: { initial: Report }) {
           </p>
         </div>
         <div className="flex flex-wrap gap-2">
-          {session.status === "active" ? (
+          {canResumeSession(session) ? (
             <LinkButton href={`/interview/${session.id}`} data-testid="continue-session">
               继续作答
             </LinkButton>

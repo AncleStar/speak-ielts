@@ -41,6 +41,7 @@ export const MODE_LABEL: Record<string, string> = {
 
 export const SESSION_STATUS_LABEL: Record<string, string> = {
   active: "进行中",
+  paused: "已暂停",
   completed: "已完成",
   interrupted: "中断",
   abandoned: "已放弃",

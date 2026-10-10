@@ -8,7 +8,7 @@ import { AppError, badRequest, forbidden, notFound } from "@/lib/errors";
 import { buildFollowUpMessages } from "@/lib/feedback/prompt";
 import { validateFollowUpChoice } from "@/lib/feedback/validate";
 import { logOps } from "@/lib/ops";
-import { withLock } from "@/lib/lock";
+import { withLocks } from "@/lib/lock";
 import { providers } from "@/lib/providers";
 import { assertCanStartSession, getQuotaStatus, reserveSessionQuota } from "@/lib/quota";
 import { requirePublished } from "@/lib/services/content";
@@ -27,6 +27,8 @@ import {
 import { FOLLOWUP_WAIT_SECONDS, mockPartDurationMs, startOfDayShanghai } from "@/lib/timing";
 import { metered } from "@/lib/providers/metered";
 import { assertRecordingConsent, withRecordingConsent } from "@/lib/services/recording-consent";
+import { canResumeSession, type PausedUpload } from "@/lib/sessions/lifecycle";
+import { slotLimitSeconds } from "@/lib/sessions/plan";
 
 export type SessionRow = typeof practiceSession.$inferSelect;
 
@@ -148,26 +150,13 @@ async function createSessionLocked(u: UserLite, input: CreateSessionInput): Prom
           eq(practiceSession.levelId, built.levelId),
           eq(practiceSession.mode, "level"),
           isNull(practiceSession.deletedAt),
-          sql`(${practiceSession.status} = 'active' or (${practiceSession.status} = 'abandoned' and ${practiceSession.createdAt} >= ${startOfDayShanghai()}))`,
+          sql`(${practiceSession.status} in ('active', 'paused') or (${practiceSession.status} = 'abandoned' and ${practiceSession.interruptReason} = 'inactive'))`,
         ),
       )
       .orderBy(desc(practiceSession.createdAt))
       .limit(1);
     if (existing) {
-      if (existing.status === "abandoned") {
-        const [used] = await db
-          .select({ ms: sql<number>`coalesce(sum(coalesce(${answer.durationMs}, ${answer.clientDurationMs}, 0)), 0)::float8` })
-          .from(answer)
-          .where(eq(answer.sessionId, existing.id));
-        await assertCanStartSession(u.id, Math.max(0, existing.reservedSeconds - Number(used?.ms ?? 0) / 1000));
-        await db.transaction(async tx => {
-        await reserveSessionQuota(tx, u.id, existing.id, existing.reservedSeconds);
-        await tx
-          .update(practiceSession)
-          .set({ status: "active", endedAt: null, interruptReason: null, lastActivityAt: new Date() })
-          .where(eq(practiceSession.id, existing.id));
-        });
-      }
+      // A resumed disc is admitted when Start is pressed, not while opening its history.
       return { id: existing.id, reused: true };
     }
   }
@@ -181,7 +170,7 @@ async function createSessionLocked(u: UserLite, input: CreateSessionInput): Prom
           eq(practiceSession.userId, u.id),
           eq(practiceSession.mode, "mock"),
           eq(practiceSession.mockSetId, built.mockSetId!),
-          eq(practiceSession.status, "active"),
+          inArray(practiceSession.status, ["active", "paused"]),
           isNull(practiceSession.startedAt),
           isNull(practiceSession.deletedAt),
         ),
@@ -264,6 +253,8 @@ export async function getSessionView(userId: string, sessionId: string) {
       id: s.id,
       mode: s.mode,
       status: s.status,
+      stateVersion: s.stateVersion,
+      activationId: s.activationId,
       levelId: s.levelId,
       mockSetId: s.mockSetId,
       questionId: s.questionId,
@@ -306,7 +297,11 @@ async function planWithCurrentVoice(plan: SessionPlan) {
   return attachTtsIds(plan, await ensureTtsAssets(collectPromptTexts(plan)));
 }
 
-export type SessionEventType = "start" | "part_start" | "position" | "skip" | "finish" | "interrupt" | "heartbeat";
+export type SessionEventType = "start" | "pause" | "part_start" | "position" | "skip" | "finish" | "interrupt" | "heartbeat";
+export interface SessionEventInput {
+  eventId: string; type: SessionEventType; part?: number; position?: number; planIndex?: number; reason?: string;
+  expectedVersion?: number; startEventId?: string; pendingUploads?: PausedUpload[];
+}
 
 /**
  * 会话事件（带事件标识，可重复提交）：开始、部分开始、推进、跳过、结束、中断。
@@ -315,29 +310,61 @@ export type SessionEventType = "start" | "part_start" | "position" | "skip" | "f
 export async function recordEvent(
   userId: string,
   sessionId: string,
-  ev: { eventId: string; type: SessionEventType; part?: number; position?: number; planIndex?: number; reason?: string },
+  ev: SessionEventInput,
 ) {
-  return ["finish", "interrupt"].includes(ev.type) ? withLock(`session-event:${sessionId}`, () => recordEventLocked(userId, sessionId, ev)) : withRecordingConsent(userId, () => recordEventLocked(userId, sessionId, ev), [`session-event:${sessionId}`]);
+  const keys = [`recording-consent:${userId}`, `session-event:${sessionId}`, ...(ev.type === "start" ? ["session-admission"] : [])];
+  return withLocks(keys, async () => {
+    if (!["finish", "interrupt", "pause"].includes(ev.type)) await assertRecordingConsent(userId);
+    return recordEventLocked(userId, sessionId, ev);
+  });
 }
 
-async function recordEventLocked(userId: string, sessionId: string, ev: { eventId: string; type: SessionEventType; part?: number; position?: number; planIndex?: number; reason?: string }) {
+async function recordEventLocked(userId: string, sessionId: string, ev: SessionEventInput) {
   if (!ev.eventId || ev.eventId.length > 100) throw badRequest("缺少事件标识");
   const s = await getOwnedSession(userId, sessionId);
   const [prev] = await db.select().from(sessionEvent).where(eq(sessionEvent.id, ev.eventId));
   if (prev) {
     if (prev.sessionId !== s.id) throw badRequest("事件标识冲突");
-    return { duplicate: true, ...(prev.result as object), serverTime: Date.now() };
+    return { duplicate: true, ...(prev.result as object), status: s.status, stateVersion: s.stateVersion, activationId: s.activationId, serverTime: Date.now() };
   }
+  if (["start", "pause"].includes(ev.type) && !Number.isInteger(ev.expectedVersion)) throw new AppError(409, "session_changed", "练习状态已更新，请重新载入后操作。");
+  // Exit can race the matching Start response. A different tab's later Start must never be paused.
+  const matchingStart = ev.type === "pause" && s.status === "active" && s.activationId === ev.startEventId && s.stateVersion === (ev.expectedVersion ?? -2) + 1;
+  if (ev.expectedVersion !== undefined && ev.expectedVersion !== s.stateVersion && !matchingStart) throw new AppError(409, "session_changed", "练习已在另一页面更新；旧操作未生效，请重新载入。");
   const now = new Date();
   const plan = s.plan as SessionPlan;
   const patch: Partial<SessionRow> = { lastActivityAt: now };
   let result: Record<string, unknown> = {};
 
   const isActive = s.status === "active";
+  if (!isActive && !["start", "pause", "finish", "interrupt"].includes(ev.type)) throw new AppError(409, "session_closed", "练习已暂停或结束，请重新载入。");
   switch (ev.type) {
     case "start":
+      if (!canResumeSession(s) || plan.mode === "mock" && s.startedAt) throw new AppError(409, "session_closed", "本次练习已结束或模考已经开始，不能继续作答。");
+      {
+        const reserve = await remainingReservation(s, plan, now);
+        const held = isActive ? Math.max(s.reservedSeconds, reserve.usedToday) : reserve.usedToday;
+        await assertCanStartSession(userId, Math.max(0, reserve.seconds - held), s.id);
+        patch.reservedSeconds = reserve.seconds;
+        patch.status = "active"; patch.endedAt = null; patch.interruptReason = null;
+        patch.stateVersion = s.stateVersion + 1; patch.activationId = ev.eventId; patch.pausedUploads = [];
+      }
       if (!s.startedAt) patch.startedAt = now;
       break;
+    case "pause": {
+      if (!isActive) break;
+      const consent = await assertRecordingConsent(userId);
+      const pending = ev.pendingUploads ?? [];
+      if (pending.length > 100 || new Set(pending.map(p => p.submissionId)).size !== pending.length) throw badRequest("待上传录音列表无效");
+      for (const p of pending) {
+        if (!/^[A-Za-z0-9_-]{8,80}$/.test(p.submissionId) || p.consentVersion !== consent.version || slotLimitSeconds(plan, p.planIndex, p.kind) === null) throw badRequest("待上传录音与本次练习或授权不符");
+        if (p.kind === "followup" && plan.mode !== "mock" && !plan.items[p.planIndex].followUp?.candidates.some(c => c.id === p.followUpId)) throw badRequest("待上传追问不属于本题");
+      }
+      patch.status = plan.mode === "mock" && s.startedAt ? "interrupted" : "paused";
+      patch.interruptReason = "user_exit"; patch.endedAt = now; patch.stateVersion = s.stateVersion + 1;
+      patch.pausedUploads = pending;
+      break;
+    }
     case "heartbeat":
       break;
     case "part_start": {
@@ -390,7 +417,11 @@ async function recordEventLocked(userId: string, sessionId: string, ev: { eventI
       .values({ id: ev.eventId, sessionId: s.id, type: ev.type, payload: ev, result })
       .onConflictDoNothing()
       .returning({ id: sessionEvent.id });
-    if (inserted.length) await tx.update(practiceSession).set(patch).where(eq(practiceSession.id, s.id));
+    if (inserted.length) {
+      if (ev.type === "start") await reserveSessionQuota(tx, userId, s.id, patch.reservedSeconds!);
+      const changed = await tx.update(practiceSession).set(patch).where(and(eq(practiceSession.id, s.id), eq(practiceSession.stateVersion, s.stateVersion), isNull(practiceSession.deletedAt))).returning({ id: practiceSession.id });
+      if (!changed.length) throw new AppError(409, "session_changed", "练习状态已更新，请重新载入后操作。");
+    }
   });
   if (patch.status && patch.status !== "active") {
     await afterSessionClosed(s.id).catch((e) => console.error("[session] 结束后处理失败", e));
@@ -400,11 +431,21 @@ async function recordEventLocked(userId: string, sessionId: string, ev: { eventI
     duplicate: false,
     ...result,
     status: fresh.status,
+    stateVersion: fresh.stateVersion,
+    activationId: fresh.activationId,
     partDeadlines: fresh.partDeadlines,
     partStarts: fresh.partStarts,
     position: fresh.position,
     serverTime: Date.now(),
   };
+}
+
+async function remainingReservation(s: SessionRow, plan: SessionPlan, now: Date) {
+  const rows = await db.select({ planIndex: answer.planIndex, kind: answer.kind, status: answer.status, interrupted: answer.interrupted, createdAt: answer.createdAt, durationMs: answer.durationMs, clientDurationMs: answer.clientDurationMs }).from(answer).where(eq(answer.sessionId, s.id));
+  const dayStart = startOfDayShanghai(now).getTime(), dayEnd = dayStart + 86400_000;
+  const usedToday = Math.ceil(rows.filter(r => r.createdAt.getTime() >= dayStart && r.createdAt.getTime() < dayEnd).reduce((n, r) => n + (r.durationMs ?? r.clientDurationMs ?? 0) / 1000, 0));
+  const remaining = plan.mode === "mock" ? plan.reserveSeconds : requiredSlots(plan).filter(slot => !rows.some(r => r.planIndex === slot.index && r.kind === slot.kind && r.status !== "created" && !r.interrupted)).reduce((n, slot) => n + (slotLimitSeconds(plan, slot.index, slot.kind) ?? 0), 0);
+  return { seconds: Math.ceil(usedToday + remaining), usedToday };
 }
 
 /** 结束会话：训练需全部必答题已保存录音才记为完成；模考需三个部分都已开始且未中断。 */
@@ -551,6 +592,8 @@ export async function listSessions(userId: string, opts: { mode?: string; limit?
       report: practiceSession.report,
       createdAt: practiceSession.createdAt,
       endedAt: practiceSession.endedAt,
+      startedAt: practiceSession.startedAt,
+      interruptReason: practiceSession.interruptReason,
       answerCount: sql<number>`count(${answer.id})::int`,
       durationMs: sql<number>`coalesce(sum(coalesce(${answer.durationMs}, ${answer.clientDurationMs}, 0)), 0)::int`,
     })
@@ -587,7 +630,7 @@ export async function abandonStaleSessions(minutes: number) {
   const since = new Date(Date.now() - minutes * 60_000);
   const rows = await db
     .update(practiceSession)
-    .set({ status: sql`case when ${practiceSession.mode} = 'mock' and ${practiceSession.startedAt} is not null then 'interrupted' else 'abandoned' end`, interruptReason: "inactive", endedAt: new Date() })
+    .set({ status: sql`case when ${practiceSession.mode} = 'mock' and ${practiceSession.startedAt} is not null then 'interrupted' else 'abandoned' end`, interruptReason: "inactive", endedAt: new Date(), stateVersion: sql`${practiceSession.stateVersion} + 1` })
     .where(and(eq(practiceSession.status, "active"), sql`${practiceSession.lastActivityAt} < ${since}`))
     .returning({ id: practiceSession.id });
   for (const r of rows) await afterSessionClosed(r.id).catch(() => {});

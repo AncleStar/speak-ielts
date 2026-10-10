@@ -141,7 +141,7 @@ export async function reserveSessionQuota(tx: Tx, userId: string, sessionId: str
   await tx.insert(quotaHold).values({ userId, sessionId, day, baseSeconds: base, credits }).onConflictDoUpdate({ target: [quotaHold.sessionId, quotaHold.day], set: { baseSeconds: base, credits, settled: false } });
 }
 
-export async function activeSessionCount(settings: AppSettings, excludeUserId?: string): Promise<number> {
+export async function activeSessionCount(settings: AppSettings, excludeSessionId?: string): Promise<number> {
   const since = new Date(Date.now() - settings.limits.abandonMinutes * 60_000);
   const [row] = await db
     .select({ n: sql<number>`count(*)::int` })
@@ -151,7 +151,7 @@ export async function activeSessionCount(settings: AppSettings, excludeUserId?: 
         eq(practiceSession.status, "active"),
         isNull(practiceSession.deletedAt),
         gte(practiceSession.lastActivityAt, since),
-        excludeUserId ? sql`${practiceSession.userId} <> ${excludeUserId}` : undefined,
+        excludeSessionId ? sql`${practiceSession.id} <> ${excludeSessionId}` : undefined,
       ),
     );
   return Number(row?.n ?? 0);
@@ -161,13 +161,13 @@ export async function activeSessionCount(settings: AppSettings, excludeUserId?: 
  * 新建会话前的检查：暂停开关、月度预算、全站并发、个人每日额度（含本次预留）。
  * 预留：训练为各题答题上限之和；模考为 12.5 分钟。
  */
-export async function assertCanStartSession(userId: string, reserveSeconds: number) {
+export async function assertCanStartSession(userId: string, reserveSeconds: number, excludeSessionId?: string) {
   const settings = await getSettings();
   if (settings.pauseNewSessions) {
     throw new AppError(503, "paused", "管理员已暂停新的练习，请稍后再试。历史记录仍可正常查看。");
   }
   await assertUserAiBudget(userId);
-  const active = await activeSessionCount(settings);
+  const active = await activeSessionCount(settings, excludeSessionId);
   if (active >= settings.limits.maxActiveSessions) {
     throw new AppError(429, "busy", `当前同时进行的面试已达上限（${settings.limits.maxActiveSessions} 个），请稍后再试。`);
   }

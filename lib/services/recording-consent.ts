@@ -27,7 +27,7 @@ export async function grantRecordingConsent(userId: string, preferences: { targe
 export async function withdrawRecordingConsent(userId: string) {
   const result = await withLock(`recording-consent:${userId}`, () => db.transaction(async tx => {
     const [row] = await tx.update(user).set({ consentAt: null, recordingConsentVersion: sql`${user.recordingConsentVersion} + case when ${user.consentAt} is not null then 1 else 0 end`, updatedAt: new Date() }).where(eq(user.id, userId)).returning({ version: user.recordingConsentVersion });
-    await tx.update(practiceSession).set({ status: sql`case when ${practiceSession.mode} = 'mock' and ${practiceSession.startedAt} is not null then 'interrupted' else 'abandoned' end`, interruptReason: "consent_withdrawn", endedAt: new Date() }).where(and(eq(practiceSession.userId, userId), eq(practiceSession.status, "active"), isNull(practiceSession.deletedAt)));
+    await tx.update(practiceSession).set({ status: sql`case when ${practiceSession.mode} = 'mock' and ${practiceSession.startedAt} is not null then 'interrupted' else 'abandoned' end`, interruptReason: "consent_withdrawn", endedAt: new Date(), stateVersion: sql`${practiceSession.stateVersion} + 1`, pausedUploads: [] }).where(and(eq(practiceSession.userId, userId), inArray(practiceSession.status, ["active", "paused"]), isNull(practiceSession.deletedAt)));
     await tx.update(answer).set({ status: "failed", processingStage: "consent_wait", error: "录音授权已撤回，后续处理已暂停。已保存录音可在重新同意后手动重试；尚未上传的回答需重新录音。", updatedAt: new Date() }).where(and(eq(answer.userId, userId), inArray(answer.status, ["created", "uploaded", "queued"])));
     return { allowed: false, version: row.version };
   }));

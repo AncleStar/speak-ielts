@@ -1,4 +1,5 @@
 import { sql } from "drizzle-orm";
+import type { PausedUpload } from "@/lib/sessions/lifecycle";
 import {
   boolean,
   doublePrecision,
@@ -185,8 +186,11 @@ export const practiceSession = pgTable(
     mockSetId: text("mock_set_id"),
     questionId: text("question_id"),
     sourceAnswerId: text("source_answer_id"),
-    /** active | completed | interrupted | abandoned */
+    /** active | paused | completed | interrupted | abandoned */
     status: text("status").notNull().default("active"),
+    stateVersion: integer("state_version").notNull().default(0),
+    activationId: text("activation_id"),
+    pausedUploads: jsonb("paused_uploads").$type<PausedUpload[]>().notNull().default([]),
     plan: jsonb("plan").notNull(),
     position: integer("position").notNull().default(0),
     currentPart: integer("current_part"),
