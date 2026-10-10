@@ -961,7 +961,7 @@ export function InterviewRoom({ sessionId, subtitlePref, userId }: { sessionId: 
         </div>
       </div>
 
-      {!online && <Alert tone="warning" className="mb-3">网络已断开。当前录音会先保留在本机；请保持页面打开，恢复网络后重试上传。模考计时继续。</Alert>}
+      {!online && <Alert tone="warning" className="mb-3">网络已断开。当前录音会先保留在本机；请保持页面打开，恢复网络后重试上传。{phase === "running" ? isMock ? "模考计时继续。" : "练习录音按当前步骤与计时进行。" : "未开始的新作答不会自动录音。"}</Alert>}
       {!persistent ? (
         <Alert tone="warning" className="mb-3">
           浏览器本地存储不可用或空间不足，录音暂存在内存中；请保持页面打开，确认上传成功后再离开。

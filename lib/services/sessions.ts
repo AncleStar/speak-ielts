@@ -28,6 +28,7 @@ import { FOLLOWUP_WAIT_SECONDS, mockPartDurationMs, startOfDayShanghai } from "@
 import { metered } from "@/lib/providers/metered";
 import { assertRecordingConsent, withRecordingConsent } from "@/lib/services/recording-consent";
 import { canResumeSession, type PausedUpload } from "@/lib/sessions/lifecycle";
+import { accountedRecordingMs, consumedRecordingMs } from "@/lib/answer-quota";
 import { slotLimitSeconds } from "@/lib/sessions/plan";
 
 export type SessionRow = typeof practiceSession.$inferSelect;
@@ -441,9 +442,9 @@ async function recordEventLocked(userId: string, sessionId: string, ev: SessionE
 }
 
 async function remainingReservation(s: SessionRow, plan: SessionPlan, now: Date) {
-  const rows = await db.select({ planIndex: answer.planIndex, kind: answer.kind, status: answer.status, interrupted: answer.interrupted, createdAt: answer.createdAt, durationMs: answer.durationMs, clientDurationMs: answer.clientDurationMs }).from(answer).where(eq(answer.sessionId, s.id));
+  const rows = await db.select({ planIndex: answer.planIndex, kind: answer.kind, status: answer.status, interrupted: answer.interrupted, createdAt: answer.createdAt, accountedMs: accountedRecordingMs(now) }).from(answer).where(eq(answer.sessionId, s.id));
   const dayStart = startOfDayShanghai(now).getTime(), dayEnd = dayStart + 86400_000;
-  const usedToday = Math.ceil(rows.filter(r => r.createdAt.getTime() >= dayStart && r.createdAt.getTime() < dayEnd).reduce((n, r) => n + (r.durationMs ?? r.clientDurationMs ?? 0) / 1000, 0));
+  const usedToday = Math.ceil(rows.filter(r => r.createdAt.getTime() >= dayStart && r.createdAt.getTime() < dayEnd).reduce((n, r) => n + Number(r.accountedMs) / 1000, 0));
   const remaining = plan.mode === "mock" ? plan.reserveSeconds : requiredSlots(plan).filter(slot => !rows.some(r => r.planIndex === slot.index && r.kind === slot.kind && r.status !== "created" && !r.interrupted)).reduce((n, slot) => n + (slotLimitSeconds(plan, slot.index, slot.kind) ?? 0), 0);
   return { seconds: Math.ceil(usedToday + remaining), usedToday };
 }
@@ -594,8 +595,8 @@ export async function listSessions(userId: string, opts: { mode?: string; limit?
       endedAt: practiceSession.endedAt,
       startedAt: practiceSession.startedAt,
       interruptReason: practiceSession.interruptReason,
-      answerCount: sql<number>`count(${answer.id})::int`,
-      durationMs: sql<number>`coalesce(sum(coalesce(${answer.durationMs}, ${answer.clientDurationMs}, 0)), 0)::int`,
+      answerCount: sql<number>`count(${answer.id}) filter (where ${answer.storageKey} is not null or ${answer.durationMs} is not null)::int`,
+      durationMs: sql<number>`coalesce(sum(${consumedRecordingMs()}), 0)::int`,
     })
     .from(practiceSession)
     .leftJoin(answer, eq(answer.sessionId, practiceSession.id))
@@ -618,7 +619,7 @@ export async function listSessions(userId: string, opts: { mode?: string; limit?
 
 export async function totalTrainingSeconds(userId: string) {
   const [r] = await db
-    .select({ ms: sql<number>`coalesce(sum(coalesce(${answer.durationMs}, ${answer.clientDurationMs}, 0)), 0)::float8` })
+    .select({ ms: sql<number>`coalesce(sum(${consumedRecordingMs()}), 0)::float8` })
     .from(answer)
     .innerJoin(practiceSession, eq(practiceSession.id, answer.sessionId))
     .where(and(eq(answer.userId, userId), isNull(practiceSession.deletedAt)));

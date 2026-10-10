@@ -10,10 +10,11 @@ import { logOps } from "@/lib/ops";
 import { QUEUES, enqueue } from "@/lib/queue";
 import { revokeAllSessions } from "@/lib/auth";
 import { storage } from "@/lib/storage";
-import { startOfDayShanghai } from "@/lib/timing";
 import { settleQuotaHolds } from "@/lib/quota";
 import { walletLock } from "@/lib/services/rewards";
 import { parseDeletionLog, type DeletionEntry } from "@/lib/deletion-log";
+import { consumedRecordingMs, PENDING_UPLOAD_TTL_MS } from "@/lib/answer-quota";
+import { withLock } from "@/lib/lock";
 export type { DeletionEntry } from "@/lib/deletion-log";
 
 export const DELETION_LOG_FILE = () => path.join(dataDir(), "deletion-log.jsonl");
@@ -37,6 +38,9 @@ export async function readDeletionLog(): Promise<DeletionEntry[]> {
 
 /** 删除一次练习：立即撤销访问，后台清理录音、转写和反馈 */
 export async function deleteSession(userId: string, sessionId: string, requestedBy: string) {
+  return withLock(`recording-consent:${userId}`, () => deleteSessionLocked(userId, sessionId, requestedBy));
+}
+async function deleteSessionLocked(userId: string, sessionId: string, requestedBy: string) {
   const [owned] = await db.select({ id: practiceSession.id }).from(practiceSession)
     .where(and(eq(practiceSession.id, sessionId), eq(practiceSession.userId, userId), isNull(practiceSession.deletedAt)));
   if (!owned) throw notFound("会话");
@@ -60,6 +64,11 @@ export async function deleteSession(userId: string, sessionId: string, requested
 
 /** 清理会话的存储文件与数据库记录（幂等） */
 export async function purgeSession(sessionId: string) {
+  const [owner] = await db.select({ userId: practiceSession.userId }).from(practiceSession).where(eq(practiceSession.id, sessionId));
+  if (!owner) return;
+  return withLock(`recording-consent:${owner.userId}`, () => purgeSessionLocked(sessionId));
+}
+async function purgeSessionLocked(sessionId: string) {
   const rows = await db.select({ key: answer.storageKey }).from(answer).where(eq(answer.sessionId, sessionId));
   const st = storage();
   for (const r of rows) if (r.key) await st.delete(r.key);
@@ -69,14 +78,17 @@ export async function purgeSession(sessionId: string) {
     if (s) {
       await walletLock(tx, s.userId);
       await tx.update(practiceSession).set({ status: "abandoned" }).where(and(eq(practiceSession.id, sessionId), eq(practiceSession.status, "active")));
+      // A deleted session cannot receive these declarations. They are not consumed recordings.
+      await tx.update(answer).set({ status: "failed", processingStage: "upload_discarded" }).where(and(eq(answer.sessionId, sessionId), isNull(answer.storageKey), isNull(answer.durationMs)));
       await settleQuotaHolds(tx, s.userId);
     }
     const [current] = await tx.select({ userId: practiceSession.userId }).from(practiceSession).where(eq(practiceSession.id, sessionId)).for("update");
     if (!current) return;
-    const [used] = await tx.select({ seconds: sql<number>`coalesce(sum(coalesce(${answer.durationMs}, ${answer.clientDurationMs}, 0)), 0)::float8 / 1000` }).from(answer)
-      .where(and(eq(answer.sessionId, sessionId), sql`${answer.createdAt} >= ${startOfDayShanghai()}`));
-    if (Number(used.seconds) > 0) await tx.insert(usageEvent).values({ userId: current.userId, service: "deleted-audio-quota", model: "quota-ledger", mock: true, costYuan: 0,
-      units: { seconds: Number(used.seconds), day: startOfDayShanghai().toISOString() } });
+    const recordedDay = sql<Date>`date_trunc('day', ${answer.createdAt} at time zone 'Asia/Shanghai') at time zone 'Asia/Shanghai'`;
+    const used = await tx.select({ day: recordedDay, seconds: sql<number>`coalesce(sum(${consumedRecordingMs()}), 0)::float8 / 1000` }).from(answer)
+      .where(eq(answer.sessionId, sessionId)).groupBy(recordedDay);
+    for (const row of used) if (Number(row.seconds) > 0) await tx.insert(usageEvent).values({ userId: current.userId, service: "deleted-audio-quota", model: "quota-ledger", mock: true, costYuan: 0,
+      units: { seconds: Number(row.seconds), day: new Date(row.day).toISOString() } });
     await tx.delete(practiceSession).where(eq(practiceSession.id, sessionId));
   });
   await db
@@ -172,14 +184,20 @@ export async function dailyCleanup(now = new Date()) {
     if (a.key) await st.delete(a.key);
     await db.update(answer).set({ audioDeletedAt: now }).where(eq(answer.id, a.id));
   }
-  const staleCutoff = new Date(now.getTime() - 24 * 3600_000);
+  const staleCutoff = new Date(now.getTime() - PENDING_UPLOAD_TTL_MS);
   const stale = await db
-    .select({ id: answer.id, key: answer.storageKey })
+    .select({ id: answer.id, userId: answer.userId })
     .from(answer)
-    .where(and(eq(answer.status, "created"), lt(answer.createdAt, staleCutoff)));
+    .where(and(eq(answer.status, "created"), isNull(answer.storageKey), isNull(answer.durationMs), lt(answer.createdAt, staleCutoff)));
+  let staleRemoved = 0;
   for (const a of stale) {
-    if (a.key) await st.delete(a.key);
-    await db.delete(answer).where(eq(answer.id, a.id));
+    staleRemoved += await withLock(`recording-consent:${a.userId}`, () => db.transaction(async tx => {
+      await walletLock(tx, a.userId);
+      // Recheck under admission and wallet locks; an upload selected before cleanup may have completed.
+      const removed = await tx.delete(answer).where(and(eq(answer.id, a.id), eq(answer.status, "created"), isNull(answer.storageKey), isNull(answer.durationMs), lt(answer.createdAt, staleCutoff))).returning({ id: answer.id });
+      if (removed.length) await settleQuotaHolds(tx, a.userId, now);
+      return removed.length;
+    }));
   }
   const deletedSessions = await db
     .select({ id: practiceSession.id })
@@ -191,7 +209,7 @@ export async function dailyCleanup(now = new Date()) {
     .from(user)
     .where(and(isNotNull(user.deletedAt), lt(user.deletedAt, new Date(now.getTime() - 3600_000))));
   for (const u of deletedUsers) await purgeUser(u.id);
-  const result = { expiredAudio: old.length, staleUploads: stale.length, purgedSessions: deletedSessions.length, purgedUsers: deletedUsers.length };
+  const result = { expiredAudio: old.length, staleUploads: staleRemoved, purgedSessions: deletedSessions.length, purgedUsers: deletedUsers.length };
   await logOps("info", "cleanup", null, `每日清理：${JSON.stringify(result)}`);
   return result;
 }

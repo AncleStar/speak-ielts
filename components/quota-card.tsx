@@ -28,6 +28,7 @@ export function QuotaCard({ quota }: { quota: QuotaStatus }) {
         )}
         <div className="mt-3 flex items-center justify-between border-t border-line pt-3 text-sm"><span>额外可用 <b>{((quota.extraSeconds ?? 0) / 60).toFixed(1)}</b> 分钟</span><Link href="/rewards" className="text-xs text-brand-700 underline">积分兑换</Link></div>
         {!!quota.reservedSeconds && <p className="text-xs text-muted">会话预留约 {Math.ceil(quota.reservedSeconds / 60)} 分钟，结束后释放未使用部分。</p>}
+        {!!quota.pendingUploadSeconds && <p className="text-xs text-muted" data-testid="pending-upload-quota">待上传片段暂记 {quota.pendingUploadSeconds} 秒，尚未记为音频消费。可补传或丢弃；未上传满 24 小时后释放。进行中的整盘预留需退出练习后释放。</p>}
         {quota.nextExpiry && <p className="text-xs text-muted">最近一张券到期：{new Date(quota.nextExpiry).toLocaleString("zh-CN", { timeZone: "Asia/Shanghai", month: "numeric", day: "numeric", hour: "2-digit", minute: "2-digit" })}</p>}
       </CardContent>
     </Card>

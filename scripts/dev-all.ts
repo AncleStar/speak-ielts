@@ -8,6 +8,7 @@ import pg from "pg";
 import { sourceFingerprint } from "./build-fingerprint";
 import { ensureLocalEnv } from "./local-env";
 import { writeRuntimeState } from "./runtime-state";
+import { supervisorLockAlive } from "./supervisor-owner";
 
 // A supervisor only stops and restarts children that it created in this checkout.
 const root = process.cwd(), runDir = path.resolve("data/run");
@@ -18,9 +19,8 @@ process.env.LOCAL_APP_INSTANCE = instance;
 const lockPath = path.join(runDir, "supervisor.lock"), statePath = path.join(runDir, "supervisor.json");
 try { fs.writeFileSync(lockPath, JSON.stringify({ pid: process.pid, instance }), { flag: "wx" }); }
 catch {
-  const old = JSON.parse(fs.readFileSync(lockPath, "utf8")) as { pid: number };
-  let alive = true; try { process.kill(old.pid, 0); } catch (e) { alive = (e as NodeJS.ErrnoException).code !== "ESRCH"; }
-  if (alive) { console.log("本目录已有应用管理进程，请使用查看状态或重启入口。"); process.exit(0); }
+  const old = JSON.parse(fs.readFileSync(lockPath, "utf8")) as { pid: number; instance: string };
+  if (supervisorLockAlive(old)) { console.log("本目录已有应用管理进程，请使用查看状态或重启入口。"); process.exit(0); }
   fs.unlinkSync(lockPath);
   fs.writeFileSync(lockPath, JSON.stringify({ pid: process.pid, instance }), { flag: "wx" });
 }

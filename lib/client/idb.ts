@@ -16,6 +16,10 @@ export interface PendingSessionPause {
   id: string; kind: "session-pause"; userId: string; epoch: string; consentVersion: number;
   sessionId: string; eventId: string; expectedVersion: number; startEventId?: string; pendingUploads: PausedUpload[]; savedAt: number;
 }
+export interface PendingUploadDiscard {
+  id: string; kind: "upload-discard"; userId: string; epoch: string; consentVersion: number;
+  sessionId: string; submissionId: string; eventId: string; savedAt: number;
+}
 export class LocalSessionEnded extends Error { constructor() { super("当前登录已结束，请重新登录。"); } }
 export class LocalConsentEnded extends LocalSessionEnded { constructor() { super(); this.message = "录音授权已撤回或改变，请重新同意后开始新录音。"; } }
 export class LocalThoughtDeleted extends Error { constructor() { super("这份观点已删除，相关草稿不会继续暂存。请新建观点。"); } }
@@ -26,6 +30,7 @@ let dbPromise: Promise<IDBDatabase | null> | null = null, identity: LocalIdentit
 const memMeta = new Map<string, RecordingMeta>(), memChunks = new Map<string, Blob[]>(), memDrafts = new Map<string, ThoughtDraft>();
 const memDeletedThoughts = new Set<string>();
 const memPauses = new Map<string, PendingSessionPause>();
+const memDiscards = new Map<string, PendingUploadDiscard>();
 function limited() { persistent = false; if (typeof window !== "undefined") window.dispatchEvent(new Event("recording-storage-limited")); }
 function open(): Promise<IDBDatabase | null> {
   if (dbPromise) return dbPromise;
@@ -50,7 +55,7 @@ function open(): Promise<IDBDatabase | null> {
 export async function isPersistent() { await open(); return persistent; }
 export function localIdentity() { return identity?.userId ? { ...identity } : null; }
 export function recordingPermitted() { return !!identity?.userId && identity.consentAllowed === true; }
-export function invalidateLocalMemory() { identity = null; memMeta.clear(); memChunks.clear(); memDrafts.clear(); memDeletedThoughts.clear(); memPauses.clear(); }
+export function invalidateLocalMemory() { identity = null; memMeta.clear(); memChunks.clear(); memDrafts.clear(); memDeletedThoughts.clear(); memPauses.clear(); memDiscards.clear(); }
 function matches(a: Pick<LocalIdentity, "userId" | "epoch"> | null | undefined, b: Pick<LocalIdentity, "userId" | "epoch"> | null | undefined) { return !!a && !!b && a.userId === b.userId && a.epoch === b.epoch; }
 function transaction<T>(db: IDBDatabase, stores: string[], mode: IDBTransactionMode, work: (t: IDBTransaction, result: (v: T) => void, fail: (e: Error) => void) => void) {
   return new Promise<T>((resolve, reject) => {
@@ -118,12 +123,12 @@ export async function activateLocalAccount(userId: string, signal?: AbortSignal,
         }
       };
       const drafts = t.objectStore("thoughtDrafts").openCursor(); drafts.onsuccess = () => { const cursor = drafts.result; if (cursor) { if (!validDraft(cursor.value, userId, next.epoch)) cursor.delete(); cursor.continue(); } };
-      const pauses = t.objectStore("privateSession").openCursor(); pauses.onsuccess = () => { const cursor = pauses.result; if (cursor) { if (cursor.value.kind === "session-pause" && !validPause(cursor.value, next)) cursor.delete(); cursor.continue(); } };
+      const pauses = t.objectStore("privateSession").openCursor(); pauses.onsuccess = () => { const cursor = pauses.result; if (cursor) { if (cursor.value.kind === "session-pause" && !validPause(cursor.value, next) || cursor.value.kind === "upload-discard" && !validDiscard(cursor.value, next)) cursor.delete(); cursor.continue(); } };
       done(next);
     };
   });
   signal?.throwIfAborted();
-  if (!matches(selected, identity)) invalidateLocalMemory(); else if (selected.consentVersion !== identity?.consentVersion || !selected.consentAllowed) { memMeta.clear(); memChunks.clear(); memPauses.clear(); } identity = selected; memoryIdentity = selected; return selected;
+  if (!matches(selected, identity)) invalidateLocalMemory(); else if (selected.consentVersion !== identity?.consentVersion || !selected.consentAllowed) { memMeta.clear(); memChunks.clear(); memPauses.clear(); memDiscards.clear(); } identity = selected; memoryIdentity = selected; return selected;
 }
 /** Monotone consent revisions stop delayed responses from re-enabling an old recording; text scope remains unchanged. */
 export async function syncLocalRecordingConsent(userId: string, consent: RecordingConsentState) {
@@ -138,14 +143,14 @@ export async function syncLocalRecordingConsent(userId: string, consent: Recordi
       if (next && next !== previous) {
         if (next.consentVersion !== previous?.consentVersion || !next.consentAllowed) {
           t.objectStore("recordings").clear(); t.objectStore("chunks").clear();
-          const pauses = t.objectStore("privateSession").openCursor(); pauses.onsuccess = () => { const cursor = pauses.result; if (cursor) { if (cursor.value.kind === "session-pause") cursor.delete(); cursor.continue(); } };
+          const pauses = t.objectStore("privateSession").openCursor(); pauses.onsuccess = () => { const cursor = pauses.result; if (cursor) { if (cursor.value.kind === "session-pause" || cursor.value.kind === "upload-discard") cursor.delete(); cursor.continue(); } };
         }
         t.objectStore("privateSession").put(next);
       } done(next);
     };
   }) : apply(memoryIdentity);
   if (matches(identity, next)) {
-    if (next?.consentVersion !== identity?.consentVersion || !next?.consentAllowed) { memMeta.clear(); memChunks.clear(); memPauses.clear(); }
+    if (next?.consentVersion !== identity?.consentVersion || !next?.consentAllowed) { memMeta.clear(); memChunks.clear(); memPauses.clear(); memDiscards.clear(); }
     identity = next;
   }
   if (!memoryIdentity || matches(memoryIdentity, next)) memoryIdentity = next;
@@ -179,7 +184,7 @@ export async function saveMeta(meta: RecordingMeta) {
 export async function updateMeta(id: string, patch: Partial<RecordingMeta>) { const current = await getMeta(id); if (current) await saveMeta({ ...current, ...patch, userId: current.userId, localEpoch: current.localEpoch, consentVersion: current.consentVersion }); }
 export async function getMeta(id: string): Promise<RecordingMeta | undefined> {
   const memory = memMeta.get(id), db = await open();
-  if (!db || !persistent) return recordingOwned(memory) ? memory : undefined;
+  if (!db || !persistent && recordingOwned(memory)) return recordingOwned(memory) ? memory : undefined;
   if (!identity?.userId) return;
   const row = await transaction<RecordingMeta | undefined>(db, ["recordings"], "readonly", (t, done) => { const request = t.objectStore("recordings").get(id); request.onsuccess = () => done(request.result); }).catch(() => { limited(); return recordingOwned(memory) ? memory : undefined; });
   return recordingOwned(row) ? row : undefined;
@@ -192,7 +197,7 @@ export async function putChunk(recId: string, seq: number, blob: Blob) {
 export async function getBlob(recId: string, mimeType: string): Promise<Blob | null> {
   if (!await getMeta(recId)) return null;
   const memory = memChunks.get(recId), db = await open();
-  if (!db || !persistent) return memory?.length ? new Blob(memory.filter(Boolean), { type: mimeType }) : null;
+  if (!db || !persistent && memory?.length) return memory?.length ? new Blob(memory.filter(Boolean), { type: mimeType }) : null;
   const rows = await transaction<{ seq: number; blob: Blob }[]>(db, ["chunks"], "readonly", (t, done) => { const request = t.objectStore("chunks").index("recId").getAll(IDBKeyRange.only(recId)); request.onsuccess = () => done(request.result); });
   rows.sort((a, b) => a.seq - b.seq);
   return rows.length ? new Blob(rows.map(row => row.blob), { type: mimeType }) : null;
@@ -271,6 +276,42 @@ export async function deletePendingPause(row: PendingSessionPause) {
   const scope = localIdentity(); if (!scope || !matches(row, scope)) return;
   await write(["privateSession"], scope, t => { const store = t.objectStore("privateSession"), request = store.get(row.id); request.onsuccess = () => { if (request.result?.eventId === row.eventId) store.delete(row.id); }; });
   if (memPauses.get(row.id)?.eventId === row.eventId) memPauses.delete(row.id);
+}
+function validDiscard(row: PendingUploadDiscard | undefined, scope: LocalIdentity | null) {
+  return !!row && row.kind === "upload-discard" && matches(row, scope) && scope?.consentAllowed === true && row.consentVersion === scope.consentVersion && typeof row.sessionId === "string" && row.sessionId.length > 0 && row.sessionId.length <= 60 && /^[A-Za-z0-9_-]{8,80}$/.test(row.submissionId) && row.id === `discard:${row.sessionId}:${row.submissionId}` && typeof row.eventId === "string" && row.eventId.length >= 8 && row.eventId.length <= 100 && Number.isFinite(row.savedAt) && row.savedAt <= Date.now() + 60_000 && Date.now() - row.savedAt < LOCAL_TTL_MS;
+}
+/** Save the cancellation intent and remove its local audio in one transaction, never a half-discard. */
+export async function stageRecordingDiscard(row: PendingUploadDiscard) {
+  const scope = localIdentity(); if (!scope || !validDiscard(row, scope)) throw new LocalConsentEnded();
+  const discard = async () => {
+    const meta = await getMeta(row.submissionId);
+    if (meta && (!recordingOwned(meta, scope) || meta.sessionId !== row.sessionId)) throw new LocalSessionEnded();
+    const durable = await write(["privateSession", "recordings", "chunks"], scope, t => {
+      t.objectStore("privateSession").put(row); t.objectStore("recordings").delete(row.submissionId);
+      const request = t.objectStore("chunks").index("recId").openKeyCursor(IDBKeyRange.only(row.submissionId));
+      request.onsuccess = () => { const cursor = request.result; if (cursor) { t.objectStore("chunks").delete(cursor.primaryKey); cursor.continue(); } };
+    }, true);
+    // An aborted real transaction keeps the file. Only an unavailable DB uses the explicitly limited memory mode.
+    if (!durable && await open()) throw new Error("无法保存取消任务，片段仍保留。请检查浏览器存储后重试。");
+    memDiscards.set(row.id, row); memMeta.delete(row.submissionId); memChunks.delete(row.submissionId); return durable;
+  };
+  const meta = await getMeta(row.submissionId);
+  if (meta?.status !== "recording") return discard();
+  if (meta.recordingGuard !== RECORDING_GUARD) throw new Error("无法确认旧录音是否仍被占用，请先关闭旧页面。");
+  const result = await withStoppedRecording(meta.id, async () => ({ durable: await discard() }));
+  if (!result) throw new Error("另一页面仍在录音，暂不能恢复或丢弃。");
+  return result.durable;
+}
+export async function listPendingUploadDiscards() {
+  const scope = localIdentity(); if (!scope) return [];
+  const rows = new Map<string, PendingUploadDiscard>(); for (const row of await all<PendingUploadDiscard>("privateSession")) if (row.kind === "upload-discard") rows.set(row.id, row);
+  if (!persistent) for (const row of memDiscards.values()) rows.set(row.id, row);
+  return [...rows.values()].filter(row => validDiscard(row, scope) && matches(scope, identity));
+}
+export async function deletePendingUploadDiscard(row: PendingUploadDiscard) {
+  const scope = localIdentity(); if (!scope || !validDiscard(row, scope)) return;
+  await write(["privateSession"], scope, t => { const store = t.objectStore("privateSession"), request = store.get(row.id); request.onsuccess = () => { if (request.result?.eventId === row.eventId) store.delete(row.id); }; }, true);
+  if (memDiscards.get(row.id)?.eventId === row.eventId) memDiscards.delete(row.id);
 }
 export async function saveThoughtDraft(draft: ThoughtDraft) {
   const scope = localIdentity(), clean = scope?.userId ? validDraft(draft, scope.userId, scope.epoch) : null; if (!scope || !clean) throw new LocalSessionEnded();

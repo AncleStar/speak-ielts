@@ -44,13 +44,14 @@ type AnswerLite = {
   clientDurationMs: number | null;
   metrics: unknown;
   interrupted?: boolean;
+  storageKey?: string | null;
 };
 type FeedbackLite = { answerId: string; goalMet: boolean; goalReason: string; mock?: boolean };
 
 /** 由回答与反馈汇总会话结果（纯函数） */
 export function summarize(plan: SessionPlan, status: string, answers: AnswerLite[], feedbacks: FeedbackLite[]): SessionSummary {
   const fbByAnswer = new Map(feedbacks.filter(f => !f.mock).map((f) => [f.answerId, f]));
-  const uploaded = answers.filter((a) => a.status !== "created");
+  const uploaded = answers.filter((a) => a.status !== "created" && (a.storageKey === undefined || a.storageKey !== null || a.durationMs !== null));
   const pending = uploaded.filter((a) => (PENDING_STATUSES as readonly string[]).includes(a.status)).length;
   const items: GoalItemResult[] = [];
   let metCount = 0;
@@ -119,6 +120,7 @@ export async function recomputeSessionOutcome(sessionId: string): Promise<Sessio
       kind: answer.kind,
       status: answer.status,
       durationMs: answer.durationMs,
+      storageKey: answer.storageKey,
       clientDurationMs: answer.clientDurationMs,
       metrics: answer.metrics,
       interrupted: answer.interrupted,

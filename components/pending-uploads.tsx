@@ -3,9 +3,10 @@
 import { useEffect, useRef, useState } from "react";
 import { LinkButton, Button } from "@/components/ui/button";
 import { Alert } from "@/components/ui/feedback";
-import { discardStoppedRecording, getBlob, listRecordings, localIdentity, purgeExpired, recordingRecoveryState, recoverRecording, type RecordingMeta, type RecordingRecoveryState } from "@/lib/client/idb";
+import { getBlob, listRecordings, localIdentity, purgeExpired, recordingRecoveryState, recoverRecording, type RecordingMeta, type RecordingRecoveryState } from "@/lib/client/idb";
 import { PRIVATE_SESSION_EVENT, RECORDING_CONSENT_EVENT } from "@/lib/client/private-session";
 import { uploadQueue } from "@/lib/client/uploader";
+import { requestUploadDiscard } from "@/lib/client/upload-discard";
 
 type Item = RecordingMeta & { recovery: RecordingRecoveryState };
 /** Only the current login's durable, stopped fragments can be recovered or discarded. */
@@ -68,7 +69,12 @@ export function PendingUploads({ userId, sessionId, onChange, onUploaded, onBusy
             {meta.status === "recording" ? <Button size="sm" variant="secondary" disabled={waiting || !stopped} onClick={() => void act(meta, async () => { const result = await recoverRecording(meta.id); await playLocal(result.meta); return "已恢复本机现有片段。可以回放后重试上传；也可以丢弃，再重新回答。"; })}>恢复中断片段</Button>
               : <><Button size="sm" variant="secondary" disabled={waiting} onClick={() => void act(meta, async () => { await uploadQueue.enqueue(meta); clearPreview(); await uploaded.current?.(); return "上传成功，反馈将在后台生成。"; })}>{uploadQueue.isPending(meta.id) ? "正在上传…" : "重试上传"}</Button>
                 <Button size="sm" variant="outline" disabled={waiting} onClick={() => void act(meta, async () => { await playLocal(meta); return "正在回放本机保留片段。"; })}>回放片段</Button></>}
-            <Button size="sm" variant="ghost" disabled={waiting || !stopped} onClick={() => { if (confirm("丢弃这段本机录音？丢弃后无法恢复。")) void act(meta, async () => { await discardStoppedRecording(meta.id); clearPreview(); return "片段已丢弃，可回到原练习重新回答。"; }); }}>丢弃片段</Button>
+            <Button size="sm" variant="ghost" disabled={waiting || !stopped} onClick={() => { if (confirm("丢弃这段本机录音？丢弃后无法恢复。")) void act(meta, async () => {
+              const result = await requestUploadDiscard(meta, clearPreview);
+              if (!result.receipt) return result.persistent ? "本机片段已丢弃，取消任务已保留。上传暂记尚未确认释放，联网后自动同步。" : "本机片段已丢弃，服务器暂记尚未确认释放。浏览器无法持久保存取消任务，请保持此页并联网；未上传满 24 小时后自动释放。";
+              await uploaded.current?.();
+              return result.receipt.alreadyStored ? "本机片段已丢弃；服务器已保存的记录与已消费时长仍保留。" : `本机片段已丢弃，上传暂记已撤销。${result.receipt.wholePlanActive ? "进行中的整盘预留需退出练习后释放。" : "可回到原练习重新回答。"}`;
+            }); }}>丢弃片段</Button>
             {!sessionId && <LinkButton href={`/interview/${meta.sessionId}`} size="sm" variant="outline">回到原练习</LinkButton>}
           </div>
           {preview?.id === meta.id && <audio src={preview.url} controls preload="metadata" aria-label="本机中断录音回放" className="block w-full min-w-0 max-w-full" />}

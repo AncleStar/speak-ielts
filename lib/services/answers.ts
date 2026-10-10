@@ -1,6 +1,6 @@
 import crypto from "node:crypto";
 import { and, desc, eq, isNull, sql } from "drizzle-orm";
-import { answer, feedback, practiceSession, retryItem, user } from "@/db/schema";
+import { answer, feedback, practiceSession, retryItem, sessionEvent, user } from "@/db/schema";
 import { detectAudioType, MAX_UPLOAD_BYTES } from "@/lib/audio";
 import type { QuestionContent } from "@/lib/content/types";
 import { db } from "@/lib/db";
@@ -16,6 +16,9 @@ import { assertCoveredQuota, reconcileAnswerQuota, reserveSessionQuota, settleQu
 import { startOfDayShanghai } from "@/lib/timing";
 import { assertUserAiBudget } from "@/lib/ai/runtime";
 import { withRecordingConsent } from "@/lib/services/recording-consent";
+import { accountedRecordingMs, PENDING_UPLOAD_TTL_MS } from "@/lib/answer-quota";
+import { walletLock } from "@/lib/services/rewards";
+import { withLock } from "@/lib/lock";
 
 export type AnswerRow = typeof answer.$inferSelect;
 
@@ -67,14 +70,18 @@ async function createUploadTicketLocked(userId: string, input: TicketInput, vers
   if (!u?.consentAt) throw forbidden("请先同意录音说明", "consent_required");
   const s = await getOwnedSession(userId, input.sessionId);
   const plan = s.plan as SessionPlan;
+  const [discarded] = await db.select({ id: sessionEvent.id }).from(sessionEvent).where(and(eq(sessionEvent.sessionId, s.id), eq(sessionEvent.type, "upload_discard"), sql`${sessionEvent.result}->>'submissionId' = ${input.submissionId}`)).limit(1);
+  if (discarded) throw new AppError(410, "upload_discarded", "该片段已经丢弃，旧上传凭证不能继续使用。");
 
   const [existing] = await db
     .select()
     .from(answer)
     .where(and(eq(answer.sessionId, s.id), eq(answer.submissionId, input.submissionId)));
   if (existing) {
+    if (existing.processingStage === "upload_discarded") throw new AppError(410, "upload_discarded", "该片段已经丢弃，旧上传凭证不能继续使用。");
     if (!existing.storageKey && existing.processingStage === "consent_wait") throw forbidden("这次录音的授权已撤回，请开始新的录音", "consent_required");
-    return { answerId: existing.id, status: existing.status, ticket: signUploadTicket(existing.id, userId, Date.now(), version) };
+    if (!existing.storageKey && existing.createdAt.getTime() + PENDING_UPLOAD_TTL_MS <= Date.now()) throw new AppError(410, "upload_expired", "未上传片段已超过 24 小时补传期，请重新录音。");
+    return { answerId: existing.id, status: existing.status, ticket: retainedTicket(existing, userId, version) };
   }
 
   const paused = (s.status === "paused" || s.status === "interrupted" && s.interruptReason === "user_exit") && s.endedAt && Date.now() - s.endedAt.getTime() < 24 * 3600_000;
@@ -100,7 +107,7 @@ async function createUploadTicketLocked(userId: string, input: TicketInput, vers
   if (!isDurationWithinLimit(dur, limit)) {
     throw badRequest(`录音时长超过本题上限（${Math.round(limit)} 秒）`, "duration_exceeded");
   }
-  const [usedInSession] = await db.select({ seconds: sql<number>`coalesce(sum(coalesce(${answer.durationMs}, ${answer.clientDurationMs}, 0)), 0)::float8 / 1000` }).from(answer)
+  const [usedInSession] = await db.select({ seconds: sql<number>`coalesce(sum(${accountedRecordingMs()}), 0)::float8 / 1000` }).from(answer)
     .where(and(eq(answer.sessionId, s.id), sql`${answer.createdAt} >= ${startOfDayShanghai()}`));
 
   const [prevAttempt] = await db
@@ -137,7 +144,30 @@ async function createUploadTicketLocked(userId: string, input: TicketInput, vers
   else await tx.update(practiceSession).set({ reservedSeconds: reserve, lastActivityAt: new Date() }).where(eq(practiceSession.id, s.id));
   return row;
   });
-  return { answerId: row.id, status: row.status, ticket: signUploadTicket(row.id, userId, Date.now(), version) };
+  return { answerId: row.id, status: row.status, ticket: retainedTicket(row, userId, version) };
+}
+
+function retainedTicket(row: AnswerRow, userId: string, version: number) {
+  const now = Date.now();
+  return signUploadTicket(row.id, userId, row.storageKey ? now : Math.min(now, row.createdAt.getTime() + PENDING_UPLOAD_TTL_MS - TICKET_TTL_MS), version);
+}
+
+/** Cancellation shares admission/consent and wallet locks. Stored audio is never refunded or deleted here. */
+export async function discardPendingUpload(userId: string, sessionId: string, submissionId: string) {
+  if (!/^[A-Za-z0-9_-]{8,80}$/.test(submissionId)) throw badRequest("无效的提交标识");
+  return withLock(`recording-consent:${userId}`, () => db.transaction(async tx => {
+    await walletLock(tx, userId);
+    const [s] = await tx.select().from(practiceSession).where(and(eq(practiceSession.id, sessionId), eq(practiceSession.userId, userId)));
+    if (!s) throw notFound("会话");
+    const [a] = await tx.select().from(answer).where(and(eq(answer.sessionId, sessionId), eq(answer.submissionId, submissionId)));
+    if (a && (a.storageKey || a.durationMs !== null)) return { discarded: false, alreadyStored: true, wholePlanActive: s.status === "active" };
+    const [prior] = await tx.select({ id: sessionEvent.id }).from(sessionEvent).where(and(eq(sessionEvent.sessionId, sessionId), eq(sessionEvent.type, "upload_discard"), sql`${sessionEvent.result}->>'submissionId' = ${submissionId}`)).limit(1);
+    if (!prior) await tx.insert(sessionEvent).values({ id: crypto.randomUUID(), sessionId, type: "upload_discard", result: { submissionId } });
+    if (a) await tx.update(answer).set({ status: "failed", processingStage: "upload_discarded", interrupted: true, error: "片段已丢弃，尚未上传的时间预留已撤销。", updatedAt: new Date() }).where(eq(answer.id, a.id));
+    await tx.update(practiceSession).set({ pausedUploads: s.pausedUploads.filter(row => row.submissionId !== submissionId) }).where(eq(practiceSession.id, sessionId));
+    await settleQuotaHolds(tx, userId);
+    return { discarded: true, alreadyStored: false, wholePlanActive: s.status === "active" };
+  }));
 }
 
 /** 接收录音：凭上传凭证，校验大小与实际类型（按文件头），写入私有存储。 */
@@ -149,8 +179,10 @@ async function receiveAudioLocked(userId: string, answerId: string, ticket: stri
   if (!verifyUploadTicket(ticket, answerId, userId, Date.now(), version)) throw new AppError(403, "invalid_ticket", "上传凭证无效、已过期或录音授权已改变");
   const [a] = await db.select().from(answer).where(and(eq(answer.id, answerId), eq(answer.userId, userId)));
   if (!a) throw notFound("回答");
+  if (a.processingStage === "upload_discarded") throw new AppError(410, "upload_discarded", "该片段已经丢弃，旧上传凭证不能继续使用。");
   await assertSessionVisible(a.sessionId);
   if (a.status !== "created") return { status: a.status, duplicate: true };
+  if (a.createdAt.getTime() + PENDING_UPLOAD_TTL_MS <= Date.now()) throw new AppError(410, "upload_expired", "未上传片段已超过 24 小时补传期，请重新录音。");
   if (body.length === 0) throw badRequest("录音为空");
   if (body.length > MAX_UPLOAD_BYTES) throw new AppError(413, "too_large", "录音文件超过 25 MB");
   const kind = detectAudioType(body);
@@ -172,6 +204,7 @@ export async function submitAnswer(userId: string, answerId: string) {
 async function submitAnswerLocked(userId: string, answerId: string) {
   const [a] = await db.select().from(answer).where(and(eq(answer.id, answerId), eq(answer.userId, userId)));
   if (!a) throw notFound("回答");
+  if (a.processingStage === "upload_discarded") throw new AppError(410, "upload_discarded", "该片段已经丢弃，不能继续提交。");
   await assertSessionVisible(a.sessionId);
   if (a.status === "created") throw conflict("录音尚未上传", "not_uploaded");
   const [claimed] = await db

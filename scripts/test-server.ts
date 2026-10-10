@@ -18,13 +18,18 @@ await (await import("./seed")).seed({ tts: false, quiet: true });
 const { createAccount } = await import("@/lib/auth");
 const { db, closeDb } = await import("@/lib/db");
 const { user } = await import("@/db/schema"); const { eq } = await import("drizzle-orm");
-for (const name of ["onboarding", "learner", "outsider", "admin", "privacy-idea", "privacy-conflict", "privacy-recall", "privacy-upload", "privacy-denial", "privacy-recorder", "privacy-quota", "privacy-delete", "consent-interview", "consent-thought", "consent-device", "consent-pending-mic", "consent-upload", "identity-alice", "identity-bob", "identity-silent-alice", "identity-silent-bob", "identity-parallel", "pause-offline", "pause-peer", "measured-quota", "recover-crash", "recover-peer", "recover-inactive", "recover-mock", "recover-consent"]) {
+for (const name of ["onboarding", "learner", "outsider", "admin", "privacy-idea", "privacy-conflict", "privacy-recall", "privacy-upload", "privacy-denial", "privacy-recorder", "privacy-quota", "privacy-delete", "consent-interview", "consent-thought", "consent-device", "consent-pending-mic", "consent-upload", "identity-alice", "identity-bob", "identity-silent-alice", "identity-silent-bob", "identity-parallel", "pause-offline", "pause-peer", "measured-quota", "recover-crash", "recover-peer", "recover-inactive", "recover-mock", "recover-consent", "pending-discard", "pending-stored", "pending-storage"]) {
   const u = await createAccount({ email: `${name}@example.test`, password: "Browser-test-123!", name, role: name === "admin" ? "admin" : "user" });
   if (name !== "onboarding") await db.update(user).set({ mustChangePassword: false, consentAt: new Date(), onboardedAt: new Date(), dailyQuotaMinutes: 1000 }).where(eq(user.id, u.id));
   if (name === "measured-quota") {
     const { minuteCredit } = await import("@/db/schema");
     await db.update(user).set({ dailyQuotaMinutes: 0 }).where(eq(user.id, u.id));
     await db.insert(minuteCredit).values({ userId: u.id, redemptionKey: "quota-browser-fixture", totalSeconds: 5, remainingSeconds: 5, expiresAt: new Date(Date.now() + 86400_000) });
+  }
+  if (name.startsWith("pending-")) {
+    const { minuteCredit } = await import("@/db/schema");
+    await db.update(user).set({ dailyQuotaMinutes: 0 }).where(eq(user.id, u.id));
+    await db.insert(minuteCredit).values({ userId: u.id, redemptionKey: `pending-browser-${name}`, totalSeconds: 60, remainingSeconds: 60, expiresAt: new Date(Date.now() + 86400_000) });
   }
 }
 await closeDb();

@@ -6,6 +6,7 @@ import { AppError } from "@/lib/errors";
 import { getSettings, type AppSettings } from "@/lib/settings";
 import { startOfDayShanghai } from "@/lib/timing";
 import { assertUserAiBudget } from "@/lib/ai/runtime";
+import { consumedRecordingMs, pendingRecordingMs } from "@/lib/answer-quota";
 
 export interface SessionUsageRow {
   status: string;
@@ -33,6 +34,7 @@ export interface QuotaStatus {
   reservedSeconds?: number;
   nextExpiry?: string | null;
   uncoveredSeconds?: number;
+  pendingUploadSeconds?: number;
 }
 
 export function quotaFrom(usedSeconds: number, limitSeconds: number): QuotaStatus {
@@ -47,13 +49,13 @@ export function quotaFrom(usedSeconds: number, limitSeconds: number): QuotaStatu
   };
 }
 
-export async function dailyUsageSeconds(userId: string, now = new Date(), connection: Tx | typeof db = db, excludeSessionId?: string, includeReservations = true): Promise<number> {
+export async function dailyUsageSeconds(userId: string, now = new Date(), connection: Tx | typeof db = db, excludeSessionId?: string, includeReservations = true, accountingNow = now): Promise<number> {
   const dayStart = startOfDayShanghai(now), dayEnd = new Date(dayStart.getTime() + 86400_000);
   const rows = await connection
     .select({
       status: practiceSession.status,
       reservedSeconds: practiceSession.reservedSeconds,
-      usedSeconds: sql<number>`coalesce(sum(case when ${answer.createdAt} >= ${dayStart} and ${answer.createdAt} < ${dayEnd} then coalesce(${answer.durationMs}, ${answer.clientDurationMs}, 0) else 0 end), 0)::float8 / 1000`,
+      usedSeconds: sql<number>`coalesce(sum(case when ${answer.createdAt} >= ${dayStart} and ${answer.createdAt} < ${dayEnd} then ${consumedRecordingMs()} + case when ${practiceSession.deletedAt} is null then ${pendingRecordingMs(accountingNow)} else 0 end else 0 end), 0)::float8 / 1000`,
     })
     .from(practiceSession)
     .leftJoin(answer, eq(answer.sessionId, practiceSession.id))
@@ -85,22 +87,24 @@ export async function settleQuotaHolds(tx: Tx, userId: string, now = new Date())
   // Aggregate once: historical, unchanged holds must not cause one query per recording on every /api/me.
   const rows = await tx.select({ hold: quotaHold, sessionId: practiceSession.id, status: practiceSession.status,
     deletedAt: practiceSession.deletedAt, reserve: practiceSession.reservedSeconds,
-    used: sql<number>`coalesce(sum(coalesce(${answer.durationMs}, ${answer.clientDurationMs}, 0)), 0)::float8 / 1000`,
-    lastRecordedAt: sql<Date | string | null>`max(${answer.createdAt})`,
+    used: sql<number>`coalesce(sum(${consumedRecordingMs()}), 0)::float8 / 1000`,
+    pending: sql<number>`coalesce(sum(case when ${practiceSession.deletedAt} is null then ${pendingRecordingMs(now)} else 0 end), 0)::float8 / 1000`,
+    lastRecordedAt: sql<Date | string | null>`max(case when ${answer.storageKey} is not null or ${answer.durationMs} is not null then ${answer.createdAt} else null end)`,
   }).from(quotaHold).leftJoin(practiceSession, eq(practiceSession.id, quotaHold.sessionId))
     .leftJoin(answer, and(eq(answer.sessionId, quotaHold.sessionId), sql`${answer.createdAt} >= (${quotaHold.day}::date::timestamp at time zone 'Asia/Shanghai') and ${answer.createdAt} < ((${quotaHold.day}::date + 1)::timestamp at time zone 'Asia/Shanghai')`))
     .where(eq(quotaHold.userId, userId)).groupBy(quotaHold.id, practiceSession.id).orderBy(quotaHold.day, quotaHold.createdAt, quotaHold.id);
   for (const row of rows) {
     const hold = row.hold, used = row.sessionId ? Math.ceil(Number(row.used)) : hold.usedSeconds;
     const active = row.status === "active" && !row.deletedAt && hold.day === rewardDay(now);
-    const needed = active ? Math.max(used, row.reserve ?? 0) : used;
+    const accounted = used + Math.ceil(Number(row.pending));
+    const needed = active ? Math.max(accounted, row.reserve ?? 0) : accounted;
     const held = hold.baseSeconds + hold.credits.reduce((n, c) => n + c.seconds, 0);
     if (used === hold.usedSeconds && needed === held && !hold.uncoveredSeconds && hold.settled === !active) continue;
     const recordedAt = row.lastRecordedAt ? new Date(row.lastRecordedAt) : hold.createdAt;
     const day = dayDate(hold.day);
     const otherHolds = await tx.select().from(quotaHold).where(and(eq(quotaHold.userId, userId), eq(quotaHold.day, hold.day), sql`${quotaHold.id} <> ${hold.id}`));
     const otherBase = otherHolds.reduce((n, h) => n + h.baseSeconds, 0), otherCredits = otherHolds.reduce((n, h) => n + h.credits.reduce((m, c) => m + c.seconds, 0), 0);
-    const otherRaw = row.sessionId ? await dailyUsageSeconds(userId, day, tx, hold.sessionId, hold.day === rewardDay(now)) : 0;
+    const otherRaw = row.sessionId ? await dailyUsageSeconds(userId, day, tx, hold.sessionId, hold.day === rewardDay(now), now) : 0;
     // A deleted ledger keeps its already assigned base; a later day's free allowance cannot cover an old recording.
     const freeBase = row.sessionId ? Math.max(0, hold.baseLimitSeconds - Math.max(otherBase, Math.ceil(otherRaw) - otherCredits)) : hold.baseSeconds;
     const base = Math.min(needed, Math.max(hold.baseSeconds, freeBase));
@@ -114,7 +118,7 @@ export async function settleQuotaHolds(tx: Tx, userId: string, now = new Date())
     if (extra) {
       // Existing recordings may correct a voucher that was valid when recorded; this does not renew expired credit.
       const grants = await tx.select().from(minuteCredit).where(and(eq(minuteCredit.userId, userId), sql`${minuteCredit.remainingSeconds} > 0`,
-        sql`(${minuteCredit.expiresAt} > ${now} or (${minuteCredit.createdAt} <= ${recordedAt} and ${minuteCredit.expiresAt} > ${recordedAt}))`)).orderBy(minuteCredit.expiresAt, minuteCredit.id);
+        sql`(${minuteCredit.expiresAt} > ${now} or (${used > 0} and ${minuteCredit.createdAt} <= ${recordedAt} and ${minuteCredit.expiresAt} > ${recordedAt}))`)).orderBy(minuteCredit.expiresAt, minuteCredit.id);
       for (const grant of grants) {
         const take = Math.min(extra, grant.remainingSeconds); if (!take) continue;
         await tx.update(minuteCredit).set({ remainingSeconds: grant.remainingSeconds - take }).where(eq(minuteCredit.id, grant.id));
@@ -157,7 +161,9 @@ async function quotaStatusTx(tx: Tx, userId: string, settings: AppSettings, now 
   const [uncovered] = await tx.select({ all: sql<number>`coalesce(sum(${quotaHold.uncoveredSeconds}),0)::int`, past: sql<number>`coalesce(sum(case when ${quotaHold.day} <> ${rewardDay(now)} then ${quotaHold.uncoveredSeconds} else 0 end),0)::int` }).from(quotaHold).where(eq(quotaHold.userId, userId));
   const used = Math.max(0, Math.ceil(raw) - covered), baseRemainingSeconds = Math.max(0, limit - used);
   const remainingSeconds = Number(uncovered.all) > 0 ? 0 : Math.max(0, limit + extraSeconds - used - Number(uncovered.past));
+  const [pending] = await tx.select({ seconds: sql<number>`coalesce(sum(${pendingRecordingMs(now)}),0)::float8 / 1000` }).from(answer).innerJoin(practiceSession, eq(practiceSession.id, answer.sessionId)).where(and(eq(answer.userId, userId), isNull(practiceSession.deletedAt)));
   return { ...quotaFrom(used, limit), remainingSeconds, exceeded: remainingSeconds <= 0, baseRemainingSeconds, extraSeconds,
+    warn: limit > 0 ? used >= limit * 0.8 : remainingSeconds <= 0, ratio: limit > 0 ? used / limit : remainingSeconds <= 0 ? 1 : 0, pendingUploadSeconds: Math.ceil(Number(pending.seconds)),
     reservedSeconds: holds.filter(h => !h.settled).reduce((n, h) => n + h.baseSeconds + h.credits.reduce((m, c) => m + c.seconds, 0), 0), uncoveredSeconds: Number(uncovered.all), nextExpiry: credits[0]?.expiresAt.toISOString() ?? null };
 }
 
