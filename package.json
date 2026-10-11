@@ -39,6 +39,7 @@
     "dev:all": "tsx scripts/dev-all.ts",
     "check:release": "tsx scripts/release-source.ts",
     "check:build-isolation": "tsx scripts/check-build-isolation.ts",
+    "check:render-cancellation": "tsx scripts/check-render-cancellation.ts",
     "export:source": "tsx scripts/release-source.ts --export"
   },
   "dependencies": {
@@ -50,7 +51,7 @@
     "drizzle-orm": "0.45.3",
     "kokoro-js": "1.2.1",
     "lucide-react": "1.48.0",
-    "next": "16.3.6",
+    "next": "16.4.0",
     "pg": "8.23.0",
     "pg-boss": "12.34.0",
     "react": "19.2.8",

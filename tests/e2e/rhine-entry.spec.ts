@@ -1,4 +1,5 @@
 import {test,expect,type Page} from "@playwright/test";
+import {writeFile} from "node:fs/promises";
 
 test.use({viewport:{width:1600,height:900},video:{mode:"on",size:{width:1280,height:720}},extraHTTPHeaders:{"x-forwarded-for":"192.0.2.46"}});
 async function signIn(page:Page){
@@ -79,4 +80,25 @@ test("reduced motion goes directly to the real disc library",async({page})=>{
   await expect(page.getByTestId("terminal-entry")).toHaveCount(0);
   await expect(page.getByRole("button",{name:"下一张磁盘",exact:true})).toBeEnabled();
   await expect(page.locator(".terminal-entry-content")).not.toHaveAttribute("inert","");
+});
+
+test("leaving a slow model releases its WebGL context before the asset arrives",async({page})=>{
+  const errors:string[]=[];page.on("pageerror",error=>errors.push(error.message));
+  let release!:()=>void;const gate=new Promise<void>(resolve=>{release=resolve;});
+  await page.route("**/*.glb",async route=>{await gate;await route.continue().catch(()=>{});});
+  try{
+    await signIn(page);await expect(page.locator(".rhine-world-canvas canvas")).toHaveCount(1);
+    await page.locator(".rhine-world-canvas canvas").evaluate(el=>{(window as typeof window&{slowGl:WebGL2RenderingContext|null}).slowGl=(el as HTMLCanvasElement).getContext("webgl2");});
+    expect(await page.evaluate(()=>(window as typeof window&{slowGl:WebGL2RenderingContext|null}).slowGl?.isContextLost())).toBe(false);
+    await page.getByRole("button",{name:"跳过动画，进入系统"}).click();await page.getByRole("link",{name:"SPEAK 首页",exact:true}).click();await expect(page).toHaveURL(/\/$/);
+    await expect.poll(()=>page.evaluate(()=>(window as typeof window&{slowGl:WebGL2RenderingContext|null}).slowGl?.isContextLost()),{timeout:3000}).toBe(true);
+    await expect(page.locator(".rhine-world-canvas canvas")).toHaveCount(0);
+  }finally{release();}
+  await page.getByRole("link",{name:"训练磁盘",exact:true}).click();
+  await expect(page.getByTestId("disc-scene")).toHaveAttribute("data-renderer","ready");
+  expect(await page.locator(".rhine-world-canvas canvas").evaluate(el=>{const context=(el as HTMLCanvasElement).getContext("webgl2");return context!==null&&!context.isContextLost();})).toBe(true);
+  await page.getByRole("button",{name:"下一张磁盘",exact:true}).click();
+  await expect(page.getByTestId("q-P1-HOME-2")).toBeVisible();
+  expect(errors).toEqual([]);
+  await writeFile("data/verification/round13-scene-browser.json",JSON.stringify({checkedAt:new Date().toISOString(),actualWebGL:true,pendingAssetOnExit:true,oldContextLost:true,canvasRemoved:true,reenteredSceneReady:true,newContextUsable:true,nextDiscUsable:true,pageErrors:errors,paidApiCalls:0},null,2));
 });

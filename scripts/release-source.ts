@@ -6,7 +6,7 @@ import { createHash } from "node:crypto";
 // No env loader: private values are compared in memory and never printed.
 const root = process.cwd();
 const git = (...args:string[]) => execFileSync("git",args,{cwd:root,encoding:"utf8",maxBuffer:64*1024*1024,windowsHide:true});
-const blocked = /(^|\/)(?:data|backups|node_modules|\.next|\.git|\.codex|\.claude|release|test-results|playwright-report|blob-report|coverage)(\/|$)|(^|\/)\.env(?:\..*)?$|\.(?:blend\d*|pem|key|p12|pfx|dump|sqlite3?|bak|zip|log)$/i;
+const blocked = /(^|\/)(?:data|backups|node_modules|\.next|\.git|\.pg-local|\.codex|\.claude|release|test-results|playwright-report|blob-report|coverage)(\/|$)|(^|\/)\.env(?:\..*)?$|\.(?:blend\d*|heapprofile|heapsnapshot|pem|key|p12|pfx|dump|sqlite3?|bak|zip|log)$/i;
 const patterns = [
   {name:"credential-shaped value",re:/\b(?:sk-[A-Za-z0-9_-]{24,}|gh[pousr]_[A-Za-z0-9]{30,}|AKIA[A-Z0-9]{16})\b/},
   {name:"private key block",re:/-----BEGIN (?:RSA |EC |OPENSSH )?PRIVATE KEY-----/},

@@ -170,6 +170,7 @@ TIME_SCALE=1
 | `npm run db:migrate` / `npm run db:seed -- --no-tts` | 独立迁移 / 初始化 |
 | `npm run setup:backup` | Windows 准备 PostgreSQL 17 便携备份客户端，约 334 MB 首次下载 |
 | `npm run check:build-isolation` | 构建后核对全部部署追踪清单，拒绝私有配置、运行数据和工作区外文件 |
+| `npm run check:render-cancellation` | 隔离构建与真实浏览器检查请求取消，保留真正异常的报告；使用独立端口 3102，无数据库或付费 API |
 | `npm run backup` | 本机完整备份：数据库、私有音频、删除日志和逐文件 SHA-256 |
 | `npm run restore -- 备份目录` | 恢复到新建独立空库与新目录；先按恢复文档设置目标，禁止覆盖业务库 |
 | `npm run restore:ledger -- 私有文件` | 停止源环境服务后，只读导出费用合计供恢复对账，不覆盖已有文件 |

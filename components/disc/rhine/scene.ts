@@ -9,7 +9,7 @@ import { disposeThreeTree } from "./three-resources";
 import { ThemeWave } from "./theme-motion";
 import { themeMaterial, themeEnvironment } from "./theme-material";
 import { RhythmMotion, rhythmDisplacement, quietBands, type MusicBands, type RhythmStyle } from "./archive-play-motion";
-import { GLTFLoader } from "three/addons/loaders/GLTFLoader.js";
+import { loadGltf } from "./load-gltf";
 import { createArchiveLighting, type LightingLook } from "./archive-lighting";
 import { EffectComposer } from "three/addons/postprocessing/EffectComposer.js";
 import { RenderPass } from "three/addons/postprocessing/RenderPass.js";
@@ -60,6 +60,8 @@ export class ArchiveScene {
   private playback = "idle";
   setPlayback(state: string) { this.playback = state; this.renderState.invalidate(); }
   private inputEvents = new AbortController();
+  private assets = new AbortController();
+  private disposed = false;
   private presence = 1;
   private presenceTarget = 1;
   setPresentationVisible(visible: boolean, immediate = false) {
@@ -74,6 +76,9 @@ export class ArchiveScene {
   }
   revealImmediately() { this.reveal = this.targetReveal; }
   dispose() {
+    if (this.disposed) return;
+    this.disposed = true;
+    this.assets.abort();
     this.inputEvents.abort();
     this.cancelPointer();
     disposeThreeTree(this.scene);
@@ -345,9 +350,7 @@ export class ArchiveScene {
     this.bindPointer();
   }
   async load(assetUrl = publicAsset("assets/archive-cassette.glb")) {
-    const gltf = await new GLTFLoader().loadAsync(
-      assetUrl,
-    );
+    const gltf = await loadGltf(assetUrl, this.assets.signal);
     gltf.scene.updateMatrixWorld(true);
     const meshes: THREE.Mesh[] = [];
     gltf.scene.traverse((o) => {
@@ -508,8 +511,7 @@ export class ArchiveScene {
 
   private assemblyTemplate?: Promise<THREE.Group>;
   async createAssemblyModel() {
-    this.assemblyTemplate ??= new GLTFLoader()
-      .loadAsync(publicAsset("assets/archive-assembly.glb"))
+    this.assemblyTemplate ??= loadGltf(publicAsset("assets/archive-assembly.glb"), this.assets.signal)
       .then((gltf) => {
         gltf.scene.updateMatrixWorld(true);
         return gltf.scene;

@@ -33,13 +33,14 @@ export function RhineProvider({children}:{children:React.ReactNode}){
   useEffect(()=>{stopPlayback();return stopPlayback;},[path,stopPlayback]);
   useEffect(()=>{
     if(!active||!configured||simple||!host.current)return;
-    let cancelled=false;setStatus("loading");
+    const controller=new AbortController(),element=host.current;
+    let owned:RhineStage|null=null;setStatus("loading");
     import("./rhine-runtime").then(async({createRhineStage})=>{
-      if(cancelled)return;
-      const next=await createRhineStage(host.current!,()=>latest.current,()=>{if(!cancelled)setStatus("fallback");});
-      if(cancelled){next.dispose();return;}stage.current=next;setStatus("ready");
-    }).catch(()=>{if(!cancelled)setStatus("fallback");});
-    return()=>{cancelled=true;stage.current?.dispose();stage.current=null;};
+      if(controller.signal.aborted)return;
+      const next=await createRhineStage(element,()=>latest.current,()=>{if(!controller.signal.aborted)setStatus("fallback");},controller.signal);
+      if(controller.signal.aborted){next.dispose();return;}owned=next;stage.current=next;setStatus("ready");
+    }).catch(()=>{if(!controller.signal.aborted)setStatus("fallback");});
+    return()=>{controller.abort();owned?.dispose();if(stage.current===owned)stage.current=null;};
   },[active,configured,simple]);
   useEffect(()=>{if(variant==="library")stage.current?.cancel();},[path,variant]);
   const enter=useCallback(async()=>{

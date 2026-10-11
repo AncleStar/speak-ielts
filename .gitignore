@@ -35,6 +35,8 @@ tests/fixtures/*.wav
 release/
 *.blend
 *.blend1
+*.heapprofile
+*.heapsnapshot
 *.pem
 *.key
 *.p12

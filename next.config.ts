@@ -5,7 +5,12 @@ const nextConfig: NextConfig = {
   turbopack: { root: process.cwd() },
   outputFileTracingRoot: process.cwd(),
   // Runtime backups, credentials and data are mounted/configured separately, never shipped in traces.
-  outputFileTracingExcludes: { "/*": ["./data/**/*", "./backups/**/*", "./.env", "./.env.*", "./.git/**/*", "./release/**/*"] },
+  outputFileTracingExcludes: { "/*": [
+    "./data/**/*", "./backups/**/*", "./.env", "./.env.*", "./.git/**/*", "./release/**/*",
+    "./test-results/**/*", "./playwright-report/**/*", "./blob-report/**/*", "./coverage/**/*",
+    "./.pg-local/**/*", "./.codex/**/*", "./.claude/**/*", "./.next/cache/**/*",
+    "./*.tsbuildinfo", "./**/*.blend", "./**/*.blend1", "./**/*.heapprofile", "./**/*.heapsnapshot",
+  ] },
   // A stale broad filesystem trace made cache shutdown retain ~14 GB on Windows. Build without that cache.
   experimental: { turbopackFileSystemCacheForBuild: false },
   // pg / pg-boss / ali-oss 为 Node 专用依赖，不参与打包

@@ -7,7 +7,8 @@ import type { DiscSceneProps } from "./disc-scene";
 
 export interface RhineStage { update(): void; enter(): void; cancel(): void; stopPlayback():void; dispose(): void }
 
-export async function createRhineStage(host: HTMLElement, props: () => DiscSceneProps, failed: () => void): Promise<RhineStage> {
+export async function createRhineStage(host: HTMLElement, props: () => DiscSceneProps, failed: () => void, signal?: AbortSignal): Promise<RhineStage> {
+  signal?.throwIfAborted();
   const catalogFor = (p: DiscSceneProps) => new ArchiveCatalog(p.ids.map((id,i)=>({id,column:p.columns?.[i]})));
   const scene = new ArchiveScene(host, catalogFor(props()));
   let destroyed=false, raf=0, mode="", lastId="", libraryKey="", entering=false, reduced=false, paused=false, playbackState="", intro=false;
@@ -74,10 +75,12 @@ export async function createRhineStage(host: HTMLElement, props: () => DiscScene
   const resize=new ResizeObserver(()=>{host.dataset.layout=host.clientWidth/host.clientHeight<1.05?"portrait":host.clientWidth<1100?"compact":"desktop";scene.resize();wake();});
   const attributes=new MutationObserver(preferences);
   function dispose(){
-    if(destroyed)return;destroyed=true;cancelAnimationFrame(raf);events.abort();resize.disconnect();attributes.disconnect();motionQuery.removeEventListener("change",preferences);scene.dispose();overlay.remove();
+    if(destroyed)return;destroyed=true;cancelAnimationFrame(raf);events.abort();signal?.removeEventListener("abort",dispose);resize.disconnect();attributes.disconnect();motionQuery.removeEventListener("change",preferences);scene.dispose();overlay.remove();
   }
+  signal?.addEventListener("abort",dispose,{once:true});
   try{
     await scene.load();
+    signal?.throwIfAborted();
     scene.setQuality(host.clientWidth<700?qualityPresets.performance:{...qualityPresets.original,aoSamples:16,aoResolution:.5,pixelRatio:1});
     scene.onSelect=(index,cell)=>props().onSelect?.(index,cell?{cell}:undefined);
     scene.onNavigate=(axis,direction)=>{const index=scene.catalog.records.findIndex(r=>r.id===lastId);props().onSelect?.(scene.catalog.navigate(index,axis,direction),{axis,direction});};
