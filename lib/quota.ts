@@ -55,13 +55,13 @@ export async function dailyUsageSeconds(userId: string, now = new Date(), connec
     .select({
       status: practiceSession.status,
       reservedSeconds: practiceSession.reservedSeconds,
-      usedSeconds: sql<number>`coalesce(sum(case when ${answer.createdAt} >= ${dayStart} and ${answer.createdAt} < ${dayEnd} then ${consumedRecordingMs()} + case when ${practiceSession.deletedAt} is null then ${pendingRecordingMs(accountingNow)} else 0 end else 0 end), 0)::float8 / 1000`,
+      usedSeconds: sql<number>`ceil(coalesce(sum(case when ${answer.createdAt} >= ${dayStart} and ${answer.createdAt} < ${dayEnd} then ${consumedRecordingMs()} + case when ${practiceSession.deletedAt} is null then ${pendingRecordingMs(accountingNow)} else 0 end else 0 end), 0)::float8 / 1000)`,
     })
     .from(practiceSession)
     .leftJoin(answer, eq(answer.sessionId, practiceSession.id))
     .where(and(eq(practiceSession.userId, userId), excludeSessionId ? sql`${practiceSession.id} <> ${excludeSessionId}` : undefined, sql`((${practiceSession.createdAt} >= ${dayStart} and ${practiceSession.createdAt} < ${dayEnd}) or (${answer.createdAt} >= ${dayStart} and ${answer.createdAt} < ${dayEnd}) or ${includeReservations} and ${practiceSession.status} = 'active')`))
     .groupBy(practiceSession.id);
-  const [deleted] = await connection.select({ seconds: sql<number>`coalesce(sum((${usageEvent.units}->>'seconds')::float8), 0)` }).from(usageEvent)
+  const [deleted] = await connection.select({ seconds: sql<number>`coalesce(sum(ceil((${usageEvent.units}->>'seconds')::float8)), 0)` }).from(usageEvent)
     .where(and(eq(usageEvent.userId, userId), eq(usageEvent.service, "deleted-audio-quota"), sql`${usageEvent.units}->>'day' = ${startOfDayShanghai(now).toISOString()}`));
   return computeDailyUsage(rows.map((r) => ({ ...r, status: includeReservations ? r.status : "closed", usedSeconds: Number(r.usedSeconds) }))) + Number(deleted?.seconds ?? 0);
 }
@@ -87,16 +87,17 @@ export async function settleQuotaHolds(tx: Tx, userId: string, now = new Date())
   // Aggregate once: historical, unchanged holds must not cause one query per recording on every /api/me.
   const rows = await tx.select({ hold: quotaHold, sessionId: practiceSession.id, status: practiceSession.status,
     deletedAt: practiceSession.deletedAt, reserve: practiceSession.reservedSeconds,
-    used: sql<number>`coalesce(sum(${consumedRecordingMs()}), 0)::float8 / 1000`,
-    pending: sql<number>`coalesce(sum(case when ${practiceSession.deletedAt} is null then ${pendingRecordingMs(now)} else 0 end), 0)::float8 / 1000`,
+    used: sql<number>`coalesce(sum(${consumedRecordingMs()}), 0)::float8`,
+    pending: sql<number>`coalesce(sum(case when ${practiceSession.deletedAt} is null then ${pendingRecordingMs(now)} else 0 end), 0)::float8`,
     lastRecordedAt: sql<Date | string | null>`max(case when ${answer.storageKey} is not null or ${answer.durationMs} is not null then ${answer.createdAt} else null end)`,
   }).from(quotaHold).leftJoin(practiceSession, eq(practiceSession.id, quotaHold.sessionId))
     .leftJoin(answer, and(eq(answer.sessionId, quotaHold.sessionId), sql`${answer.createdAt} >= (${quotaHold.day}::date::timestamp at time zone 'Asia/Shanghai') and ${answer.createdAt} < ((${quotaHold.day}::date + 1)::timestamp at time zone 'Asia/Shanghai')`))
     .where(eq(quotaHold.userId, userId)).groupBy(quotaHold.id, practiceSession.id).orderBy(quotaHold.day, quotaHold.createdAt, quotaHold.id);
   for (const row of rows) {
-    const hold = row.hold, used = row.sessionId ? Math.ceil(Number(row.used)) : hold.usedSeconds;
+    const hold = row.hold, actualMs = row.sessionId ? Number(row.used) : hold.usedSeconds * 1000, used = Math.ceil(actualMs / 1000);
     const active = row.status === "active" && !row.deletedAt && hold.day === rewardDay(now);
-    const accounted = used + Math.ceil(Number(row.pending));
+    // The ledger rounds once per session and recording day, including pending audio.
+    const accounted = Math.ceil((actualMs + Number(row.pending)) / 1000);
     const needed = active ? Math.max(accounted, row.reserve ?? 0) : accounted;
     const held = hold.baseSeconds + hold.credits.reduce((n, c) => n + c.seconds, 0);
     if (used === hold.usedSeconds && needed === held && !hold.uncoveredSeconds && hold.settled === !active) continue;
@@ -161,9 +162,12 @@ async function quotaStatusTx(tx: Tx, userId: string, settings: AppSettings, now 
   const [uncovered] = await tx.select({ all: sql<number>`coalesce(sum(${quotaHold.uncoveredSeconds}),0)::int`, past: sql<number>`coalesce(sum(case when ${quotaHold.day} <> ${rewardDay(now)} then ${quotaHold.uncoveredSeconds} else 0 end),0)::int` }).from(quotaHold).where(eq(quotaHold.userId, userId));
   const used = Math.max(0, Math.ceil(raw) - covered), baseRemainingSeconds = Math.max(0, limit - used);
   const remainingSeconds = Number(uncovered.all) > 0 ? 0 : Math.max(0, limit + extraSeconds - used - Number(uncovered.past));
-  const [pending] = await tx.select({ seconds: sql<number>`coalesce(sum(${pendingRecordingMs(now)}),0)::float8 / 1000` }).from(answer).innerJoin(practiceSession, eq(practiceSession.id, answer.sessionId)).where(and(eq(answer.userId, userId), isNull(practiceSession.deletedAt)));
+  const pending = await tx.select({ seconds: sql<number>`ceil(coalesce(sum(${consumedRecordingMs()} + ${pendingRecordingMs(now)}),0)::float8 / 1000) - ceil(coalesce(sum(${consumedRecordingMs()}),0)::float8 / 1000)` })
+    .from(answer).innerJoin(practiceSession, eq(practiceSession.id, answer.sessionId))
+    .where(and(eq(answer.userId, userId), isNull(practiceSession.deletedAt), excludeSessionId ? sql`${answer.sessionId} <> ${excludeSessionId}` : undefined))
+    .groupBy(answer.sessionId, sql`(${answer.createdAt} at time zone 'Asia/Shanghai')::date`);
   return { ...quotaFrom(used, limit), remainingSeconds, exceeded: remainingSeconds <= 0, baseRemainingSeconds, extraSeconds,
-    warn: limit > 0 ? used >= limit * 0.8 : remainingSeconds <= 0, ratio: limit > 0 ? used / limit : remainingSeconds <= 0 ? 1 : 0, pendingUploadSeconds: Math.ceil(Number(pending.seconds)),
+    warn: limit > 0 ? used >= limit * 0.8 : remainingSeconds <= 0, ratio: limit > 0 ? used / limit : remainingSeconds <= 0 ? 1 : 0, pendingUploadSeconds: pending.reduce((n, row) => n + Number(row.seconds), 0),
     reservedSeconds: holds.filter(h => !h.settled).reduce((n, h) => n + h.baseSeconds + h.credits.reduce((m, c) => m + c.seconds, 0), 0), uncoveredSeconds: Number(uncovered.all), nextExpiry: credits[0]?.expiresAt.toISOString() ?? null };
 }
 

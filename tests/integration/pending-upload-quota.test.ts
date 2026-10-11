@@ -117,3 +117,78 @@ it("ownership is required and releasing a temporary hold does not renew an expir
   expect((await quota.getQuotaStatus(owner.id, new Date(Date.now() + 86400_001))).extraSeconds).toBe(0);
   expect((await db.select().from(schema.minuteCredit).where(eq(schema.minuteCredit.id, creditId)))[0].remainingSeconds).toBe(600);
 });
+async function groupedDeclarations(durations: number[], storedIndex = -1) {
+  const s = await sessions.createSession(owner, { mode: "practice", questionId: "P1-HOME-1", fresh: true }), nonces = durations.map(() => randomUUID());
+  await sessions.recordEvent(owner.id, s.id, { type: "pause", expectedVersion: 0, eventId: randomUUID(), pendingUploads: nonces.map(submissionId => ({ submissionId, planIndex: 0, kind: "main", consentVersion: version })) });
+  const tickets = [];
+  for (let i = 0; i < durations.length; i++) {
+    const ticket = await answers.createUploadTicket(owner.id, { sessionId: s.id, submissionId: nonces[i], planIndex: 0, kind: "main", interrupted: true, clientDurationMs: durations[i] * 1000, consentVersion: version });
+    if (i === storedIndex) await answers.receiveAudio(owner.id, ticket.answerId, ticket.ticket, pcmFixture(durations[i])); tickets.push(ticket);
+  }
+  return { s, nonces, tickets };
+}
+async function evidence(key: string, value: unknown) {
+  if (process.env.RECORD_ROUND12_BASELINE !== "true") return;
+  const file = "data/verification/round12-baseline.json", before = await fs.readFile(file, "utf8").then(JSON.parse).catch(() => ({}));
+  await fs.writeFile(file, JSON.stringify({ ...before, actualPostgres: true, syntheticOnly: true, sourceCommit: "b56ca34d7ded1ed9d890df141141bcc7c710d082", paidCostYuan: 0, [key]: value }, null, 2));
+}
+it("fractional declarations in separate sessions display the same protected seconds as their voucher holds", async () => {
+  await declaration(1.001); await declaration(1.001); const q = await quota.getQuotaStatus(owner.id);
+  await evidence("fractionalSeparateSessions", { displayedSeconds: q.pendingUploadSeconds, voucherHeldSeconds: 600 - q.extraSeconds! });
+  expect(q).toMatchObject({ pendingUploadSeconds: 4, extraSeconds: 596 });
+});
+it("fractional daily usage cannot allocate more base seconds than its daily limit", async () => {
+  await db.update(schema.user).set({ dailyQuotaMinutes: 1 }).where(eq(schema.user.id, owner.id));
+  await declaration(12.1); await declaration(12.1); const active = await sessions.createSession(owner, { mode: "practice", questionId: "P1-HOME-1", fresh: true });
+  const holds = await db.select().from(schema.quotaHold).where(eq(schema.quotaHold.userId, owner.id)), base = holds.reduce((n, h) => n + h.baseSeconds, 0), q = await quota.getQuotaStatus(owner.id);
+  await evidence("fractionalBaseAllowance", { allocatedBaseSeconds: base, configuredBaseSeconds: 60, newHold: await hold(active.id), quota: q });
+  expect(base).toBe(60); expect(await hold(active.id)).toMatchObject({ baseSeconds: 34, credits: [{ id: creditId, seconds: 11 }] }); expect(q).toMatchObject({ usedSeconds: 60, extraSeconds: 589, baseRemainingSeconds: 0 });
+});
+it("stored and pending fractions in one record day round together without charging an extra second", async () => {
+  const { s, nonces } = await groupedDeclarations([1.001, 1.001], 0), q = await quota.getQuotaStatus(owner.id);
+  await evidence("fractionalMixedAudio", { displayedPendingSeconds: q.pendingUploadSeconds, voucherHeldSeconds: 600 - q.extraSeconds!, consumedSeconds: (await hold(s.id)).usedSeconds });
+  expect(q).toMatchObject({ pendingUploadSeconds: 1, extraSeconds: 597 }); expect((await hold(s.id)).usedSeconds).toBe(2);
+  await answers.discardPendingUpload(owner.id, s.id, nonces[1]); expect(await quota.getQuotaStatus(owner.id)).toMatchObject({ pendingUploadSeconds: 0, extraSeconds: 598 });
+});
+it("fractional consumption stays rounded per session and day after deletion", async () => {
+  const first = await declaration(1.001, true); await declaration(1.001, true);
+  expect(await quota.dailyUsageSeconds(owner.id)).toBe(4); await deletion.purgeSession(first.s.id);
+  expect(await quota.dailyUsageSeconds(owner.id)).toBe(4); expect((await quota.getQuotaStatus(owner.id)).extraSeconds).toBe(596);
+});
+it("a pending fraction inside an already consumed rounded second needs no extra voucher time", async () => {
+  const { s, nonces } = await groupedDeclarations([1.001, 0.998], 0);
+  expect(await quota.getQuotaStatus(owner.id)).toMatchObject({ pendingUploadSeconds: 0, extraSeconds: 598 }); expect((await hold(s.id)).usedSeconds).toBe(2);
+  await answers.discardPendingUpload(owner.id, s.id, nonces[1]); expect((await quota.getQuotaStatus(owner.id)).extraSeconds).toBe(598);
+});
+it("one session spanning two Shanghai record days protects each day's fraction independently", async () => {
+  const { s, tickets } = await groupedDeclarations([1.001, 1.001]);
+  const past = new Date((await import("@/lib/timing")).startOfDayShanghai(new Date()).getTime() - 1), pastDay = (await import("@/lib/services/rewards")).rewardDay(past);
+  await db.update(schema.answer).set({ createdAt: past }).where(eq(schema.answer.id, tickets[0].answerId));
+  await db.insert(schema.quotaHold).values({ userId: owner.id, sessionId: s.id, day: pastDay, baseLimitSeconds: 0, baseSeconds: 0, credits: [], usedSeconds: 0, settled: true });
+  expect(await quota.getQuotaStatus(owner.id)).toMatchObject({ pendingUploadSeconds: 4, extraSeconds: 596 });
+  expect(await quota.dailyUsageSeconds(owner.id, past, db, undefined, false, new Date())).toBe(2);
+});
+it("a report containing only discarded declarations is empty rather than all answers processed", async () => {
+  const { s, input } = await declaration(); await answers.discardPendingUpload(owner.id, s.id, input.submissionId);
+  const report = await (await import("@/lib/services/reports")).getSessionReport(owner.id, s.id);
+  await evidence("discardedReport", { state: report.state, answers: report.summary.answers, failed: report.summary.failed, complete: report.summary.complete });
+  expect(report).toMatchObject({ state: "empty", discardedAnswers: 1, summary: { answers: 0, failed: 0, durationSec: 0, complete: false } });
+  expect(report.items[0].attempts[0].answer).toMatchObject({ durationMs: null, hasAudio: false, processingStage: "upload_discarded" });
+  expect((await answers.getAnswerDetail({ id: owner.id, isAdmin: false }, report.items[0].attempts[0].answer.id)).answer).toMatchObject({ durationMs: null, hasAudio: false });
+});
+it("discarded declarations remain visible without inflating real processing failures or pending answers", async () => {
+  const { s, nonces } = await groupedDeclarations([8, 12], 0); await answers.discardPendingUpload(owner.id, s.id, nonces[1]);
+  const report = await (await import("@/lib/services/reports")).getSessionReport(owner.id, s.id);
+  expect(report).toMatchObject({ state: "processing", discardedAnswers: 1, summary: { answers: 1, pending: 1, failed: 0, durationSec: 8 } }); expect(report.items[0].attempts).toHaveLength(2);
+});
+it("a discarded mock answer can start an ordinary exact-question retry without resuming its interrupted exam", async () => {
+  await db.update(schema.user).set({ dailyQuotaMinutes: 30 }).where(eq(schema.user.id, owner.id));
+  const s = await sessions.createSession(owner, { mode: "mock", mockSetId: "mock-1", fresh: true });
+  await sessions.recordEvent(owner.id, s.id, { type: "start", eventId: randomUUID(), expectedVersion: 0 });
+  const nonce = randomUUID(), interrupted = await sessions.recordEvent(owner.id, s.id, { type: "pause", eventId: randomUUID(), expectedVersion: 1, pendingUploads: [{ submissionId: nonce, planIndex: 0, kind: "main", consentVersion: version }] });
+  const ticket = await answers.createUploadTicket(owner.id, { sessionId: s.id, submissionId: nonce, planIndex: 0, kind: "main", clientDurationMs: 1001, consentVersion: version });
+  await answers.discardPendingUpload(owner.id, s.id, nonce);
+  const retry = await sessions.createSession(owner, { mode: "retry", sourceAnswerId: ticket.answerId, fresh: true }), retryView = await sessions.getSessionView(owner.id, retry.id), original = await sessions.getSessionView(owner.id, s.id);
+  expect(interrupted.status).toBe("interrupted"); expect(original.session.status).toBe("interrupted"); expect(retryView.plan.items[0].prompt.text).toBe(original.plan.items[0].prompt.text); expect(retryView.plan.mode).toBe("retry");
+  await expect(sessions.recordEvent(owner.id, s.id, { type: "start", eventId: randomUUID(), expectedVersion: original.session.stateVersion })).rejects.toMatchObject({ code: "session_closed" });
+});

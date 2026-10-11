@@ -99,7 +99,7 @@ export function SessionReport({ initial }: { initial: Report }) {
           <CardTitle>本次结果</CardTitle>
         </CardHeader>
         <CardContent className="space-y-3">
-          <div className="flex flex-wrap items-center gap-3" data-testid="report-status">
+          <div className="flex flex-wrap items-center gap-3" data-testid="report-status" data-state={report.state}>
             {report.state === "processing" ? (
               <span className="flex items-center gap-2 text-sm text-brand-700">
                 <Loader2 className="h-4 w-4 animate-spin" /> 反馈处理中（{summary.pending} 条），可以离开后回来查看
@@ -107,10 +107,10 @@ export function SessionReport({ initial }: { initial: Report }) {
             ) : report.state === "partial" ? (
               <span className="text-sm text-amber-800">部分完成：{summary.failed} 条处理失败，可在下方重试</span>
             ) : report.state === "empty" ? (
-              <span className="text-sm text-muted">还没有保存的回答</span>
+              <span className="text-sm text-muted">{report.discardedAnswers > 0 ? `已丢弃 ${report.discardedAnswers} 个片段，尚无已上传回答` : "还没有保存的回答"}</span>
             ) : (
               <span className="flex items-center gap-1.5 text-sm text-emerald-700">
-                <CheckCircle2 className="h-4 w-4" /> 全部回答已处理
+                <CheckCircle2 className="h-4 w-4" /> 已保存回答已处理
               </span>
             )}
             <span className="flex items-center gap-1 text-sm text-muted">
@@ -189,7 +189,7 @@ export function SessionReport({ initial }: { initial: Report }) {
                     [...it.attempts].reverse().map((a, i) => (
                       <div key={a.answer.id} className={i > 0 ? "border-t border-dashed border-line pt-4 opacity-90" : ""}>
                         {i === 1 ? <p className="mb-2 text-xs font-medium text-muted">之前的作答</p> : null}
-                        <AnswerCard answer={a.answer as unknown as AnswerView} feedback={a.feedback as FeedbackView | null} onChanged={refresh} compact={i > 0} />
+                        <AnswerCard answer={a.answer as unknown as AnswerView} feedback={a.feedback as FeedbackView | null} onChanged={refresh} compact={i > 0} resumeSessionId={session.mode !== "mock" && a.answer.kind === "main" && canResumeSession(session) ? session.id : undefined} />
                       </div>
                     ))
                   )}

@@ -103,7 +103,7 @@ export function summarize(plan: SessionPlan, status: string, answers: AnswerLite
       met,
       items,
     },
-    complete: pending === 0,
+    complete: uploaded.length > 0 && pending === 0,
     updatedAt: new Date().toISOString(),
   };
 }

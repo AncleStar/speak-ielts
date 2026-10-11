@@ -88,7 +88,7 @@ async function purgeSessionLocked(sessionId: string) {
     const used = await tx.select({ day: recordedDay, seconds: sql<number>`coalesce(sum(${consumedRecordingMs()}), 0)::float8 / 1000` }).from(answer)
       .where(eq(answer.sessionId, sessionId)).groupBy(recordedDay);
     for (const row of used) if (Number(row.seconds) > 0) await tx.insert(usageEvent).values({ userId: current.userId, service: "deleted-audio-quota", model: "quota-ledger", mock: true, costYuan: 0,
-      units: { seconds: Number(row.seconds), day: new Date(row.day).toISOString() } });
+      units: { seconds: Math.ceil(Number(row.seconds)), day: new Date(row.day).toISOString() } });
     await tx.delete(practiceSession).where(eq(practiceSession.id, sessionId));
   });
   await db

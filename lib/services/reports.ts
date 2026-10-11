@@ -67,7 +67,8 @@ export async function getSessionReport(userId: string, sessionId: string) {
     rows,
     fbs.map((f) => ({ answerId: f.answerId, goalMet: f.goalMet, goalReason: f.goalReason, mock: f.mock })),
   );
-  const state = uploaded.length === 0 ? "empty" : summary.pending > 0 ? "processing" : summary.failed > 0 ? "partial" : "complete";
+  const discardedAnswers = rows.filter(r => r.processingStage === "upload_discarded" && r.storageKey === null && r.durationMs === null).length;
+  const state = summary.answers === 0 ? "empty" : summary.pending > 0 ? "processing" : summary.failed > 0 ? "partial" : "complete";
   return {
     session: {
       id: s.id,
@@ -92,6 +93,7 @@ export async function getSessionReport(userId: string, sessionId: string) {
     items,
     summary,
     state,
+    discardedAnswers,
     anyMock: fbs.some((f) => f.mock),
   };
 }

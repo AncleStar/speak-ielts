@@ -180,6 +180,7 @@ export function AnswerCard({
   recordingOnly = false,
   onPlaybackChange,
   summary,
+  resumeSessionId,
 }: {
   answer: AnswerView;
   feedback: FeedbackView | null;
@@ -189,6 +190,7 @@ export function AnswerCard({
   recordingOnly?: boolean;
   onPlaybackChange?: (playing: boolean) => void;
   summary?: React.ReactNode;
+  resumeSessionId?: string;
 }) {
   const router = useRouter();
   const [editing, setEditing] = useState(false);
@@ -212,6 +214,19 @@ export function AnswerCard({
       setMsg({ tone: "danger", text: e instanceof ApiError ? e.message : "操作失败" });
     }
     setBusy(false);
+  }
+
+  if (answer.processingStage === "upload_discarded" && !answer.hasAudio && answer.durationMs === null) {
+    return <div className="space-y-3" data-testid="answer-card" data-status="discarded">
+      <Badge tone="muted">片段已丢弃</Badge>
+      <Alert tone="info" title="这次片段未上传">
+        片段已经丢弃，没有可回放的录音，也不会生成转写或反馈。它不计入已完成的回答；可回到原练习或重新录制本题。
+      </Alert>
+      {showActions && <div className="flex flex-wrap gap-2">
+        {resumeSessionId ? <Link href={`/interview/${resumeSessionId}`} className="inline-flex min-h-11 items-center text-sm font-medium underline" data-testid="resume-discarded">回原练习重新作答</Link>
+          : <StartSessionButton input={{ mode: "retry", sourceAnswerId: answer.id }} size="sm" variant="outline" testId="rerecord-discarded">重新录制本题</StartSessionButton>}
+      </div>}
+    </div>;
   }
 
   return (

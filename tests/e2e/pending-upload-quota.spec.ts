@@ -2,9 +2,9 @@ import fs from "node:fs/promises";
 import { test, expect, type Page, type BrowserContext } from "@playwright/test";
 test.use({ extraHTTPHeaders: { "x-forwarded-for": "192.0.2.111" } });
 type Local = { meta: { id: string; durationMs: number; mimeType: string; status: string }[]; chunks: number; bytes: number; discards: number };
-let owned: string | null = null;
-test.beforeEach(() => { owned = null; });
-test.afterEach(async ({ context }) => { if (owned) { const r = await context.request.delete(`/api/sessions/${owned}`); expect([200, 404]).toContain(r.status()); } });
+let owned: string[] = [];
+test.beforeEach(() => { owned = []; });
+test.afterEach(async ({ context }) => { for (const id of owned) { const r = await context.request.delete(`/api/sessions/${id}`); expect([200, 404]).toContain(r.status()); } });
 async function local(page: Page): Promise<Local> {
   return page.evaluate(() => new Promise<Local>((resolve, reject) => {
     const r = indexedDB.open("ielts-recordings", 2); r.onerror = () => reject(r.error); r.onsuccess = () => { const db = r.result, tx = db.transaction(["recordings", "chunks", "privateSession"]), meta = tx.objectStore("recordings").getAll(), chunks = tx.objectStore("chunks").getAll(), rows = tx.objectStore("privateSession").getAll(); tx.oncomplete = () => { resolve({ meta: meta.result, chunks: chunks.result.length, bytes: chunks.result.reduce((sum, row) => sum + row.blob.size, 0), discards: rows.result.filter(row => row.kind === "upload-discard").length }); db.close(); }; tx.onerror = () => reject(tx.error); };
@@ -13,7 +13,7 @@ async function local(page: Page): Promise<Local> {
 async function me(page: Page) { const r = await page.request.get("/api/me"); expect(r.ok()).toBe(true); return r.json(); }
 async function fragment(page: Page, context: BrowserContext, account: string) {
   await page.goto("/login"); await page.getByLabel("邮箱", { exact: true }).fill(`${account}@example.test`); await page.getByLabel("密码", { exact: true }).fill("Browser-test-123!"); await page.getByRole("button", { name: "登录", exact: true }).click(); await expect(page).not.toHaveURL(/\/login$/);
-  const created = await page.request.post("/api/sessions", { data: { mode: "practice", questionId: "P2-PERSON-1", fresh: true } }); expect(created.ok()).toBe(true); const { id } = await created.json(); owned = id;
+  const created = await page.request.post("/api/sessions", { data: { mode: "practice", questionId: "P2-PERSON-1", fresh: true } }); expect(created.ok()).toBe(true); const { id } = await created.json(); owned.push(id);
   await page.goto(`/interview/${id}`); await page.getByTestId("start-interview").click(); await page.getByRole("button", { name: "开始回答", exact: true }).click(); await expect(page.getByTestId("recording-indicator")).toBeVisible(); await expect.poll(async () => (await local(page)).chunks).toBeGreaterThanOrEqual(4);
   const before = await local(page); expect(before.bytes).toBeGreaterThan(1000); const nonce = before.meta[0].id;
   const crashed = page.waitForEvent("crash"), cdp = await context.newCDPSession(page); void cdp.send("Page.crash").catch(() => {}); await crashed; await page.close();
@@ -35,8 +35,17 @@ test("offline discard is durable across page close and reconnect cancels only it
   expect((await next.request.put(f.ticket.uploadUrl, { headers: { "Content-Type": "audio/webm" }, data: Buffer.from([1, 2, 3]) })).status()).toBe(410);
   const view = await (await next.request.get(`/api/sessions/${f.id}`)).json(); expect(view.session.status).toBe("paused"); expect(view.answers[0]).toMatchObject({ interrupted: true, status: "failed" });
   const history = await (await next.request.get("/api/sessions")).json(); expect(history.sessions.find((row: { id: string }) => row.id === f.id)).toMatchObject({ durationMs: 0, answerCount: 0 });
-  await next.waitForTimeout(4500); await next.screenshot({ path: "data/verification/round11-discard-desktop.png", fullPage: true }); await next.setViewportSize({ width: 320, height: 740 }); await next.screenshot({ path: "data/verification/round11-discard-320.png", fullPage: true }); expect(await next.evaluate(() => document.documentElement.scrollWidth <= innerWidth + 1)).toBe(true);
-  await fs.writeFile("data/verification/round11-discard-browser.json", JSON.stringify({ actualMediaRecorder: true, rendererCrash: true, durableChunks: f.before.chunks, savedBytes: f.before.bytes, offlineDiscardOutbox: true, closedPageThenReconnected: true, releasedSeconds: f.pending.quota.pendingUploadSeconds, unuploadedHistorySeconds: 0, latePutStatus: 410, completed: false, paidApiCalls: 0 }, null, 2));
+  await next.waitForTimeout(4500); await next.screenshot({ path: "data/verification/round12-home-desktop.png", fullPage: true }); await next.setViewportSize({ width: 320, height: 740 });
+  const titleWidth = await next.getByTestId("recent-record-title").first().evaluate(e => e.getBoundingClientRect().width); expect(titleWidth).toBeGreaterThan(160);
+  await next.screenshot({ path: "data/verification/round12-home-320.png", fullPage: true }); expect(await next.evaluate(() => document.documentElement.scrollWidth <= innerWidth + 1)).toBe(true);
+  await next.goto(`/sessions/${f.id}`); await expect(next.getByTestId("report-status")).toHaveAttribute("data-state", "empty"); await expect(next.getByText("已丢弃 1 个片段，尚无已上传回答", { exact: true })).toBeVisible();
+  const card = next.getByTestId("answer-card"); await expect(card).toHaveAttribute("data-status", "discarded"); await expect(card.getByRole("button", { name: "重试处理", exact: true })).toHaveCount(0); await expect(card.locator("audio")).toHaveCount(0); await expect(next.getByText("已保存回答已处理", { exact: false })).toHaveCount(0);
+  await next.screenshot({ path: "data/verification/round12-discard-report-320.png", fullPage: true }); expect(await next.evaluate(() => document.documentElement.scrollWidth <= innerWidth + 1)).toBe(true);
+  await next.setViewportSize({ width: 1440, height: 1000 }); await next.screenshot({ path: "data/verification/round12-discard-report-desktop.png", fullPage: true });
+  await next.goto(`/answers/${f.ticket.answerId}`); await expect(next.getByTestId("answer-card")).toHaveAttribute("data-status", "discarded"); await next.getByRole("tab", { name: "反馈报告", exact: true }).click(); await expect(next.getByText("这次片段已丢弃，没有上传录音，不会生成反馈。重新作答后可查看新的报告。", { exact: true })).toBeVisible(); await expect(next.getByRole("button", { name: "我已复盘，准备重练", exact: true })).toHaveCount(0);
+  await next.getByRole("tab", { name: "录音与转写", exact: true }).click(); await next.getByTestId("resume-discarded").click(); await expect(next).toHaveURL(new RegExp(`/interview/${f.id}$`)); await next.getByTestId("start-interview").click(); await expect(next.getByTestId("exit-interview")).toBeVisible(); await expect.poll(async () => (await me(next)).quota.reservedSeconds).toBeGreaterThan(0);
+  await next.getByTestId("exit-interview").click(); await expect(next).toHaveURL(/\/practice\?.*disc=P2-PERSON-1/);
+  await fs.writeFile("data/verification/round12-discard-browser.json", JSON.stringify({ actualMediaRecorder: true, rendererCrash: true, durableChunks: f.before.chunks, savedBytes: f.before.bytes, offlineDiscardOutbox: true, closedPageThenReconnected: true, releasedSeconds: f.pending.quota.pendingUploadSeconds, unuploadedHistorySeconds: 0, latePutStatus: 410, discardedReportState: "empty", originalSessionResume: true, reservationReadmitted: true, misleadingRetryHidden: true, homeTitleWidthAt320: titleWidth, completed: false, paidApiCalls: 0 }, null, 2));
 });
 test("discarding a local copy after its audio arrived preserves the server recording and consumed time", async ({ page, context }) => {
   const f = await fragment(page, context, "pending-stored"), p = f.page;
@@ -51,4 +60,18 @@ test("a real IndexedDB transaction failure keeps the recording rather than half 
   const f = await fragment(page, context, "pending-storage"), p = f.page;
   await p.evaluate(() => { const put = IDBObjectStore.prototype.put; IDBObjectStore.prototype.put = function(value: unknown, key?: IDBValidKey) { if ((value as { kind?: string })?.kind === "upload-discard") this.transaction.abort(); return key === undefined ? put.call(this, value) : put.call(this, value, key); }; });
   p.once("dialog", d => d.accept()); await p.getByRole("button", { name: "丢弃片段", exact: true }).click(); await expect(p.getByText("无法保存取消任务，片段仍保留。请检查浏览器存储后重试。", { exact: true })).toBeVisible(); expect(await local(p)).toMatchObject({ bytes: f.before.bytes, chunks: f.before.chunks, discards: 0 }); expect((await me(p)).quota.extraSeconds).toBe(f.pending.quota.extraSeconds);
+});
+test("an interrupted mock's discarded answer offers a fresh exact-question recording rather than exam resume", async ({ page }) => {
+  await page.goto("/login"); await page.getByLabel("邮箱", { exact: true }).fill("discarded-mock@example.test"); await page.getByLabel("密码", { exact: true }).fill("Browser-test-123!"); await page.getByRole("button", { name: "登录", exact: true }).click(); await expect(page).not.toHaveURL(/\/login$/);
+  const created = await page.request.post("/api/sessions", { data: { mode: "mock", mockSetId: "mock-1", fresh: true } }); expect(created.ok()).toBe(true); const { id } = await created.json(); owned.push(id);
+  expect((await page.request.post(`/api/sessions/${id}/events`, { data: { type: "start", eventId: crypto.randomUUID(), expectedVersion: 0 } })).ok()).toBe(true);
+  const identity = await me(page), submissionId = crypto.randomUUID();
+  expect((await page.request.post(`/api/sessions/${id}/events`, { data: { type: "pause", eventId: crypto.randomUUID(), expectedVersion: 1, pendingUploads: [{ submissionId, planIndex: 0, kind: "main", consentVersion: identity.user.recordingConsentVersion }] } })).ok()).toBe(true);
+  const declared = await page.request.post("/api/answers/upload-ticket", { data: { sessionId: id, submissionId, planIndex: 0, kind: "main", clientDurationMs: 1001, consentVersion: identity.user.recordingConsentVersion } }); expect(declared.ok()).toBe(true); const { answerId } = await declared.json();
+  expect((await page.request.post("/api/answers/discard-pending", { data: { sessionId: id, submissionId } })).ok()).toBe(true);
+  const original = await (await page.request.get(`/api/sessions/${id}`)).json(); expect(original.session.status).toBe("interrupted");
+  await page.goto(`/sessions/${id}`); await expect(page.getByTestId("report-status")).toHaveAttribute("data-state", "empty"); await expect(page.getByTestId("continue-session")).toHaveCount(0); await expect(page.getByTestId("resume-discarded")).toHaveCount(0);
+  await page.goto(`/answers/${answerId}`); await expect(page.getByTestId("answer-card")).toHaveAttribute("data-status", "discarded"); await expect(page.getByTestId("resume-discarded")).toHaveCount(0);
+  const response = page.waitForResponse(r => r.url().endsWith("/api/sessions") && r.request().method() === "POST"); await page.getByTestId("rerecord-discarded").click(); const r = await response; expect(r.ok()).toBe(true); const retried = await r.json(); owned.push(retried.id); await expect(page).toHaveURL(new RegExp(`/interview/${retried.id}$`));
+  const fresh = await (await page.request.get(`/api/sessions/${retried.id}`)).json(); expect(fresh.plan.mode).toBe("retry"); expect(fresh.plan.items[0].prompt.text).toBe(original.plan.items[0].prompt.text); expect((await (await page.request.get(`/api/sessions/${id}`)).json()).session.status).toBe("interrupted");
 });
