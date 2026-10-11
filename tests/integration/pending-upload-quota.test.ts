@@ -112,9 +112,11 @@ it("daily cleanup removes only expired unreceived declarations and repeated clea
   expect((await quota.getQuotaStatus(owner.id, future)).extraSeconds).toBe(592); await deletion.dailyCleanup(future); expect((await quota.getQuotaStatus(owner.id, future)).extraSeconds).toBe(592);
 });
 it("ownership is required and releasing a temporary hold does not renew an expired voucher", async () => {
-  const { s, input } = await declaration(); await expect(answers.discardPendingUpload("other-owner", s.id, input.submissionId)).rejects.toMatchObject({ status: 404 });
-  await db.update(schema.minuteCredit).set({ expiresAt: new Date(Date.now() + 3600_000) }).where(eq(schema.minuteCredit.id, creditId));
-  expect((await quota.getQuotaStatus(owner.id, new Date(Date.now() + 86400_001))).extraSeconds).toBe(0);
+  const { s, input, ticket } = await declaration(); await expect(answers.discardPendingUpload("other-owner", s.id, input.submissionId)).rejects.toMatchObject({ status: 404 });
+  // PostgreSQL and Date.now() may differ by a few milliseconds on Windows. Anchor expiry to the stored record.
+  const recordedAt = (await answerRow(ticket.answerId)).createdAt.getTime();
+  await db.update(schema.minuteCredit).set({ expiresAt: new Date(recordedAt + 3600_000) }).where(eq(schema.minuteCredit.id, creditId));
+  expect((await quota.getQuotaStatus(owner.id, new Date(recordedAt + 86400_001))).extraSeconds).toBe(0);
   expect((await db.select().from(schema.minuteCredit).where(eq(schema.minuteCredit.id, creditId)))[0].remainingSeconds).toBe(600);
 });
 async function groupedDeclarations(durations: number[], storedIndex = -1) {

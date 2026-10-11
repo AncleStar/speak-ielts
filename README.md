@@ -141,6 +141,8 @@ LOCAL_TTS_SPEED=0.95
 
 可选音色：`bf_emma`、`bf_isabella`（英式女声）、`bm_george`（英式男声）、`af_heart`（美式女声）。速度范围 `0.8–1.2`。修改后重启网页和 worker，刷新练习页面；已保存的题目和倒计时不会被重置。模型、音色、速度均区分缓存，旧队列不会混入新声音。
 
+依赖升级后可运行 `npm run check:natural-voice`，检查四种音色、速度边界、长回答分段和实际 WAV 输出。命令只调用本机模型，禁止 HTTP 下载、不调用付费服务；音频和报告保存在私有验证目录。详见 [依赖维护与自然语音验证](docs/依赖维护与自然语音验证.md)。
+
 `TTS_PROVIDER=auto` 随 `AI_PROVIDER` 使用原有语音服务，`dashscope` 单独启用云语音，`mock` 使用传统系统声音。模型缺失时会提示生成失败，按界面文字继续，不会把提示音当成自然语音。模型来源和音色列表见 [Kokoro 模型说明](https://huggingface.co/onnx-community/Kokoro-82M-v1.0-ONNX)。
 
 ## 开启真实转写与反馈
