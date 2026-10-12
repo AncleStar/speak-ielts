@@ -100,7 +100,7 @@ class UploadQueue {
         const blob = blobIn ?? (await getBlob(meta.id, meta.mimeType));
         if (!blob || blob.size === 0) throw new ApiError(400, "no_local_audio", "本地录音不存在或为空");
         this.setStage(meta.id, attempt ? `第 ${attempt + 1} 次尝试 · 获取上传凭证` : "1/3 · 获取上传凭证");
-        const t = await api<{ answerId: string; status: string; uploadUrl: string }>("/api/answers/upload-ticket", {
+        const t = await api<{ answerId: string; status: string; uploadUrl: string; interrupted: boolean; recordingSource: string }>("/api/answers/upload-ticket", {
           signal,
           body: {
             sessionId: meta.sessionId,
@@ -111,9 +111,11 @@ class UploadQueue {
             clientDurationMs: Math.round(meta.durationMs),
             interrupted: meta.interrupted,
             consentVersion: meta.consentVersion,
+            activationId: meta.activationId,
           },
         });
         if (signal.aborted) throw new LocalSessionEnded();
+        await updateMeta(meta.id, { interrupted: t.interrupted, recordingSource: t.recordingSource });
         if (t.status === "created") {
           this.setStage(meta.id, "2/3 · 正在上传录音，请保持页面打开");
           await uploadBlob(t.uploadUrl, blob, percent => this.setStage(meta.id, `2/3 · 正在上传 ${percent}%${percent === 100 ? "，等待服务器确认" : ""}`), signal);

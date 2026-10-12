@@ -14,6 +14,7 @@ const schema = z.object({
   clientDurationMs: z.number().min(0).max(30 * 60 * 1000),
   interrupted: z.boolean().optional(),
   consentVersion: z.number().int().min(0).optional(),
+  activationId: z.string().min(8).max(100).nullish(),
 });
 
 /** 校验会话归属，按提交标识创建或复用回答，签发限定对象和有效期的上传凭证 */

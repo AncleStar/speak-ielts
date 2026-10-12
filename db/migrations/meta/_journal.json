@@ -71,6 +71,13 @@
       "when": 1791803100000,
       "tag": "0009_private_reference_audio",
       "breakpoints": true
+    },
+    {
+      "idx": 10,
+      "version": "7",
+      "when": 1791807600000,
+      "tag": "0010_recording_source",
+      "breakpoints": true
     }
   ]
 }

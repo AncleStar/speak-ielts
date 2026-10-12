@@ -26,8 +26,9 @@ afterEach(async () => {
 });
 afterAll(async () => { await (await import("@/lib/queue")).stopBoss(); await (await import("@/lib/db")).closeDb(); await pg?.stop(); }, 30000);
 const practice = () => sessions.createSession(owner, { mode: "practice", questionId: "P1-HOME-1", fresh: true });
-const start = (id: string, expectedVersion: number, eventId = randomUUID()) => sessions.recordEvent(owner.id, id, { type: "start", eventId, expectedVersion });
-const pause = (id: string, expectedVersion: number, extra: Partial<import("@/lib/services/sessions").SessionEventInput> = {}) => sessions.recordEvent(owner.id, id, { type: "pause", eventId: randomUUID(), expectedVersion, ...extra });
+const activations = new Map<string, string>();
+const start = async (id: string, expectedVersion: number, eventId = randomUUID()) => { const r = await sessions.recordEvent(owner.id, id, { type: "start", eventId, expectedVersion }); activations.set(id, eventId); return r; };
+const pause = (id: string, expectedVersion: number, extra: Partial<import("@/lib/services/sessions").SessionEventInput> = {}) => sessions.recordEvent(owner.id, id, { type: "pause", eventId: randomUUID(), expectedVersion, startEventId: activations.get(id), ...extra });
 
 it("returns unused credits and capacity on pause; the same disc resumes and duplicate exits do not refund twice", async () => {
   const s = await practice(); expect((await quota.getQuotaStatus(owner.id)).extraSeconds).toBe(555);
@@ -50,9 +51,9 @@ it("only retained recordings can obtain a paused ticket, charge actual submitted
   await answers.receiveAudio(owner.id, ticket.answerId, ticket.ticket, pcmFixture(12)); await answers.submitAnswer(owner.id, ticket.answerId);
   const view = await sessions.getSessionView(owner.id, s.id); expect(view.answers).toHaveLength(1); expect(view.answers[0]).toMatchObject({ planIndex: 0, interrupted: true });
   const resumed = await start(s.id, 2); expect(resumed.status).toBe("active"); expect((await quota.getQuotaStatus(owner.id)).extraSeconds).toBe(543); // 12 spent, 45 available for a complete retry
-  const replacement = await answers.createUploadTicket(owner.id, { ...input, submissionId: "completed-retry-answer-001", clientDurationMs: 10000, interrupted: false });
+  const replacement = await answers.createUploadTicket(owner.id, { ...input, activationId: activations.get(s.id), submissionId: "completed-retry-answer-001", clientDurationMs: 10000, interrupted: false });
   await answers.receiveAudio(owner.id, replacement.answerId, replacement.ticket, pcmFixture(10)); await answers.submitAnswer(owner.id, replacement.answerId);
-  expect(await sessions.recordEvent(owner.id, s.id, { type: "finish", eventId: randomUUID(), expectedVersion: 3 })).toMatchObject({ status: "completed", finished: true });
+  expect(await sessions.recordEvent(owner.id, s.id, { type: "finish", eventId: randomUUID(), expectedVersion: 3, startEventId: activations.get(s.id) })).toMatchObject({ status: "completed", finished: true });
   expect(await quota.getQuotaStatus(owner.id)).toMatchObject({ extraSeconds: 578, reservedSeconds: 0 });
 });
 it("resuming rechecks remaining credit, site pause and monthly budget without reopening on rejection", async () => {

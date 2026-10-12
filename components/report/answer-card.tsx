@@ -6,6 +6,7 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { StartSessionButton } from "@/components/start-session-button";
 import { ReferenceAudio } from "./reference-audio";
+import { recordingSourceNote } from "@/lib/sessions/recording-source";
 import { RecordPlayer } from "./record-player";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -33,6 +34,7 @@ export interface AnswerView {
   insufficientReason: string | null;
   error: string | null;
   interrupted: boolean;
+  recordingSource?: string;
   hasAudio: boolean;
   audioExpiresAt: string | null;
   createdAt: string | Date;
@@ -245,6 +247,7 @@ export function AnswerCard({
         <span className="text-xs text-muted">{answer.hasAudio && answer.audioExpiresAt ? `录音可回放至 ${formatDate(answer.audioExpiresAt)}` : "当前无可回放录音"}</span>
       </div>
 
+      {recordingSourceNote(answer.recordingSource) ? <Alert tone="warning">{recordingSourceNote(answer.recordingSource)}</Alert> : null}
       {answer.hasAudio ? <RecordPlayer answerId={answer.id} durationMs={answer.durationMs} onPlaying={onPlaybackChange}/> : <p className="text-sm text-muted">录音已到期或不可用，已保存的转写与报告仍可查看。</p>}
       {!recordingOnly && <MetricsRow answer={answer} />}
       {processing && <p role="status" className="text-sm text-muted">{({ audio: "1 / 3 · 正在检查录音与静音", transcription: "2 / 3 · 正在识别英语作答", feedback: "3 / 3 · 正在核对原句并生成反馈" } as Record<string, string>)[answer.processingStage ?? ""] ?? "录音已提交，正在排队处理"}。可以离开本页，稍后回来查看。</p>}

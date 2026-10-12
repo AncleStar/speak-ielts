@@ -227,6 +227,14 @@ export async function getOwnedSession(userId: string, sessionId: string): Promis
   return s;
 }
 
+/** Read-only lease check; does not prepare voices or change interview timing. */
+export async function getSessionState(userId: string, sessionId: string) {
+  const [s] = await db.select({ status: practiceSession.status, stateVersion: practiceSession.stateVersion, activationId: practiceSession.activationId }).from(practiceSession)
+    .where(and(eq(practiceSession.id, sessionId), eq(practiceSession.userId, userId), isNull(practiceSession.deletedAt)));
+  if (!s) throw notFound("会话");
+  return s;
+}
+
 export async function getSessionView(userId: string, sessionId: string) {
   const s = await getOwnedSession(userId, sessionId);
   const plan = await planWithCurrentVoice(s.plan as SessionPlan);
@@ -240,6 +248,7 @@ export async function getSessionView(userId: string, sessionId: string) {
       status: answer.status,
       submissionId: answer.submissionId,
       interrupted: answer.interrupted,
+      recordingSource: answer.recordingSource,
       clientDurationMs: answer.clientDurationMs,
     })
     .from(answer)
@@ -302,6 +311,7 @@ export type SessionEventType = "start" | "pause" | "part_start" | "position" | "
 export interface SessionEventInput {
   eventId: string; type: SessionEventType; part?: number; position?: number; planIndex?: number; reason?: string;
   expectedVersion?: number; startEventId?: string; pendingUploads?: PausedUpload[];
+  takeover?: boolean; expectedActivationId?: string | null;
 }
 
 /**
@@ -332,6 +342,7 @@ async function recordEventLocked(userId: string, sessionId: string, ev: SessionE
   // Exit can race the matching Start response. A different tab's later Start must never be paused.
   const matchingStart = ev.type === "pause" && s.status === "active" && s.activationId === ev.startEventId && s.stateVersion === (ev.expectedVersion ?? -2) + 1;
   if (ev.expectedVersion !== undefined && ev.expectedVersion !== s.stateVersion && !matchingStart) throw new AppError(409, "session_changed", "练习已在另一页面更新；旧操作未生效，请重新载入。");
+  if (s.activationId && ev.type !== "start" && ev.startEventId !== s.activationId) throw new AppError(409, "session_changed", "这次操作来自旧页面，未改变当前设备的练习。请重新载入。");
   const now = new Date();
   const plan = s.plan as SessionPlan;
   const patch: Partial<SessionRow> = { lastActivityAt: now };
@@ -342,6 +353,7 @@ async function recordEventLocked(userId: string, sessionId: string, ev: SessionE
   switch (ev.type) {
     case "start":
       if (!canResumeSession(s) || plan.mode === "mock" && s.startedAt) throw new AppError(409, "session_closed", "本次练习已结束或模考已经开始，不能继续作答。");
+      if (isActive && s.activationId && (!ev.takeover || ev.expectedActivationId !== s.activationId)) throw new AppError(409, "session_in_use", "练习已在其他页面或设备开始，请确认接管后继续。旧设备尚未上传的录音不会自动同步。");
       {
         const reserve = await remainingReservation(s, plan, now);
         const held = isActive ? Math.max(s.reservedSeconds, reserve.usedToday) : reserve.usedToday;
@@ -364,6 +376,7 @@ async function recordEventLocked(userId: string, sessionId: string, ev: SessionE
       patch.status = plan.mode === "mock" && s.startedAt ? "interrupted" : "paused";
       patch.interruptReason = "user_exit"; patch.endedAt = now; patch.stateVersion = s.stateVersion + 1;
       patch.pausedUploads = pending;
+      result = { recordingActivationId: s.activationId, retainedUploads: pending };
       break;
     }
     case "heartbeat":

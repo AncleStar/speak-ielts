@@ -5,6 +5,7 @@ import { RECORDING_GUARD, withStoppedRecording } from "./recording-owner";
 
 /** Every private write checks its login epoch in the same IndexedDB transaction. */
 export interface RecordingMeta {
+  activationId?: string | null; recordingSource?: string;
   userId?: string; localEpoch?: string; consentVersion?: number; id: string; sessionId: string; planIndex: number;
   kind: "main" | "followup" | "rounding"; followUpId: string | null; promptText: string; mimeType: string;
   durationMs: number; createdAt: number; status: "recording" | "pending" | "failed"; interrupted: boolean; lastError?: string;

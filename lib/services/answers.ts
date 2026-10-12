@@ -19,6 +19,7 @@ import { withRecordingConsent } from "@/lib/services/recording-consent";
 import { accountedRecordingMs, PENDING_UPLOAD_TTL_MS } from "@/lib/answer-quota";
 import { walletLock } from "@/lib/services/rewards";
 import { withLock } from "@/lib/lock";
+import { recordingSource } from "@/lib/sessions/recording-source";
 
 export type AnswerRow = typeof answer.$inferSelect;
 
@@ -54,6 +55,7 @@ export interface TicketInput {
   clientDurationMs: number;
   interrupted?: boolean;
   consentVersion?: number;
+  activationId?: string | null;
 }
 
 /**
@@ -81,12 +83,22 @@ async function createUploadTicketLocked(userId: string, input: TicketInput, vers
     if (existing.processingStage === "upload_discarded") throw new AppError(410, "upload_discarded", "该片段已经丢弃，旧上传凭证不能继续使用。");
     if (!existing.storageKey && existing.processingStage === "consent_wait") throw forbidden("这次录音的授权已撤回，请开始新的录音", "consent_required");
     if (!existing.storageKey && existing.createdAt.getTime() + PENDING_UPLOAD_TTL_MS <= Date.now()) throw new AppError(410, "upload_expired", "未上传片段已超过 24 小时补传期，请重新录音。");
-    return { answerId: existing.id, status: existing.status, ticket: retainedTicket(existing, userId, version) };
+    return { answerId: existing.id, status: existing.status, interrupted: existing.interrupted, recordingSource: existing.recordingSource, ticket: retainedTicket(existing, userId, version) };
   }
 
   const paused = (s.status === "paused" || s.status === "interrupted" && s.interruptReason === "user_exit") && s.endedAt && Date.now() - s.endedAt.getTime() < 24 * 3600_000;
-  const allowed = paused && s.pausedUploads.some(p => p.submissionId === input.submissionId && p.planIndex === input.planIndex && p.kind === input.kind && (p.followUpId ?? null) === (input.followUpId ?? null) && p.consentVersion === version && input.consentVersion === version);
-  if (s.status !== "active" && !allowed) throw conflict("本次练习已暂停或结束；只有退出前保留的录音可补传，新录音请先继续练习。", "session_closed");
+  const allowed = paused && (!input.activationId || input.activationId === s.activationId) && s.pausedUploads.some(p => p.submissionId === input.submissionId && p.planIndex === input.planIndex && p.kind === input.kind && (p.followUpId ?? null) === (input.followUpId ?? null) && p.consentVersion === version && input.consentVersion === version);
+  // A pause records finalized local submissions before another activation clears pausedUploads.
+  const [retained] = await db.select({ id: sessionEvent.id }).from(sessionEvent).where(and(
+    eq(sessionEvent.sessionId, s.id), eq(sessionEvent.type, "pause"),
+    ...(input.activationId ? [sql`${sessionEvent.result}->>'recordingActivationId' = ${input.activationId}`] : []),
+    sql`${sessionEvent.createdAt} > ${new Date(Date.now() - PENDING_UPLOAD_TTL_MS)}`,
+    sql`exists (select 1 from jsonb_array_elements(coalesce(${sessionEvent.result}->'retainedUploads', '[]'::jsonb)) p where p->>'submissionId' = ${input.submissionId} and p->>'planIndex' = ${String(input.planIndex)} and p->>'kind' = ${input.kind} and coalesce(p->>'followUpId', '') = ${input.followUpId ?? ""} and p->>'consentVersion' = ${String(version)})`,
+  )).limit(1);
+  const [capture] = input.activationId ? await db.select({ id: sessionEvent.id }).from(sessionEvent).where(and(eq(sessionEvent.sessionId, s.id), eq(sessionEvent.id, input.activationId), eq(sessionEvent.type, "start"))).limit(1) : [];
+  const closedFragment = input.interrupted && capture && s.endedAt && Date.now() - s.endedAt.getTime() < PENDING_UPLOAD_TTL_MS && ["paused", "interrupted", "abandoned"].includes(s.status);
+  if (s.status !== "active" && !allowed && !retained && !closedFragment) throw conflict("本次练习已暂停或结束；只有退出前保留的录音可补传，新录音请先继续练习。", "session_closed");
+  const source = recordingSource({ currentActivationId: s.activationId, recordingActivationId: input.activationId, started: !!s.startedAt, retainedBeforePause: !!allowed || !!retained, interrupted: !!input.interrupted });
   const item = plan.items[input.planIndex];
   if (!item) throw badRequest("无效的题目位置");
   const kind = input.kind;
@@ -115,7 +127,7 @@ async function createUploadTicketLocked(userId: string, input: TicketInput, vers
     .from(answer)
     .where(and(eq(answer.sessionId, s.id), eq(answer.planIndex, input.planIndex), eq(answer.kind, kind)));
   const row = await db.transaction(async tx => {
-  const reserve = Math.ceil(Math.max(paused ? 0 : s.reservedSeconds, Number(usedInSession.seconds) + dur / 1000));
+  const reserve = Math.ceil(Math.max(s.status === "active" ? s.reservedSeconds : 0, Number(usedInSession.seconds) + dur / 1000));
   await reserveSessionQuota(tx, userId, s.id, reserve);
   const inserted = await tx
     .insert(answer)
@@ -133,18 +145,20 @@ async function createUploadTicketLocked(userId: string, input: TicketInput, vers
       submissionId: input.submissionId,
       clientDurationMs: dur,
       limitSeconds: Math.ceil(limit),
-      interrupted: !!input.interrupted,
+      interrupted: source.interrupted,
+      recordingActivationId: input.activationId,
+      recordingSource: source.source,
     })
     .onConflictDoNothing({ target: [answer.sessionId, answer.submissionId] })
     .returning();
   const row =
     inserted[0] ??
     (await tx.select().from(answer).where(and(eq(answer.sessionId, s.id), eq(answer.submissionId, input.submissionId))))[0];
-  if (paused) await settleQuotaHolds(tx, userId);
+  if (s.status !== "active") await settleQuotaHolds(tx, userId);
   else await tx.update(practiceSession).set({ reservedSeconds: reserve, lastActivityAt: new Date() }).where(eq(practiceSession.id, s.id));
   return row;
   });
-  return { answerId: row.id, status: row.status, ticket: retainedTicket(row, userId, version) };
+  return { answerId: row.id, status: row.status, interrupted: row.interrupted, recordingSource: row.recordingSource, ticket: retainedTicket(row, userId, version) };
 }
 
 function retainedTicket(row: AnswerRow, userId: string, version: number) {
@@ -272,6 +286,7 @@ export function publicAnswer(a: AnswerRow) {
     insufficientReason: a.insufficientReason,
     error: a.status === "failed" ? a.error : null,
     interrupted: a.interrupted,
+    recordingSource: a.recordingSource,
     hasAudio: !!a.storageKey && !a.audioDeletedAt && a.createdAt.getTime() + 30 * 86400_000 > Date.now(),
     audioExpiresAt: a.audioDeletedAt ? null : new Date(a.createdAt.getTime() + 30 * 86400_000).toISOString(),
     createdAt: a.createdAt,

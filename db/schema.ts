@@ -267,6 +267,8 @@ export const answer = pgTable(
     insufficientReason: text("insufficient_reason"),
     error: text("error"),
     interrupted: boolean("interrupted").notNull().default(false),
+    recordingActivationId: text("recording_activation_id"),
+    recordingSource: text("recording_source").notNull().default("accepted"),
     processAttempts: integer("process_attempts").notNull().default(0),
     diagnosis: jsonb("diagnosis"),
     audioDeletedAt: ts("audio_deleted_at"),

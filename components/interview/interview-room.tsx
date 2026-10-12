@@ -106,6 +106,9 @@ export function InterviewRoom({ sessionId, subtitlePref, userId }: { sessionId: 
   const [uploadVersion, setUploadVersion] = useState(0);
   const [followUpText, setFollowUpText] = useState<string | null>(null);
   const [online, setOnline] = useState(true);
+  const [takeoverConfirm, setTakeoverConfirm] = useState(false);
+  const [foreignMock, setForeignMock] = useState(false);
+  const [endMockConfirm, setEndMockConfirm] = useState(false);
   useEffect(() => {
     const network = () => setOnline(navigator.onLine);
     const storageLimited = () => setPersistent(false);
@@ -210,9 +213,13 @@ export function InterviewRoom({ sessionId, subtitlePref, userId }: { sessionId: 
           }
           // 模考进行中被刷新或关闭：不能伪装成完整模考
           if (retained.length && states.every(state => state === "ready" || state === "recoverable")) {
-            await api(`/api/sessions/${sessionId}/events`, { body: { eventId: randomId("ev"), type: "pause", expectedVersion: v.session.stateVersion, pendingUploads: retained.map(meta => ({ submissionId: meta.id, planIndex: meta.planIndex, kind: meta.kind, followUpId: meta.followUpId, consentVersion: meta.consentVersion })) } });
+            await api(`/api/sessions/${sessionId}/events`, { body: { eventId: randomId("ev"), type: "pause", expectedVersion: v.session.stateVersion, startEventId: v.session.activationId ?? undefined, pendingUploads: retained.map(meta => ({ submissionId: meta.id, planIndex: meta.planIndex, kind: meta.kind, followUpId: meta.followUpId, consentVersion: meta.consentVersion })) } });
             announceSessionState();
-          } else await api(`/api/sessions/${sessionId}/events`, { body: { eventId: randomId("ev"), type: "interrupt", reason: "reloaded" } }).catch(() => {});
+          } else {
+            setForeignMock(true); setPhase("closed");
+            setMessage("本次模考已经开始。查看此页面不会结束原设备的模考；请回到原设备继续，或明确结束这次模考后重新开始。");
+            return;
+          }
           setPhase("interrupted");
           setMessage("本次模考在进行中被刷新或关闭，已标记为“中断”。已录内容仍可复盘，你可以重新开始一次模考。");
           return;
@@ -244,7 +251,7 @@ export function InterviewRoom({ sessionId, subtitlePref, userId }: { sessionId: 
   useEffect(() => {
     if (phase !== "running") return;
     const t = setInterval(() => {
-      void api(`/api/sessions/${sessionId}/events`, { body: { eventId: randomId("hb"), type: "heartbeat", expectedVersion: versionRef.current } }).catch(error => { if (error instanceof ApiError && ["session_changed", "session_closed"].includes(error.code)) window.dispatchEvent(new Event(SESSION_STATE_SIGNAL)); });
+      void api(`/api/sessions/${sessionId}/events`, { body: { eventId: randomId("hb"), type: "heartbeat", expectedVersion: versionRef.current, startEventId: startEventRef.current } }).catch(error => { if (error instanceof ApiError && ["session_changed", "session_closed"].includes(error.code)) window.dispatchEvent(new Event(SESSION_STATE_SIGNAL)); });
     }, 60_000);
     return () => clearInterval(t);
   }, [phase, sessionId]);
@@ -256,26 +263,32 @@ export function InterviewRoom({ sessionId, subtitlePref, userId }: { sessionId: 
       if (checking || ended()) return;
       checking = true;
       try {
-        const latest = await api<SessionView>(`/api/sessions/${sessionId}`);
+        const state = await api<SessionView["session"]>(`/api/sessions/${sessionId}/state`);
         if (ended()) return;
-        if (latest.session.stateVersion < (versionRef.current ?? 0)) return;
-        const ownPendingStart = phaseRef.current === "starting" && (latest.session.stateVersion === versionRef.current || latest.session.activationId === startEventRef.current);
-        if (["starting", "running", "finishing"].includes(phaseRef.current) && (latest.session.status !== "active" || !ownPendingStart && latest.session.activationId !== startEventRef.current)) {
+        if (state.stateVersion < (versionRef.current ?? 0)) return;
+        const ownPendingStart = phaseRef.current === "starting" && (state.stateVersion === versionRef.current || state.activationId === startEventRef.current);
+        if (["starting", "running", "finishing"].includes(phaseRef.current) && (state.status !== "active" || !ownPendingStart && state.activationId !== startEventRef.current)) {
           const r = rt.current!; r.aborted = true; r.audio.stop(); stopDiscPlayback?.(); r.waiter?.resolve("exit"); r.waiter = null;
           setStep("idle"); setTimer(null); setPartInfo(null); setActions([]); setExaminer("waiting");
           const recording = await r.recorder.stop({ interrupted: true }); r.recorder.release(); await r.wake.release();
           if (recording) void upload(recording).catch(() => {});
           setPhase("closed"); setMessage("本次练习已在另一页面暂停或继续，当前麦克风与播放已停止。已录片段保留；重新载入后可查看当前进度。");
         }
-        versionRef.current = latest.session.stateVersion; setView(latest);
+        if (state.stateVersion !== versionRef.current) {
+          const latest = await api<SessionView>(`/api/sessions/${sessionId}`);
+          if (ended()) return;
+          versionRef.current = latest.session.stateVersion; setView(latest);
+          if (latest.session.status !== "active") setForeignMock(false);
+        }
       } catch { /* Offline state is checked again on reconnect or the next heartbeat. */ }
       finally { checking = false; }
     };
     const synced = (event: Event) => { if ((event as CustomEvent).detail?.eventId === exitPauseRef.current?.eventId && phaseRef.current === "exiting" && !exitBusy.current) retryExitRef.current(); };
     const storage = (event: StorageEvent) => { if (event.key === SESSION_STATE_SIGNAL) void changed(); };
     let channel: BroadcastChannel | undefined; try { channel = new BroadcastChannel(SESSION_STATE_SIGNAL); channel.onmessage = () => void changed(); } catch { /* focus and heartbeat also check */ }
-    window.addEventListener(SESSION_STATE_SIGNAL, changed); window.addEventListener("storage", storage); window.addEventListener("focus", changed); window.addEventListener(PAUSE_SYNC_EVENT, synced);
-    return () => { live = false; channel?.close(); window.removeEventListener(SESSION_STATE_SIGNAL, changed); window.removeEventListener("storage", storage); window.removeEventListener("focus", changed); window.removeEventListener(PAUSE_SYNC_EVENT, synced); };
+    const poll = setInterval(() => { if (navigator.onLine && ["starting", "running", "finishing"].includes(phaseRef.current)) void changed(); }, 5000);
+    window.addEventListener(SESSION_STATE_SIGNAL, changed); window.addEventListener("storage", storage); window.addEventListener("focus", changed); window.addEventListener("online", changed); window.addEventListener(PAUSE_SYNC_EVENT, synced);
+    return () => { live = false; clearInterval(poll); channel?.close(); window.removeEventListener(SESSION_STATE_SIGNAL, changed); window.removeEventListener("storage", storage); window.removeEventListener("focus", changed); window.removeEventListener("online", changed); window.removeEventListener(PAUSE_SYNC_EVENT, synced); };
   }, [sessionId, stopDiscPlayback]);
 
   // 离开页面前提醒
@@ -302,7 +315,7 @@ export function InterviewRoom({ sessionId, subtitlePref, userId }: { sessionId: 
         trigger(primary.id);
       } else if (phase === "ready") {
         e.preventDefault();
-        void startInterview();
+        requestStart();
       }
     };
     window.addEventListener("keydown", h);
@@ -399,6 +412,7 @@ export function InterviewRoom({ sessionId, subtitlePref, userId }: { sessionId: 
       userId,
       id: submissionId,
       sessionId,
+      activationId: startEventRef.current,
       planIndex: opts.item.index,
       kind: opts.kind,
       followUpId: opts.followUpId,
@@ -451,14 +465,28 @@ export function InterviewRoom({ sessionId, subtitlePref, userId }: { sessionId: 
 
   async function sendEvent(type: string, extra: Record<string, unknown> = {}) {
     const result = await api<{ partDeadlines?: Record<string, string>; finished?: boolean; missing?: unknown[]; status?: string; stateVersion?: number; activationId?: string }>(`/api/sessions/${sessionId}/events`, {
-      body: { eventId: randomId("ev"), type, expectedVersion: versionRef.current, ...extra },
+      body: { eventId: randomId("ev"), type, expectedVersion: versionRef.current, startEventId: startEventRef.current, ...extra },
     });
     if (result.stateVersion !== undefined && result.stateVersion >= (versionRef.current ?? 0)) versionRef.current = result.stateVersion;
     return result;
   }
 
   // ---------- 开始面试（用户手势） ----------
-  async function startInterview() {
+  function requestStart() {
+    if (view?.session.status === "active" && view.session.activationId) setTakeoverConfirm(true);
+    else void startInterview();
+  }
+
+  async function endForeignMock() {
+    if (!view || !foreignMock) return;
+    try {
+      await api(`/api/sessions/${sessionId}/events`, { body: { type: "interrupt", eventId: randomId("ev"), expectedVersion: versionRef.current, startEventId: view.session.activationId, reason: "device_end" } });
+      announceSessionState(); setForeignMock(false); setEndMockConfirm(false); setPhase("interrupted");
+      setMessage("本次模考已明确结束。原设备已录的片段可补传与复盘；再次模考需开始新的考试。");
+    } catch (e) { setError(e instanceof Error ? e.message : "结束失败，请联网后重试。"); }
+  }
+
+  async function startInterview(takeover = false) {
     if (!view || phase !== "ready") return;
     const r = rt.current!;
     let latestView = view;
@@ -486,7 +514,7 @@ export function InterviewRoom({ sessionId, subtitlePref, userId }: { sessionId: 
       const uploaded = await Promise.allSettled(pending.map(meta => uploadQueue.enqueue(meta, undefined, { prepareInactive: false })));
       check();
       if (uploaded.some(result => result.status === "rejected")) throw new Error("有已录片段尚未上传。请联网后重试上传，再继续练习；本机录音仍保留。");
-      const started = await sendEvent("start", { eventId, expectedVersion });
+      const started = await sendEvent("start", { eventId, expectedVersion, takeover, expectedActivationId: takeover ? view.session.activationId : undefined });
       check();
       if (started.status !== "active" || started.activationId !== eventId) throw new ApiError(409, "session_changed", "练习状态已改变，请重新载入后继续。");
       latestView = await api<SessionView>(`/api/sessions/${sessionId}`);
@@ -880,6 +908,11 @@ export function InterviewRoom({ sessionId, subtitlePref, userId }: { sessionId: 
   async function exitInterview() {
     if (consentEnded.current) { router.push(returnToDiscs); return; }
     if(exitBusy.current)return;
+    // A viewer must not pause the active recorder on another device.
+    if (view && (view.session.status !== "active" || view.session.activationId && view.session.activationId !== startEventRef.current && phaseRef.current !== "starting")) {
+      rt.current!.audio.stop(); stopDiscPlayback?.(); rt.current!.recorder.release(); await rt.current!.wake.release();
+      router.push(returnToDiscs); return;
+    }
     exitBusy.current=true;
     const r=rt.current!;
     r.aborted=true;r.audio.stop();stopDiscPlayback?.();
@@ -1011,7 +1044,11 @@ export function InterviewRoom({ sessionId, subtitlePref, userId }: { sessionId: 
               }}
               error={error}
               starting={phase === "starting"}
-              onStart={startInterview}
+              onStart={requestStart}
+              occupied={view.session.status === "active" && !!view.session.activationId}
+              confirming={takeoverConfirm}
+              onCancel={() => setTakeoverConfirm(false)}
+              onTakeover={() => { void startInterview(true); }}
             />
           ) : null}
 
@@ -1101,7 +1138,10 @@ export function InterviewRoom({ sessionId, subtitlePref, userId }: { sessionId: 
             <EndPanel tone="warning" title="本次模考已中断" text={message ?? "已录内容仍可复盘。"} sessionId={sessionId} />
           ) : null}
           {phase === "closed" ? (
-            <div className="space-y-3"><EndPanel tone="info" title={consentEnded.current ? "录音授权已改变，面试已停止" : "当前练习已停止"} text={message ?? "可以在报告中回听录音、查看反馈，或重新开始。"} sessionId={sessionId} />{consentEnded.current ? <LinkButton href="/settings" variant="outline">前往设置与录音授权</LinkButton> : canResumeSession(view.session) && <Button variant="outline" onClick={() => location.reload()}>重新载入并继续</Button>}</div>
+            <div className="space-y-3"><EndPanel tone="info" title={consentEnded.current ? "录音授权已改变，面试已停止" : foreignMock ? "模考正在原设备进行" : "当前练习已停止"} text={message ?? "可以在报告中回听录音、查看反馈，或重新开始。"} sessionId={sessionId} />{consentEnded.current ? <LinkButton href="/settings" variant="outline">前往设置与录音授权</LinkButton> : !foreignMock && canResumeSession(view.session) && <Button variant="outline" onClick={() => location.reload()}>重新载入并继续</Button>}
+              {foreignMock && (endMockConfirm ? <div role="alertdialog" aria-label="结束当前模考" className="space-y-3 rounded-xl border border-amber-300 p-4"><p>结束后，本次模考会标记为中断，考试计时不能恢复。原设备尚未上传的录音仍需在原设备补传。</p><div className="flex gap-2"><Button autoFocus variant="outline" onClick={() => setEndMockConfirm(false)}>取消</Button><Button onClick={() => { void endForeignMock(); }}>确认结束本次模考</Button></div></div> : <Button variant="outline" onClick={() => setEndMockConfirm(true)}>结束当前模考</Button>)}
+              {error && <Alert tone="danger">{error}</Alert>}
+            </div>
           ) : null}
           {phase === "error" ? (
             <div className="space-y-3">
@@ -1150,6 +1190,7 @@ function ReadyPanel({
   error,
   starting,
   onStart,
+  occupied, confirming, onCancel, onTakeover,
 }: {
   plan: SessionPlan;
   preload: { done: number; total: number; failed: number } | null;
@@ -1161,6 +1202,7 @@ function ReadyPanel({
   error: string | null;
   starting: boolean;
   onStart: () => void;
+  occupied: boolean; confirming: boolean; onCancel: () => void; onTakeover: () => void;
 }) {
   const isMock = plan.mode === "mock";
   const [uploadBusy, setUploadBusy] = useState(false);
@@ -1186,9 +1228,14 @@ function ReadyPanel({
         </Alert>
       ) : null}
       <div className="mt-auto">
+        {occupied && confirming ? <div role="alertdialog" aria-label="接管这次练习" className="mb-4 space-y-3 rounded-xl border border-amber-300 p-4">
+          <p className="font-medium">确认在此设备继续练习？</p>
+          <p className="text-sm text-muted">联网的原页面会停止录音与播放；离线设备会在恢复连接后停止。原设备尚未上传的录音不会自动出现在此设备，请在原设备补传。旧设备补传片段不计作当前设备的完整作答。</p>
+          <div className="flex flex-wrap gap-2"><Button autoFocus variant="outline" onClick={onCancel} disabled={starting}>取消</Button><Button data-testid="confirm-takeover" onClick={onTakeover} disabled={starting || uploadBusy || localPending.some(meta => meta.status === "recording" || uploadQueue.isPending(meta.id))}>确认接管并继续</Button></div>
+        </div> : null}
         <Button size="lg" className="w-full sm:w-auto" onClick={onStart} disabled={starting || uploadBusy || localPending.some(meta => meta.status === "recording" || uploadQueue.isPending(meta.id))} data-testid="start-interview">
           <Mic className="h-5 w-5" />
-          {starting ? "正在连接麦克风…" : "开始面试"}
+          {starting ? "正在连接麦克风…" : occupied ? "接管这次练习" : "开始面试"}
         </Button>
       </div>
     </div>

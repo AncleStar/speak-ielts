@@ -186,8 +186,8 @@ it("discarded declarations remain visible without inflating real processing fail
 it("a discarded mock answer can start an ordinary exact-question retry without resuming its interrupted exam", async () => {
   await db.update(schema.user).set({ dailyQuotaMinutes: 30 }).where(eq(schema.user.id, owner.id));
   const s = await sessions.createSession(owner, { mode: "mock", mockSetId: "mock-1", fresh: true });
-  await sessions.recordEvent(owner.id, s.id, { type: "start", eventId: randomUUID(), expectedVersion: 0 });
-  const nonce = randomUUID(), interrupted = await sessions.recordEvent(owner.id, s.id, { type: "pause", eventId: randomUUID(), expectedVersion: 1, pendingUploads: [{ submissionId: nonce, planIndex: 0, kind: "main", consentVersion: version }] });
+  const activationId = randomUUID(); await sessions.recordEvent(owner.id, s.id, { type: "start", eventId: activationId, expectedVersion: 0 });
+  const nonce = randomUUID(), interrupted = await sessions.recordEvent(owner.id, s.id, { type: "pause", eventId: randomUUID(), expectedVersion: 1, startEventId: activationId, pendingUploads: [{ submissionId: nonce, planIndex: 0, kind: "main", consentVersion: version }] });
   const ticket = await answers.createUploadTicket(owner.id, { sessionId: s.id, submissionId: nonce, planIndex: 0, kind: "main", clientDurationMs: 1001, consentVersion: version });
   await answers.discardPendingUpload(owner.id, s.id, nonce);
   const retry = await sessions.createSession(owner, { mode: "retry", sourceAnswerId: ticket.answerId, fresh: true }), retryView = await sessions.getSessionView(owner.id, retry.id), original = await sessions.getSessionView(owner.id, s.id);

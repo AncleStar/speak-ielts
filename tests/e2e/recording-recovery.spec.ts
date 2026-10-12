@@ -58,8 +58,9 @@ test("crashed real recording recovers offline, plays saved chunks and uploads wi
   await expect(reopened.getByTestId("disc-scene")).toHaveAttribute("data-renderer", "ready"); await reopened.waitForTimeout(4500); await reopened.screenshot({ path: "data/verification/round10-recovered-desktop.png", fullPage: true });
   await reopened.setViewportSize({ width: 320, height: 740 }); await reopened.screenshot({ path: "data/verification/round10-recovered-320.png", fullPage: true }); expect(await reopened.evaluate(() => document.documentElement.scrollWidth <= innerWidth + 1)).toBe(true);
   await context.setOffline(false); await reopened.getByRole("button", { name: "重试上传", exact: true }).click(); await expect(reopened.getByText("上传成功，反馈将在后台生成。", { exact: true })).toBeVisible(); await saved(reopened, id); expect((await local(reopened)).chunks).toBe(0);
-  const finish = await reopened.request.post(`/api/sessions/${id}/events`, { data: { type: "finish", eventId: crypto.randomUUID() } }); expect(finish.ok()).toBe(true); expect((await finish.json()).status).toBe("active");
-  await reopened.getByTestId("start-interview").click(); await reopened.getByRole("button", { name: "开始回答", exact: true }).click(); await expect(reopened.getByTestId("recording-indicator")).toBeVisible(); await reopened.getByTestId("exit-interview").click(); await expect(reopened).toHaveURL(/disc=P2-PERSON-1/);
+  const current = await (await reopened.request.get(`/api/sessions/${id}`)).json();
+  const finish = await reopened.request.post(`/api/sessions/${id}/events`, { data: { type: "finish", eventId: crypto.randomUUID(), startEventId: current.session.activationId } }); expect(finish.ok()).toBe(true); expect((await finish.json()).status).toBe("active");
+  await reopened.getByTestId("start-interview").click(); await expect(reopened.getByRole("alertdialog", { name: "接管这次练习" })).toBeVisible(); await reopened.getByTestId("confirm-takeover").click(); await reopened.getByRole("button", { name: "开始回答", exact: true }).click(); await expect(reopened.getByTestId("recording-indicator")).toBeVisible(); await reopened.getByTestId("exit-interview").click(); await expect(reopened).toHaveURL(/disc=P2-PERSON-1/);
   await fs.writeFile("data/verification/round10-crash-browser.json", JSON.stringify({ actualMediaRecorder: true, rendererCrash: true, durableChunks: before.chunks, bytesPreserved: before.bytes, offlineRecovery: true, actualBrowserPlaybackEnded: true, serverDecodedInterrupted: true, completed: false, paidApiCalls: 0 }, null, 2));
 });
 
@@ -75,12 +76,12 @@ test("an old live recorder cannot be recovered; after its crash two recovery pag
   expect((await peer.request.delete(`/api/sessions/${id}`)).ok()).toBe(true); await twin.close(); await peer.close();
 });
 
-test("an inactive ordinary practice prepares a guarded retained upload then resumes its original question", async ({ page, context }) => {
+test("an inactive ordinary practice uploads its known interrupted batch without reopening, then resumes its original question", async ({ page, context }) => {
   await login(page, "recover-inactive"); const id = await record(page); await crash(page, context);
   // Only the fresh isolated test database is used; reproduce the hourly maintenance state without waiting 30 minutes.
   const pool = new pg.Pool({ connectionString: "postgres://postgres:postgres@127.0.0.1:5545/e2e" }); try { await pool.query("update practice_session set status='abandoned', interrupt_reason='inactive', ended_at=now(), state_version=state_version+1, last_activity_at=now()-interval '31 minutes' where id=$1", [id]); } finally { await pool.end(); }
   const reopened = await context.newPage(); await ready(reopened, id); await reopened.getByRole("button", { name: "恢复中断片段", exact: true }).click(); await reopened.getByRole("button", { name: "重试上传", exact: true }).click(); await expect(reopened.getByText("上传成功，反馈将在后台生成。", { exact: true })).toBeVisible(); await saved(reopened, id);
-  const paused = await (await reopened.request.get(`/api/sessions/${id}`)).json(); expect(paused.session.status).toBe("paused"); expect((await (await reopened.request.get("/api/me")).json()).quota.reservedSeconds).toBe(0);
+  const retained = await (await reopened.request.get(`/api/sessions/${id}`)).json(); expect(retained.session.status).toBe("abandoned"); expect(retained.session.interruptReason).toBe("inactive"); expect((await (await reopened.request.get("/api/me")).json()).quota.reservedSeconds).toBe(0);
   await reopened.getByTestId("start-interview").click(); await reopened.getByRole("button", { name: "开始回答", exact: true }).click(); await expect(reopened.getByTestId("recording-indicator")).toBeVisible(); await reopened.getByTestId("exit-interview").click(); await expect(reopened).toHaveURL(/\/practice/);
 });
 

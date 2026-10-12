@@ -73,11 +73,13 @@ test("an offline exit survives closing the page, syncs on reopening, and resumes
   await reopened.getByTestId("exit-interview").click();await expect(reopened).toHaveURL(/\/practice(?:\?|$)/);await stopped(reopened);
 });
 
-test("a pause in another page stops real recording and retains the in-flight fragment without holding the whole disc",async({page,context})=>{
+test("leaving a viewing page does not pause another page's live recorder",async({page,context})=>{
   await login(page,"pause-peer");const created=await page.request.post("/api/sessions",{data:{mode:"practice",questionId:"P2-PERSON-1",fresh:true}});expect(created.ok()).toBe(true);const {id}=await created.json();
   await page.goto(`/interview/${id}`);await page.getByTestId("start-interview").click();await page.getByRole("button",{name:"开始回答",exact:true}).click();await expect(page.getByTestId("recording-indicator")).toBeVisible();
   const peer=await context.newPage();await peer.goto(`/interview/${id}`);await expect(peer.getByTestId("start-interview")).toBeVisible();await peer.getByTestId("exit-interview").click();await expect(peer).toHaveURL(/\/practice(?:\?|$)/);
-  await expect(page.getByText("本次练习已在另一页面暂停或继续",{exact:false})).toBeVisible();await stopped(page);
+  await expect(page.getByTestId("recording-indicator")).toBeVisible();
+  expect((await(await peer.request.get(`/api/sessions/${id}`)).json()).session.status).toBe("active");
+  await page.getByTestId("exit-interview").click(); await expect(page).toHaveURL(/\/practice(?:\?|$)/); await stopped(page);
   await expect.poll(async()=>{const data=await(await peer.request.get(`/api/sessions/${id}`)).json();return data.session.status==="paused"&&data.answers.some((a:{interrupted:boolean;status:string})=>a.interrupted&&a.status!=="created");},{timeout:30000}).toBe(true);
   expect((await(await peer.request.get("/api/me")).json()).quota.reservedSeconds).toBe(0);
   await page.screenshot({path:"data/verification/round8-peer-paused.png",fullPage:true});

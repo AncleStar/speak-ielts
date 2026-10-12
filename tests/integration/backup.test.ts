@@ -48,6 +48,7 @@ beforeAll(async () => {
     const ticket = await answers.createUploadTicket(ownerId, { sessionId: session.id, planIndex: 0, kind: "main", submissionId: crypto.randomUUID(), clientDurationMs: 6000 });
     await answers.receiveAudio(ownerId, ticket.answerId, ticket.ticket, audio);
     await (await import("@/lib/jobs/process-answer")).processAnswer({ answerId: ticket.answerId }, { finalAttempt: true });
+    await db.update(s.answer).set({ recordingActivationId: "backup-recording-batch-only", recordingSource: "previous_device", interrupted: true }).where(eq(s.answer.id, ticket.answerId));
     const tts = await import("@/lib/services/tts"), text = `A private reference for synthetic answer number ${i}.`;
     const referenceId = (await tts.ensureTtsAssets([text], { answerId: ticket.answerId, enqueueMissing: false })).get(text)!;
     await tts.generateTtsAsset(referenceId);
@@ -173,6 +174,7 @@ it("restores the complete archive to a new database and replays newer deletion i
   expect((await query(restoreUrl, 'SELECT count(*)::int AS n FROM "user" WHERE id=$1', [removedUserId])).rows[0].n).toBe(0);
   const restoredAnswer = (await query(restoreUrl, "SELECT * FROM answer WHERE id=$1", [keptAnswerId])).rows[0];
   expect(restoredAnswer.transcript).toBe(sourceAnswer.transcript); expect(restoredAnswer.status).toBe("done");
+  expect(restoredAnswer.recording_source).toBe(sourceAnswer.recordingSource); expect(restoredAnswer.recording_activation_id).toBe(sourceAnswer.recordingActivationId);
   expect(await fs.readFile(path.join(restored.directory, "storage", restoredAnswer.storage_key))).toEqual(originalAudio);
   const reference = (await query(restoreUrl, "SELECT is_private,answer_id,storage_key FROM tts_asset WHERE id=$1", [keptReferenceId])).rows[0];
   expect(reference.is_private).toBe(true); expect(reference.answer_id).toBe(keptAnswerId);
