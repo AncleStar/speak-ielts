@@ -1,8 +1,8 @@
 import crypto from "node:crypto";
 import fs from "node:fs/promises";
 import path from "node:path";
-import { and, eq, inArray, ne, sql } from "drizzle-orm";
-import { questionVersion, ttsAsset } from "@/db/schema";
+import { and, eq, inArray, isNull, ne, sql } from "drizzle-orm";
+import { answer, practiceSession, questionVersion, ttsAsset, user } from "@/db/schema";
 import { isFfmpegAvailable, makeTempDir, toExaminerMp3 } from "@/lib/audio";
 import { loadContent } from "@/lib/content/load";
 import type { QuestionContent } from "@/lib/content/types";
@@ -12,21 +12,43 @@ import { providers } from "@/lib/providers";
 import { QUEUES, enqueue } from "@/lib/queue";
 import { storage, ttsKey } from "@/lib/storage";
 import { metered } from "@/lib/providers/metered";
+import { notFound } from "@/lib/errors";
 
-export function ttsHash(text: string, model: string, voice: string) {
-  return crypto.createHash("sha256").update(`${model}|${voice}|${text.trim()}`).digest("hex").slice(0, 40);
+export function ttsHash(text: string, model: string, voice: string, answerId?: string) {
+  const input = answerId ? "speak-private-reference-v1\n" + JSON.stringify([model, voice, answerId, text.trim()]) : `${model}|${voice}|${text.trim()}`;
+  return crypto.createHash("sha256").update(input).digest("hex").slice(0, 40);
+}
+
+async function referenceSource(answerId: string) {
+  const [source] = await db.select({ userId: answer.userId, sessionId: answer.sessionId, allowAdminView: user.allowAdminView })
+    .from(answer).innerJoin(practiceSession, eq(practiceSession.id, answer.sessionId)).innerJoin(user, eq(user.id, answer.userId))
+    .where(and(eq(answer.id, answerId), isNull(practiceSession.deletedAt), isNull(user.deletedAt), sql`${user.banned} is not true`));
+  return source;
+}
+
+/** Personalized speech follows the answer's owner and current support consent. */
+export async function getTtsAssetForViewer(viewer: { id: string; isAdmin: boolean }, assetId: string) {
+  const [asset] = await db.select().from(ttsAsset).where(eq(ttsAsset.id, assetId));
+  if (!asset) throw notFound("音频");
+  if (asset.isPrivate) {
+    const source = asset.answerId ? await referenceSource(asset.answerId) : null;
+    if (!source || (source.userId !== viewer.id && !(viewer.isAdmin && source.allowAdminView))) throw notFound("音频");
+  }
+  return asset;
 }
 
 /** 为一组文本准备考官音频记录（不存在则创建 pending 并排队生成），返回 文本 → 资源编号。 */
-export async function ensureTtsAssets(texts: string[], opts: { enqueueMissing?: boolean } = {}): Promise<Map<string, string>> {
+export async function ensureTtsAssets(texts: string[], opts: { enqueueMissing?: boolean; answerId?: string } = {}): Promise<Map<string, string>> {
+  if (opts.answerId && !await referenceSource(opts.answerId)) throw notFound("回答");
   const { model, voice } = providers().ttsIdentity();
   const unique = [...new Set(texts.map((t) => t.trim()).filter(Boolean))];
-  const byHash = new Map(unique.map((t) => [ttsHash(t, model, voice), t]));
+  const byHash = new Map(unique.map((t) => [ttsHash(t, model, voice, opts.answerId), t]));
   if (byHash.size === 0) return new Map();
-  await db
+  const insertion = db
     .insert(ttsAsset)
-    .values([...byHash.entries()].map(([hash, text]) => ({ hash, text, model, voice, mock: providers().ttsKind === "mock" })))
-    .onConflictDoNothing({ target: ttsAsset.hash });
+    .values([...byHash.entries()].map(([hash, text]) => ({ hash, text, model, voice, isPrivate: !!opts.answerId, answerId: opts.answerId, mock: providers().ttsKind === "mock" })));
+  if (opts.answerId) await insertion.onConflictDoNothing({ target: ttsAsset.hash });
+  else await insertion.onConflictDoUpdate({ target: ttsAsset.hash, set: { isPrivate: false } });
   const rows = await db.select().from(ttsAsset).where(inArray(ttsAsset.hash, [...byHash.keys()]));
   const out = new Map<string, string>();
   const missing: string[] = [];
@@ -51,6 +73,8 @@ export async function generateTtsAsset(assetId: string, opts: { force?: boolean 
   const p = (async () => {
     const [asset] = await db.select().from(ttsAsset).where(eq(ttsAsset.id, assetId));
     if (!asset) return;
+    const source = asset.isPrivate && asset.answerId ? await referenceSource(asset.answerId) : null;
+    if (asset.isPrivate && !source) return;
     const identity = providers().ttsIdentity();
     // 切换音色后不让旧队列把新声音写入旧模型/音色的缓存。
     if (asset.model !== identity.model || asset.voice !== identity.voice) return;
@@ -70,6 +94,7 @@ export async function generateTtsAsset(assetId: string, opts: { force?: boolean 
       throw new Error("考官音频正在生成，请稍后重试");
     }
     const t0 = Date.now();
+    let privateKey: string | undefined;
     try {
       const r = await metered(`tts:${assetId}`).tts(asset.text);
       let audio = r.audio;
@@ -89,14 +114,20 @@ export async function generateTtsAsset(assetId: string, opts: { force?: boolean 
           await fs.rm(dir, { recursive: true, force: true }).catch(() => {});
         }
       }
-      const key = ttsKey(asset.hash, ext);
+      const key = source ? `reference-audio/${source.userId}/${source.sessionId}/${asset.hash}.${ext}` : ttsKey(asset.hash, ext);
       await storage().put(key, audio, mime);
-      await db
+      if (source) {
+        privateKey = key;
+        if (!asset.answerId || !await referenceSource(asset.answerId)) throw notFound("回答");
+      }
+      const saved = await db
         .update(ttsAsset)
         .set({ status: "ready", storageKey: key, mimeType: mime, error: null, mock: r.mock, updatedAt: new Date() })
-        .where(eq(ttsAsset.id, assetId));
+        .where(eq(ttsAsset.id, assetId)).returning({ id: ttsAsset.id });
+      if (!saved.length && privateKey) await storage().delete(privateKey);
       await logOps("info", "tts", assetId, `考官音频已生成（${r.model}）`, Date.now() - t0);
     } catch (e) {
+      if (privateKey) await storage().delete(privateKey);
       await db
         .update(ttsAsset)
         .set({ status: "failed", error: (e as Error).message.slice(0, 500), updatedAt: new Date() })
@@ -135,7 +166,7 @@ export async function pregenerateAll(opts: { versionIds?: string[] } = {}) {
 }
 
 export async function ttsStatusCounts() {
-  const rows = await db.select({ status: ttsAsset.status, model: ttsAsset.model, voice: ttsAsset.voice }).from(ttsAsset);
+  const rows = await db.select({ status: ttsAsset.status, model: ttsAsset.model, voice: ttsAsset.voice }).from(ttsAsset).where(eq(ttsAsset.isPrivate, false));
   const { model, voice, label } = providers().ttsIdentity();
   const current = rows.filter((r) => r.model === model && r.voice === voice);
   return {
@@ -154,7 +185,7 @@ export async function retryFailedTts() {
   const rows = await db
     .select({ id: ttsAsset.id })
     .from(ttsAsset)
-    .where(and(eq(ttsAsset.model, model), eq(ttsAsset.voice, voice), ne(ttsAsset.status, "ready")));
+    .where(and(eq(ttsAsset.isPrivate, false), eq(ttsAsset.model, model), eq(ttsAsset.voice, voice), ne(ttsAsset.status, "ready")));
   for (const r of rows) await enqueue(QUEUES.tts, { assetId: r.id });
   return rows.length;
 }

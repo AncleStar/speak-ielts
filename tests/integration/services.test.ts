@@ -143,6 +143,87 @@ describe("isolated PostgreSQL + recording pipeline", () => {
       expect(event.mock).toBe(false); expect(event.costYuan).toBe(0); expect(event.ok).toBe(true);
     } finally { await setSetting("budget", { monthlyYuan: 100 }); }
   });
+  it("keeps reference caches separate by answer and enforces owner and current admin consent", async () => {
+    const { ensureTtsAssets, getTtsAssetForViewer, ttsHash } = await import("@/lib/services/tts");
+    const text = "A private personalized example must stay attached to this answer.";
+    const privateId = (await ensureTtsAssets([text], { answerId, enqueueMissing: false })).get(text)!;
+    const publicId = (await ensureTtsAssets([text], { enqueueMissing: false })).get(text)!;
+    expect(privateId).not.toBe(publicId);
+    expect(ttsHash(text, "model", "voice", answerId)).not.toBe(ttsHash(`${text}|answer:${answerId}`, "model", "voice"));
+    expect((await getTtsAssetForViewer({ id: first.id, isAdmin: false }, privateId)).answerId).toBe(answerId);
+    for (const isAdmin of [false, true]) await expect(getTtsAssetForViewer({ id: second.id, isAdmin }, privateId)).rejects.toMatchObject({ status: 404 });
+    await db.update(schema.user).set({ allowAdminView: true }).where(eq(schema.user.id, first.id));
+    expect((await getTtsAssetForViewer({ id: second.id, isAdmin: true }, privateId)).id).toBe(privateId);
+    await db.update(schema.user).set({ allowAdminView: false }).where(eq(schema.user.id, first.id));
+    await expect(getTtsAssetForViewer({ id: second.id, isAdmin: true }, privateId)).rejects.toMatchObject({ status: 404 });
+    expect((await getTtsAssetForViewer({ id: second.id, isAdmin: false }, publicId)).isPrivate).toBe(false);
+  });
+  it("keeps upgraded unassociated caches closed until explicitly prepared as public question speech", async () => {
+    const { ensureTtsAssets, getTtsAssetForViewer } = await import("@/lib/services/tts");
+    const text = "A legacy cache cannot inherit public access from having no answer id.";
+    const id = (await ensureTtsAssets([text], { enqueueMissing: false })).get(text)!;
+    await db.update(schema.ttsAsset).set({ isPrivate: true }).where(eq(schema.ttsAsset.id, id));
+    await expect(getTtsAssetForViewer({ id: first.id, isAdmin: true }, id)).rejects.toMatchObject({ status: 404 });
+    expect((await ensureTtsAssets([text], { enqueueMissing: false })).get(text)).toBe(id);
+    expect((await getTtsAssetForViewer({ id: second.id, isAdmin: false }, id)).isPrivate).toBe(false);
+  });
+  it("preserves private scope when a voice changes and does not display private text in admin TTS counts", async () => {
+    const { providers, setProvidersForTest } = await import("@/lib/providers");
+    const { ensureTtsAssets, getTtsAssetForViewer, ttsStatusCounts } = await import("@/lib/services/tts");
+    const original = providers(), text = "Private speech uses an answer-specific voice cache.";
+    const oldId = (await ensureTtsAssets([text], { answerId, enqueueMissing: false })).get(text)!;
+    setProvidersForTest({ ...original, ttsIdentity: () => ({ model: "mock-reference-voice", voice: "private-new-voice" }) });
+    try {
+      const newId = (await ensureTtsAssets([text], { answerId, enqueueMissing: false })).get(text)!;
+      expect(newId).not.toBe(oldId); expect((await getTtsAssetForViewer({ id: first.id, isAdmin: false }, newId)).answerId).toBe(answerId);
+      await expect(getTtsAssetForViewer({ id: second.id, isAdmin: false }, newId)).rejects.toMatchObject({ status: 404 });
+      const counts = await ttsStatusCounts(); expect(counts.pending + counts.ready + counts.failed).toBe(0);
+    } finally { setProvidersForTest(original); }
+  });
+  it("removes private speech generated concurrently with deletion without leaving an orphan file", async () => {
+    const { ensureTtsAssets, generateTtsAsset, getTtsAssetForViewer } = await import("@/lib/services/tts");
+    const { providers, setProvidersForTest } = await import("@/lib/providers");
+    const { storage } = await import("@/lib/storage");
+    const session = await s.createSession(first, { mode: "practice", questionId: "P1-HOME-3", fresh: true });
+    const ticket = await a.createUploadTicket(first.id, { sessionId: session.id, planIndex: 0, kind: "main", submissionId: crypto.randomUUID(), clientDurationMs: 6000 });
+    const text = "This speech must disappear when its source session is deleted.";
+    const id = (await ensureTtsAssets([text], { answerId: ticket.answerId, enqueueMissing: false })).get(text)!;
+    const original = providers(); let release!: () => void, entered!: () => void;
+    const ready = new Promise<void>(resolve => { entered = resolve; }), gate = new Promise<void>(resolve => { release = resolve; });
+    setProvidersForTest({ ...original, tts: async t => { entered(); await gate; return original.tts(t); } });
+    const generated = generateTtsAsset(id); const rejected = expect(generated).rejects.toMatchObject({ status: 404 });
+    try {
+      await ready; await del.deleteSession(first.id, session.id, first.id); await del.purgeSession(session.id); release(); await rejected;
+      await expect(getTtsAssetForViewer({ id: first.id, isAdmin: false }, id)).rejects.toMatchObject({ status: 404 });
+      expect(await storage().list(`reference-audio/${first.id}/${session.id}/`)).toEqual([]);
+    } finally { release(); await generated.catch(() => {}); setProvidersForTest(original); }
+  });
+  it("purges quarantined legacy caches while retaining public speech and source answers", async () => {
+    const { ensureTtsAssets } = await import("@/lib/services/tts"), { storage } = await import("@/lib/storage");
+    const text = "An unassociated legacy private cache is regenerated through the owner endpoint.";
+    const legacy = (await ensureTtsAssets([text], { enqueueMissing: false })).get(text)!;
+    const key = `tts/legacy-${legacy}.wav`; await storage().put(key, pcmFixture(1), "audio/wav");
+    await db.update(schema.ttsAsset).set({ isPrivate: true, storageKey: key, status: "ready" }).where(eq(schema.ttsAsset.id, legacy));
+    const result = await del.dailyCleanup(); expect(result.purgedLegacyReferenceCaches).toBeGreaterThanOrEqual(1);
+    expect(await storage().stat(key)).toBeNull(); expect(await db.select().from(schema.answer).where(eq(schema.answer.id, answerId))).toHaveLength(1);
+    expect(await db.select().from(schema.ttsAsset).where(eq(schema.ttsAsset.isPrivate, false))).not.toHaveLength(0);
+  });
+  it("revokes account-owned speech immediately and purges its files without clearing another account", async () => {
+    const { createAccount } = await import("@/lib/auth"), { storage } = await import("@/lib/storage");
+    const { ensureTtsAssets, generateTtsAsset, getTtsAssetForViewer } = await import("@/lib/services/tts");
+    const owner = await createAccount({ email: `speech-delete-${crypto.randomUUID()}@example.test`, password: "Speech-test-only-123!", name: "Speech deletion" });
+    await db.update(schema.user).set({ consentAt: new Date(), mustChangePassword: false, dailyQuotaMinutes: 1000 }).where(eq(schema.user.id, owner.id));
+    const session = await s.createSession({ id: owner.id, consentAt: new Date() }, { mode: "practice", questionId: "P1-HOME-1", fresh: true });
+    const ticket = await a.createUploadTicket(owner.id, { sessionId: session.id, planIndex: 0, kind: "main", submissionId: crypto.randomUUID(), clientDurationMs: 6000 });
+    const text = "A deleted account must not retain its private synthesized reference.";
+    const id = (await ensureTtsAssets([text], { answerId: ticket.answerId, enqueueMissing: false })).get(text)!; await generateTtsAsset(id);
+    const asset = await getTtsAssetForViewer({ id: owner.id, isAdmin: false }, id); expect(await storage().stat(asset.storageKey!)).not.toBeNull();
+    const other = (await ensureTtsAssets([text], { answerId, enqueueMissing: false })).get(text)!;
+    await del.deleteUserAccount(owner.id, owner.id); await expect(getTtsAssetForViewer({ id: first.id, isAdmin: true }, id)).rejects.toMatchObject({ status: 404 });
+    await del.purgeUser(owner.id); expect(await storage().stat(asset.storageKey!)).toBeNull();
+    await expect(getTtsAssetForViewer({ id: owner.id, isAdmin: false }, id)).rejects.toMatchObject({ status: 404 });
+    expect((await getTtsAssetForViewer({ id: first.id, isAdmin: false }, other)).id).toBe(other);
+  });
   it("revokes deleted audio access immediately and replays deletion after an old backup", async () => {
     const { dailyUsageSeconds } = await import("@/lib/quota");
     const beforeDelete = await dailyUsageSeconds(first.id);

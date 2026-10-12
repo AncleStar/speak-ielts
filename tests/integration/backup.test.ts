@@ -17,6 +17,7 @@ Object.assign(process.env, { DATABASE_URL: sourceUrl, BETTER_AUTH_SECRET: "backu
 let server: Awaited<ReturnType<typeof import("../../scripts/local-db").startLocalPostgres>>;
 let db: typeof import("@/lib/db").db, s: typeof import("@/db/schema"), lab: typeof import("@/lib/services/thoughts"), deletion: typeof import("@/lib/services/deletion");
 let ownerId = "", removedUserId = "", keptThoughtId = "", removedThoughtId = "", keptWordId = "", removedWordId = "", keptAnswerId = "", removedSessionId = "", inviteId = "", bundle = "";
+let keptReferenceId = "", keptReferenceKey = "", removedReferenceId = "", removedReferenceKey = "";
 const key = "test_key_backup_personal_only", audio = pcmFixture(6);
 const options = () => ({ databaseUrl: sourceUrl, dataDirectory: root, storageDirectory: path.join(root, "storage"), backupDirectory: path.join(root, "backups"), storageDriver: "local" as const });
 const restoreOptions = () => ({ bundle, databaseUrl: restoreUrl, dataDirectory: path.join(root, "restored"), currentDatabaseUrl: sourceUrl,
@@ -47,6 +48,12 @@ beforeAll(async () => {
     const ticket = await answers.createUploadTicket(ownerId, { sessionId: session.id, planIndex: 0, kind: "main", submissionId: crypto.randomUUID(), clientDurationMs: 6000 });
     await answers.receiveAudio(ownerId, ticket.answerId, ticket.ticket, audio);
     await (await import("@/lib/jobs/process-answer")).processAnswer({ answerId: ticket.answerId }, { finalAttempt: true });
+    const tts = await import("@/lib/services/tts"), text = `A private reference for synthetic answer number ${i}.`;
+    const referenceId = (await tts.ensureTtsAssets([text], { answerId: ticket.answerId, enqueueMissing: false })).get(text)!;
+    await tts.generateTtsAsset(referenceId);
+    const reference = await tts.getTtsAssetForViewer({ id: ownerId, isAdmin: false }, referenceId);
+    if (i === 0) { keptReferenceId = referenceId; keptReferenceKey = reference.storageKey!; }
+    else { removedReferenceId = referenceId; removedReferenceKey = reference.storageKey!; }
     if (i === 0) keptAnswerId = ticket.answerId; else removedSessionId = session.id;
   }
   await (await import("@/lib/ai/credentials")).saveAiConfig(ownerId, { mode: "personal", asrModel: "qwen3-asr-flash-2026-02-10", llmModel: "qwen-flash", monthlyBudgetYuan: 20, consent: true, apiKey: key });
@@ -61,6 +68,7 @@ it("creates a real pg_dump bundle containing audio, material, review, usage and 
   const saved = await createBackup(options()); bundle = saved.directory;
   const inspected = await inspectBackup(bundle);
   expect(inspected.manifest.files.some(f => f.path.startsWith("storage/recordings/"))).toBe(true);
+  expect(inspected.manifest.files.some(f => f.path.startsWith("storage/reference-audio/"))).toBe(true);
   expect(saved.files).toBeGreaterThan(2); expect((await fs.readFile(path.join(bundle, "database.dump"))).subarray(0, 5).toString()).toBe("PGDMP");
   expect((await fs.readdir(path.join(root, "backups"))).some(name => name.endsWith(".partial"))).toBe(false);
   expect(JSON.stringify(inspected.manifest)).not.toContain(key); expect(JSON.stringify(inspected.manifest)).not.toContain(sourceUrl);
@@ -166,6 +174,11 @@ it("restores the complete archive to a new database and replays newer deletion i
   const restoredAnswer = (await query(restoreUrl, "SELECT * FROM answer WHERE id=$1", [keptAnswerId])).rows[0];
   expect(restoredAnswer.transcript).toBe(sourceAnswer.transcript); expect(restoredAnswer.status).toBe("done");
   expect(await fs.readFile(path.join(restored.directory, "storage", restoredAnswer.storage_key))).toEqual(originalAudio);
+  const reference = (await query(restoreUrl, "SELECT is_private,answer_id,storage_key FROM tts_asset WHERE id=$1", [keptReferenceId])).rows[0];
+  expect(reference.is_private).toBe(true); expect(reference.answer_id).toBe(keptAnswerId);
+  expect(await fs.readFile(path.join(restored.directory, "storage", reference.storage_key))).toEqual(await fs.readFile(path.join(root, "storage", keptReferenceKey)));
+  expect((await query(restoreUrl, "SELECT count(*)::int AS n FROM tts_asset WHERE id=$1", [removedReferenceId])).rows[0].n).toBe(0);
+  expect(await fs.stat(path.join(restored.directory, "storage", removedReferenceKey)).catch(() => null)).toBeNull();
   const restoredConfig = (await query(restoreUrl, "SELECT * FROM user_ai_config WHERE user_id=$1", [ownerId])).rows[0];
   expect(restoredConfig.key_ciphertext).toBe(sourceAccount.keyCiphertext); expect(restoredConfig.monthly_budget_yuan).toBe(20);
   expect((await import("@/lib/ai/credentials")).decryptApiKey(ownerId, restoredConfig.key_ciphertext)).toBe(key);

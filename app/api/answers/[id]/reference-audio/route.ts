@@ -10,6 +10,6 @@ export const POST = handle(async (_req: Request, ctx: { params: Promise<{ id: st
   const sample = (d.feedback?.data as { sampleAnswer?: unknown } | undefined)?.sampleAnswer;
   const text = typeof sample === "string" ? sample : d.question?.content.referenceAnswer;
   if (typeof text !== "string" || !text) throw notFound("参考回答");
-  const assets = await ensureTtsAssets([text]);
+  const assets = await ensureTtsAssets([text], { answerId: id });
   return json({ ttsId: assets.get(text.trim()) });
 });

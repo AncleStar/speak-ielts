@@ -2,7 +2,7 @@ import fs from "node:fs/promises";
 import path from "node:path";
 import crypto from "node:crypto";
 import { and, eq, isNotNull, isNull, lt, or, sql } from "drizzle-orm";
-import { answer, deletionLog, personalThought, vocabularyEntry, practiceSession, signupInvite, usageEvent, user, userAiConfig } from "@/db/schema";
+import { answer, deletionLog, personalThought, vocabularyEntry, practiceSession, signupInvite, ttsAsset, usageEvent, user, userAiConfig } from "@/db/schema";
 import { db } from "@/lib/db";
 import { dataDir } from "@/lib/env";
 import { notFound } from "@/lib/errors";
@@ -90,6 +90,9 @@ async function purgeSessionLocked(sessionId: string) {
     for (const row of used) if (Number(row.seconds) > 0) await tx.insert(usageEvent).values({ userId: current.userId, service: "deleted-audio-quota", model: "quota-ledger", mock: true, costYuan: 0,
       units: { seconds: Math.ceil(Number(row.seconds)), day: new Date(row.day).toISOString() } });
     await tx.delete(practiceSession).where(eq(practiceSession.id, sessionId));
+    // Cascading deletion locks private TTS rows before clearing their prefix.
+    // A concurrent generator either finishes before this cleanup or observes no row and removes its write.
+    await st.deletePrefix(`reference-audio/${current.userId}/${sessionId}/`);
   });
   await db
     .update(deletionLog)
@@ -127,6 +130,7 @@ export async function purgeUser(userId: string) {
     await tx.update(signupInvite).set({ email: null, usedBy: null, revokedAt: new Date() })
       .where(or(eq(signupInvite.usedBy, userId), u ? eq(signupInvite.email, u.email) : undefined));
     await tx.delete(user).where(eq(user.id, userId));
+    await storage().deletePrefix(`reference-audio/${userId}/`);
   });
   await db
     .update(deletionLog)
@@ -175,6 +179,14 @@ export async function replayDeletions() {
  */
 export async function dailyCleanup(now = new Date()) {
   const st = storage();
+  const legacyReferences = await db.select({ id: ttsAsset.id }).from(ttsAsset).where(and(eq(ttsAsset.isPrivate, true), isNull(ttsAsset.answerId)));
+  let purgedLegacyReferenceCaches = 0;
+  for (const candidate of legacyReferences) purgedLegacyReferenceCaches += await db.transaction(async tx => {
+    const [asset] = await tx.select().from(ttsAsset).where(and(eq(ttsAsset.id, candidate.id), eq(ttsAsset.isPrivate, true), isNull(ttsAsset.answerId))).for("update");
+    if (!asset) return 0;
+    if (asset.storageKey) await st.delete(asset.storageKey);
+    await tx.delete(ttsAsset).where(eq(ttsAsset.id, asset.id)); return 1;
+  });
   const cutoff = new Date(now.getTime() - 30 * 86400_000);
   const old = await db
     .select({ id: answer.id, key: answer.storageKey })
@@ -209,7 +221,7 @@ export async function dailyCleanup(now = new Date()) {
     .from(user)
     .where(and(isNotNull(user.deletedAt), lt(user.deletedAt, new Date(now.getTime() - 3600_000))));
   for (const u of deletedUsers) await purgeUser(u.id);
-  const result = { expiredAudio: old.length, staleUploads: staleRemoved, purgedSessions: deletedSessions.length, purgedUsers: deletedUsers.length };
+  const result = { expiredAudio: old.length, staleUploads: staleRemoved, purgedSessions: deletedSessions.length, purgedUsers: deletedUsers.length, purgedLegacyReferenceCaches };
   await logOps("info", "cleanup", null, `每日清理：${JSON.stringify(result)}`);
   return result;
 }

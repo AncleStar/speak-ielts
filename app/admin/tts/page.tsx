@@ -13,10 +13,10 @@ export const metadata: Metadata = { title: "管理 · 考官音频" };
 
 export default async function AdminTts() {
   const c = await ttsStatusCounts();
-  const problems = await db.select().from(ttsAsset).where(and(eq(ttsAsset.model, c.model), eq(ttsAsset.voice, c.voice), ne(ttsAsset.status, "ready"))).orderBy(desc(ttsAsset.updatedAt)).limit(20);
+  const problems = await db.select().from(ttsAsset).where(and(eq(ttsAsset.isPrivate, false), eq(ttsAsset.model, c.model), eq(ttsAsset.voice, c.voice), ne(ttsAsset.status, "ready"))).orderBy(desc(ttsAsset.updatedAt)).limit(20);
   return (
     <>
-      <PageHeader title="考官音频" description="题目发布后预生成音频并保存。声音切换后会生成新缓存，已有练习刷新后也会使用当前声音。" />
+      <PageHeader title="考官音频" description="这里显示共享题目音频。个人参考朗读按记录权限读取。声音切换后会生成新缓存，已有练习刷新后也会使用当前声音。" />
       <div className="grid gap-4 md:grid-cols-2">
         <Card>
           <CardHeader>

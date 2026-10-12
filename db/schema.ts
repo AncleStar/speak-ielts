@@ -414,6 +414,8 @@ export const vocabularyEntry = pgTable("vocabulary_entry", {
 
 export const ttsAsset = pgTable("tts_asset", {
   id: id(),
+  isPrivate: boolean("is_private").notNull().default(false),
+  answerId: text("answer_id").references(() => answer.id, { onDelete: "cascade" }),
   hash: text("hash").notNull().unique(),
   text: text("text").notNull(),
   voice: text("voice").notNull(),
@@ -427,7 +429,7 @@ export const ttsAsset = pgTable("tts_asset", {
   error: text("error"),
   createdAt: ts("created_at").notNull().defaultNow(),
   updatedAt: ts("updated_at").notNull().defaultNow(),
-});
+}, t => [index("tts_asset_answer_idx").on(t.answerId)]);
 
 export const usageEvent = pgTable(
   "usage_event",
