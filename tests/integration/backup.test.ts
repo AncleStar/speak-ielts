@@ -1,6 +1,9 @@
 import fs from "node:fs/promises";
 import path from "node:path";
 import pg from "pg";
+import { execFile } from "node:child_process";
+import { promisify } from "node:util";
+import { pathToFileURL } from "node:url";
 import { beforeAll, afterAll, expect, it } from "vitest";
 import { eq } from "drizzle-orm";
 import { createBackup, inspectBackup, restoreBackup } from "@/lib/backup";
@@ -62,6 +65,66 @@ it("creates a real pg_dump bundle containing audio, material, review, usage and 
   expect((await fs.readdir(path.join(root, "backups"))).some(name => name.endsWith(".partial"))).toBe(false);
   expect(JSON.stringify(inspected.manifest)).not.toContain(key); expect(JSON.stringify(inspected.manifest)).not.toContain(sourceUrl);
 });
+
+async function checkInterruptedRestore(phase: "before-archive" | "before-finalization", archive = bundle, approvedSnapshot = false) {
+  const name = `backup_interrupted_${phase.replaceAll("-", "_")}${approvedSnapshot ? "_approved" : ""}`, url = `postgres://postgres:postgres@127.0.0.1:5552/${name}`;
+  await server.createDatabase(name);
+  const directory = path.join(root, name), signal = path.join(directory + "-signal.json"), preload = path.join(directory + "-interrupt.mjs");
+  // Interrupt the real CLI at either side of its actual pg_restore call; no production test hook.
+  await fs.writeFile(preload, `import cp from 'node:child_process'; import { syncBuiltinESMExports } from 'node:module'; import { writeFileSync } from 'node:fs';
+const original = cp.spawn;
+cp.spawn = function(command, args, options) {
+  if (process.env.RESTORE_INTERRUPT_STAGE === 'before-archive' ? args?.includes('--single-transaction') : args?.some(arg => typeof arg === 'string' && arg.endsWith('restore-finalize.ts'))) {
+    writeFileSync(process.env.RESTORE_INTERRUPT_SIGNAL, JSON.stringify({ stage: process.env.RESTORE_INTERRUPT_STAGE }), { flag: 'wx', mode: 0o600, flush: true });
+    process.exit(86);
+  }
+  return original.call(this, command, args, options);
+}; syncBuiltinESMExports();`, { mode: 0o600 });
+  await expect(promisify(execFile)(process.execPath, ["--import", pathToFileURL(preload).href, "--import", "tsx", "scripts/restore.ts", archive], {
+    env: { ...process.env, RESTORE_DATABASE_URL: url, RESTORE_DATA_DIR: directory, RESTORE_LATEST_DELETION_LOG: path.join(root, "deletion-log.jsonl"),
+      RESTORE_INTERRUPT_SIGNAL: signal, RESTORE_INTERRUPT_STAGE: phase, DASHSCOPE_API_KEY: "", OSS_ACCESS_KEY_ID: "", OSS_ACCESS_KEY_SECRET: "" }, windowsHide: true, timeout: 120000,
+  }).catch(async error => {
+    await fs.writeFile(directory + "-cli.log", String(error.stderr ?? ""), { mode: 0o600 });
+    throw error;
+  })).rejects.toMatchObject({ code: 86 });
+  expect(JSON.parse(await fs.readFile(signal, "utf8"))).toEqual({ stage: phase });
+  if (phase === "before-archive") {
+    expect((await query(url, "SELECT to_regclass('public.app_setting') AS name")).rows[0].name).toBeNull();
+  } else {
+    expect((await query(url, "SELECT count(*)::int AS n FROM account WHERE password IS NOT NULL")).rows[0].n).toBeGreaterThan(0);
+    const state = (await query(url, "SELECT value FROM app_setting WHERE key='recovery:opening-review'")).rows[0]?.value;
+    expect(state?.status).toBe(approvedSnapshot ? "approved" : undefined);
+  }
+  const pending = path.join(directory, "restore-pending.json");
+  await fs.rename(pending, pending + ".lost");
+  const probe = `import { assertRecoveryReady } from './lib/recovery-state.ts'; import { billableCall } from './lib/usage.ts'; import { closeDb } from './lib/db.ts';
+let readiness, billing, dispatches=0;
+try { await assertRecoveryReady(); readiness='ready'; } catch(error) { readiness=error.code; }
+try { await billableCall({service:'asr',model:'test-no-dispatch',mock:false,jobRef:'interruption-test',estimate:{seconds:1},run:async()=>{dispatches++;throw new Error('Unexpected dispatch')},units:()=>({seconds:1})}); billing='ready'; } catch(error) { billing=error.code; }
+await closeDb(); console.log(JSON.stringify({readiness,billing,dispatches}));`;
+  const result = await promisify(execFile)(process.execPath, ["--import", "tsx", "--input-type=module", "-e", probe], {
+    env: { ...process.env, DATABASE_URL: url, DATA_DIR: directory, LOCAL_STORAGE_DIR: path.join(directory, "storage"), RESTORE_FINALIZE: "false" }, windowsHide: true, timeout: 30000,
+  });
+  const observed = JSON.parse(result.stdout.trim());
+  await fs.writeFile(directory + "-gate.json", JSON.stringify({ phase, approvedSnapshot, ...observed }), { mode: 0o600 });
+  expect(observed).toEqual({ readiness: "restore_review_required", billing: "restore_review_required", dispatches: 0 });
+}
+
+it("blocks a committed archive when the restore process exits before finalization, even with missing file markers", async () => {
+  await checkInterruptedRestore("before-finalization");
+}, 150000);
+
+it("blocks an interrupted empty target before archived tables exist", async () => {
+  await checkInterruptedRestore("before-archive");
+}, 150000);
+
+it("keeps an approved state from an older archive closed until a new recovery is reviewed", async () => {
+  await db.insert(s.appSetting).values({ key: "recovery:opening-review", value: { status: "approved", recoveryId: crypto.randomUUID() } });
+  let approvedArchive: string;
+  try { approvedArchive = (await createBackup(options())).directory; }
+  finally { await db.delete(s.appSetting).where(eq(s.appSetting.key, "recovery:opening-review")); }
+  await checkInterruptedRestore("before-finalization", approvedArchive!, true);
+}, 150000);
 
 it("restores the complete archive to a new database and replays newer deletion intents without changing the source", async () => {
   await lab.deleteThought(ownerId, removedThoughtId); await lab.deleteVocabulary(ownerId, removedWordId);
@@ -175,7 +238,14 @@ it("requires complete permissions and cost review, then rotates credentials and 
   await expect(review.approveRestoreReview(restoreUrl, directory, prepared.file)).rejects.toThrow("低于");
   Object.assign(input, valid);
   await fs.writeFile(prepared.file, JSON.stringify(input));
+  await query(restoreUrl, "CREATE TABLE speak_restore_pending.unexpected_object(id int)");
+  await expect(review.approveRestoreReview(restoreUrl, directory, prepared.file)).rejects.toThrow();
+  expect((await query(restoreUrl, "SELECT count(*)::int AS n FROM usage_event WHERE service='recovery-adjustment'")).rows[0].n).toBe(0);
+  expect((await query(restoreUrl, "SELECT password FROM account WHERE user_id=$1", [ownerId])).rows[0].password).toBeNull();
+  expect((await query(restoreUrl, "SELECT value FROM app_setting WHERE key='recovery:opening-review'")).rows[0].value.status).toBe("pending");
+  await query(restoreUrl, "DROP TABLE speak_restore_pending.unexpected_object");
   const approved = await review.approveRestoreReview(restoreUrl, directory, prepared.file);
+  expect((await query(restoreUrl, "SELECT EXISTS(SELECT 1 FROM pg_namespace WHERE nspname='speak_restore_pending') AS pending")).rows[0].pending).toBe(false);
   expect((await query(restoreUrl, "SELECT sum(cost_yuan)::float8 AS cost FROM usage_event WHERE billing_source='personal' AND mock=false")).rows[0].cost).toBe(2.2);
   expect((await query(restoreUrl, "SELECT sum(cost_yuan)::float8 AS cost FROM usage_event WHERE billing_source='platform' AND mock=false")).rows[0].cost).toBe(0.5);
   expect((await query(restoreUrl, "SELECT value FROM app_setting WHERE key='pauseNewSessions'")).rows[0].value).toBe(true);

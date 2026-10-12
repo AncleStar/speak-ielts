@@ -6,6 +6,7 @@ import { spawn } from "node:child_process";
 import pg from "pg";
 import { z } from "zod";
 import { mergeDeletionLogs, parseDeletionLog } from "@/lib/deletion-log";
+import { RESTORE_PENDING_SCHEMA } from "@/lib/recovery-constants";
 
 const fileSchema = z.object({ path: z.string().min(1).max(600), bytes: z.number().int().nonnegative(), sha256: z.string().regex(/^[a-f0-9]{64}$/) });
 const manifestSchema = z.object({ format: z.literal("speak-backup-v1"), createdAt: z.string().datetime(), databaseMajor: z.literal(17),
@@ -104,7 +105,7 @@ export async function createBackup(options: BackupOptions) {
     if (Math.floor(Number((await client.query("SHOW server_version_num")).rows[0].server_version_num) / 10000) !== 17) throw new Error("当前备份支持 PostgreSQL 17 数据库");
     const snapshot = (await client.query("SELECT pg_export_snapshot() AS id")).rows[0].id as string;
     const keys = (await client.query<{ key: string }>("SELECT storage_key AS key FROM answer WHERE storage_key IS NOT NULL AND audio_deleted_at IS NULL AND created_at >= now() - interval '30 days' UNION SELECT storage_key AS key FROM tts_asset WHERE storage_key IS NOT NULL AND status = 'ready'")).rows;
-    await run(tool, ["--no-password", "--format=custom", `--snapshot=${snapshot}`, "--file", path.join(stage, "database.dump")], connectionEnv(options.databaseUrl), "pg_dump");
+    await run(tool, ["--no-password", "--format=custom", `--exclude-schema=${RESTORE_PENDING_SCHEMA}`, `--snapshot=${snapshot}`, "--file", path.join(stage, "database.dump")], connectionEnv(options.databaseUrl), "pg_dump");
     await fs.mkdir(path.join(stage, "storage"));
     if (await exists(storage)) for (const key of await walk(storage)) {
       safeRelative(`storage/${key}`);
@@ -171,6 +172,9 @@ export async function restoreBackup(options: RestoreOptions) {
     const objects = await client.query("SELECT nspname FROM pg_namespace WHERE nspname NOT IN ('public','information_schema') AND nspname NOT LIKE 'pg_%' UNION SELECT n.nspname FROM pg_class c JOIN pg_namespace n ON n.oid=c.relnamespace WHERE n.nspname NOT IN ('pg_catalog','information_schema') AND n.nspname NOT LIKE 'pg_%' UNION SELECT n.nspname FROM pg_proc p JOIN pg_namespace n ON n.oid=p.pronamespace WHERE n.nspname NOT IN ('pg_catalog','information_schema') UNION SELECT n.nspname FROM pg_type t JOIN pg_namespace n ON n.oid=t.typnamespace WHERE n.nspname NOT IN ('pg_catalog','information_schema') AND n.nspname NOT LIKE 'pg_%'");
     if (objects.rows.length) throw new Error("恢复目标数据库不是空库，禁止覆盖已有数据");
     if (Number((await client.query("SELECT count(*) AS n FROM pg_stat_activity WHERE datname=current_database() AND pid<>pg_backend_pid()")).rows[0].n)) throw new Error("恢复数据库正在被其他进程使用，请先停止该恢复环境的服务");
+    // Commit a database guard before any archived data can become visible. It survives
+    // interrupted restores, missing data volumes, and an approved state in an older dump.
+    await client.query(`CREATE SCHEMA ${RESTORE_PENDING_SCHEMA}`);
   } finally { await client.end().catch(() => {}); }
   await fs.mkdir(path.dirname(target), { recursive: true, mode: 0o700 });
   await fs.mkdir(target, { mode: 0o700 });
@@ -183,7 +187,7 @@ export async function restoreBackup(options: RestoreOptions) {
     if ((await hashFile(destinationFile)).sha256 !== file.sha256) throw new Error("恢复音频校验失败，请保留失败目录排查，勿启动服务");
   }
   await fs.writeFile(path.join(target, "deletion-log.jsonl"), merged, { flag: "wx", mode: 0o600, flush: true });
-  await run(tool, ["--no-password", "--single-transaction", "--no-owner", "--no-acl", "--dbname", decodeURIComponent(destination.pathname.slice(1)), path.join(root, "database.dump")], environment, "pg_restore");
+  await run(tool, ["--no-password", "--single-transaction", `--exclude-schema=${RESTORE_PENDING_SCHEMA}`, "--no-owner", "--no-acl", "--dbname", decodeURIComponent(destination.pathname.slice(1)), path.join(root, "database.dump")], environment, "pg_restore");
   await run(process.execPath, ["--import", "tsx", path.resolve("scripts/restore-finalize.ts")], { ...process.env, DATABASE_URL: options.databaseUrl,
     DATA_DIR: target, LOCAL_STORAGE_DIR: path.join(target, "storage"), STORAGE_DRIVER: "local", RESTORE_FINALIZE: "true" }, "恢复迁移与删除重放");
   return { directory: target, files: manifest.files.length, deletionEntries: parseDeletionLog(merged).length };

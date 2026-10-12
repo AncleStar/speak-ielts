@@ -4,7 +4,7 @@ import { createHash, randomBytes, randomUUID } from "node:crypto";
 import pg from "pg";
 import { hashPassword } from "better-auth/crypto";
 import { z } from "zod";
-import { RECOVERY_STATE_KEY } from "@/lib/recovery-state";
+import { RECOVERY_STATE_KEY, RESTORE_PENDING_SCHEMA } from "@/lib/recovery-constants";
 
 const money = z.number().finite().nonnegative().max(1e9);
 const monthSchema = z.string().regex(/^20\d{2}-(0[1-9]|1[0-2])$/);
@@ -170,6 +170,9 @@ export async function approveRestoreReview(databaseUrl: string, directory: strin
     }
     await client.query("UPDATE app_setting SET value=$2,updated_at=now() WHERE key=$1", [RECOVERY_STATE_KEY, { ...state, status: "approved", reviewHash, approvedAt: new Date().toISOString(), personalKeysRequireReentry: true }]);
     await client.query("UPDATE app_setting SET value=$1::jsonb,updated_at=now() WHERE key='pauseNewSessions'", [JSON.stringify(!review.openNewSessions)]);
+    // Release the archive-start guard atomically with permissions, passwords and costs.
+    // RESTRICT deliberately fails if unexpected objects have appeared in this reserved schema.
+    await client.query(`DROP SCHEMA IF EXISTS ${RESTORE_PENDING_SCHEMA}`);
     await client.query("COMMIT");
     await fs.rm(path.join(directory, "restore-review-pending.json"));
     return { alreadyApproved: false, credentialsFile };
