@@ -3,7 +3,7 @@ import fs from "node:fs/promises";
 import path from "node:path";
 import { dataDir } from "@/lib/env";
 import { naturalTts, naturalVoiceIdentity, prepareNaturalVoice, disposeNaturalVoice } from "@/lib/providers/natural-tts";
-import { ensureLocalEnv } from "./local-env";
+import { ensureVoiceEnv } from "./local-env";
 import { VoiceCacheError, type VoiceProgress } from "@/lib/providers/natural-voice-cache";
 
 const cancellation = new AbortController();
@@ -20,7 +20,7 @@ function progress(event: VoiceProgress) {
 }
 
 try {
-  if (ensureLocalEnv()) console.log("已创建本机 .env，初始账号与密码请在文件中查看。");
+  if (ensureVoiceEnv()) console.log("已创建本机 .env，初始账号与密码请在文件中查看。");
   console.log("准备自然语音模型，首次需下载约 93 MB；后续使用本机缓存。");
   console.log("下载总等待上限 20 分钟；连接超过 30 秒或传输停滞超过 45 秒会终止请求，最多重试一次。Ctrl+C 取消准备。");
   await prepareNaturalVoice(true, { signal: cancellation.signal, onProgress: progress });

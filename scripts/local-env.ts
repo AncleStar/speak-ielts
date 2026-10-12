@@ -15,3 +15,9 @@ export function ensureLocalEnv(root = process.cwd()) {
   }
   loadDotEnv(file); return created;
 }
+
+/** Containers inject configuration and can keep the application directory read-only. */
+export function ensureVoiceEnv(root = process.cwd()) {
+  if (!fs.existsSync(path.join(root, ".env")) && process.env.DATABASE_URL?.trim()) return false;
+  return ensureLocalEnv(root);
+}

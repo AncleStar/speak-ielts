@@ -66,6 +66,30 @@ it("creates a real pg_dump bundle containing audio, material, review, usage and 
   expect(JSON.stringify(inspected.manifest)).not.toContain(key); expect(JSON.stringify(inspected.manifest)).not.toContain(sourceUrl);
 });
 
+it("only allows an explicitly requested truly empty pre-migration database", async () => {
+  await server.createDatabase("backup_bootstrap"); const url = sourceUrl.replace("backup_source", "backup_bootstrap");
+  const bootstrap = { ...options(), databaseUrl: url, backupDirectory: path.join(root, "bootstrap-backups") };
+  await expect(createBackup(bootstrap)).rejects.toThrow();
+  const saved = await createBackup({ ...bootstrap, allowEmptyDatabase: true });
+  expect((await inspectBackup(saved.directory)).manifest.databaseMajor).toBe(17);
+  await query(url, "CREATE TABLE unrelated (id integer)");
+  await expect(createBackup({ ...bootstrap, allowEmptyDatabase: true })).rejects.toThrow();
+});
+it("refuses an interrupted restore even when its application tables are still absent", async () => {
+  await server.createDatabase("backup_guarded_bootstrap"); const url = sourceUrl.replace("backup_source", "backup_guarded_bootstrap");
+  const { RESTORE_PENDING_SCHEMA } = await import("@/lib/recovery-constants");
+  await query(url, `CREATE SCHEMA ${RESTORE_PENDING_SCHEMA}`);
+  const guarded = { ...options(), databaseUrl: url, backupDirectory: path.join(root, "guarded-bootstrap-backups") };
+  await expect(createBackup({ ...guarded, allowEmptyDatabase: true })).rejects.toThrow("尚未完成核对");
+  await expect(createBackup(guarded)).rejects.toThrow("尚未完成核对");
+});
+it("does not republish an unreviewed recovery database when its schema guard is missing", async () => {
+  await server.createDatabase("backup_unreviewed_bootstrap"); const url = sourceUrl.replace("backup_source", "backup_unreviewed_bootstrap");
+  await query(url, "CREATE TABLE app_setting (key text PRIMARY KEY, value jsonb NOT NULL)");
+  await query(url, "INSERT INTO app_setting VALUES ('recovery:opening-review', '{\"status\":\"pending\"}')");
+  await expect(createBackup({ ...options(), databaseUrl: url, backupDirectory: path.join(root, "unreviewed-bootstrap-backups"), allowEmptyDatabase: true })).rejects.toThrow("尚未完成核对");
+});
+
 async function checkInterruptedRestore(phase: "before-archive" | "before-finalization", archive = bundle, approvedSnapshot = false) {
   const name = `backup_interrupted_${phase.replaceAll("-", "_")}${approvedSnapshot ? "_approved" : ""}`, url = `postgres://postgres:postgres@127.0.0.1:5552/${name}`;
   await server.createDatabase(name);

@@ -6,13 +6,13 @@ import { spawn } from "node:child_process";
 import pg from "pg";
 import { z } from "zod";
 import { mergeDeletionLogs, parseDeletionLog } from "@/lib/deletion-log";
-import { RESTORE_PENDING_SCHEMA } from "@/lib/recovery-constants";
+import { RECOVERY_STATE_KEY, RESTORE_PENDING_SCHEMA } from "@/lib/recovery-constants";
 
 const fileSchema = z.object({ path: z.string().min(1).max(600), bytes: z.number().int().nonnegative(), sha256: z.string().regex(/^[a-f0-9]{64}$/) });
 const manifestSchema = z.object({ format: z.literal("speak-backup-v1"), createdAt: z.string().datetime(), databaseMajor: z.literal(17),
   storageDriver: z.literal("local"), files: z.array(fileSchema).min(2).max(1_000_000) });
 export type BackupManifest = z.infer<typeof manifestSchema>;
-export interface BackupOptions { databaseUrl: string; dataDirectory: string; storageDirectory: string; backupDirectory: string; storageDriver: "local" | "oss" }
+export interface BackupOptions { databaseUrl: string; dataDirectory: string; storageDirectory: string; backupDirectory: string; storageDriver: "local" | "oss"; allowEmptyDatabase?: boolean }
 export interface RestoreOptions { bundle: string; databaseUrl: string; dataDirectory: string; currentDatabaseUrl: string;
   currentDataDirectory: string; currentStorageDirectory: string; latestDeletionLog: string; noLaterDeletions?: boolean }
 
@@ -103,8 +103,19 @@ export async function createBackup(options: BackupOptions) {
     await client.connect();
     await client.query("BEGIN ISOLATION LEVEL REPEATABLE READ READ ONLY"); transaction = true;
     if (Math.floor(Number((await client.query("SHOW server_version_num")).rows[0].server_version_num) / 10000) !== 17) throw new Error("当前备份支持 PostgreSQL 17 数据库");
+    const gates = await client.query<{ pending: string | null; settings: string | null }>("SELECT to_regnamespace($1)::text AS pending, to_regclass('public.app_setting')::text AS settings", [RESTORE_PENDING_SCHEMA]);
+    if (gates.rows[0].pending) throw new Error("恢复数据库尚未完成核对，不能生成新的完整备份");
+    if (gates.rows[0].settings) {
+      const review = await client.query<{ value: { status?: string } }>("SELECT value FROM app_setting WHERE key=$1", [RECOVERY_STATE_KEY]);
+      if (review.rows[0] && review.rows[0].value?.status !== "approved") throw new Error("恢复数据库尚未完成核对，不能生成新的完整备份");
+    }
     const snapshot = (await client.query("SELECT pg_export_snapshot() AS id")).rows[0].id as string;
-    const keys = (await client.query<{ key: string }>("SELECT storage_key AS key FROM answer WHERE storage_key IS NOT NULL AND audio_deleted_at IS NULL AND created_at >= now() - interval '30 days' UNION SELECT storage_key AS key FROM tts_asset WHERE storage_key IS NOT NULL AND status = 'ready'")).rows;
+    let emptyDatabase = false;
+    if (options.allowEmptyDatabase) {
+      const catalog = await client.query<{ relations: string }>("SELECT count(*) AS relations FROM pg_class c JOIN pg_namespace n ON n.oid=c.relnamespace WHERE n.nspname NOT LIKE 'pg_%' AND n.nspname <> 'information_schema' AND c.relkind IN ('r','p','v','m','f','S')");
+      emptyDatabase = Number(catalog.rows[0].relations) === 0;
+    }
+    const keys = emptyDatabase ? [] : (await client.query<{ key: string }>("SELECT storage_key AS key FROM answer WHERE storage_key IS NOT NULL AND audio_deleted_at IS NULL AND created_at >= now() - interval '30 days' UNION SELECT storage_key AS key FROM tts_asset WHERE storage_key IS NOT NULL AND status = 'ready'")).rows;
     await run(tool, ["--no-password", "--format=custom", `--exclude-schema=${RESTORE_PENDING_SCHEMA}`, `--snapshot=${snapshot}`, "--file", path.join(stage, "database.dump")], connectionEnv(options.databaseUrl), "pg_dump");
     await fs.mkdir(path.join(stage, "storage"));
     if (await exists(storage)) for (const key of await walk(storage)) {

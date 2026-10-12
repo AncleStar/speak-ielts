@@ -15,14 +15,20 @@ x-app: &app
   init: true
 
 x-backup: &backup
-  image: postgres:17-bookworm
+  image: ielts-interview:${APP_IMAGE_TAG:-local}
+  build: .
+  user: "0:0"
+  init: true
+  stop_grace_period: 2m
   environment:
-    PGHOST: db
-    PGUSER: interview
-    PGPASSWORD: ${POSTGRES_PASSWORD:?Set POSTGRES_PASSWORD in .env}
-    PGDATABASE: interview
+    NODE_ENV: production
+    DATABASE_URL: postgres://interview:${POSTGRES_PASSWORD:?Set POSTGRES_PASSWORD in .env}@db:5432/interview
+    DATA_DIR: /app-data
+    LOCAL_STORAGE_DIR: /app-data/storage
+    STORAGE_DRIVER: ${STORAGE_DRIVER:-local}
+    BACKUP_DIR: /backups
+    BACKUP_RETENTION_DAYS: ${BACKUP_RETENTION_DAYS:-7}
   volumes:
-    - ./docker:/ops:ro
     - app-data:/app-data:ro
     - ./backups:/backups
   depends_on:
@@ -46,7 +52,7 @@ services:
     restart: unless-stopped
   backup-premigrate:
     <<: *backup
-    command: ["sh", "/ops/backup-once.sh", "premigrate"]
+    command: ["node", "--import", "tsx", "scripts/backup.ts", "--maintenance", "--allow-empty-db"]
   setup:
     <<: *app
     command: ["npm", "run", "setup"]
@@ -75,7 +81,10 @@ services:
     restart: unless-stopped
   backup:
     <<: *backup
-    command: ["sh", "/ops/backup-loop.sh"]
+    command: ["node", "--import", "tsx", "scripts/backup-loop.ts"]
+    depends_on:
+      setup:
+        condition: service_completed_successfully
     restart: unless-stopped
   caddy:
     image: caddy:2

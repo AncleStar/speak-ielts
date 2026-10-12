@@ -1,12 +1,13 @@
 import fs from "node:fs/promises";
 import path from "node:path";
 import { randomUUID } from "node:crypto";
-import { afterAll, expect, it, vi } from "vitest";
+import { afterAll, afterEach, expect, it, vi } from "vitest";
 vi.mock("../../scripts/_env", () => ({ loadDotEnv: vi.fn() }));
-import { ensureLocalEnv } from "../../scripts/local-env";
+import { ensureLocalEnv, ensureVoiceEnv } from "../../scripts/local-env";
 import { loadDotEnv } from "../../scripts/_env";
 const base = path.resolve("data/verification"), root = path.join(base, `local-env-${randomUUID()}`);
 afterAll(async () => { if (!root.startsWith(base + path.sep)) throw new Error("Invalid cleanup path"); await fs.rm(root, { recursive: true, force: true }); });
+afterEach(() => vi.unstubAllEnvs());
 it("first-use voice or startup commands create independent random credentials without overwriting later edits", async () => {
   const template = "DATABASE_URL=postgres://postgres:postgres@localhost:5433/interview\nBETTER_AUTH_SECRET=\nADMIN_INITIAL_PASSWORD=\nAI_PROVIDER=mock\n";
   for (const name of ["first", "second"]) {
@@ -24,4 +25,12 @@ it("existing configuration is preserved even when its original template is absen
   await fs.mkdir(folder, { recursive: true }); await fs.writeFile(path.join(folder, ".env"), content);
   expect(ensureLocalEnv(folder)).toBe(false); expect(await fs.readFile(path.join(folder, ".env"), "utf8")).toBe(content);
   expect(loadDotEnv).toHaveBeenCalledWith(path.join(folder, ".env"));
+});
+it("voice preparation preserves injected configuration without reading a template or creating credentials", async () => {
+  const folder = path.join(root, "injected"); await fs.mkdir(folder, { recursive: true });
+  vi.stubEnv("DATABASE_URL", "postgres://fixture@db:5432/interview"); vi.stubEnv("BETTER_AUTH_SECRET", "injected-test-secret-must-remain");
+  expect(ensureVoiceEnv(folder)).toBe(false);
+  expect(process.env.DATABASE_URL).toBe("postgres://fixture@db:5432/interview");
+  expect(process.env.BETTER_AUTH_SECRET).toBe("injected-test-secret-must-remain");
+  expect(await fs.readdir(folder)).toEqual([]); expect(loadDotEnv).not.toHaveBeenCalledWith(path.join(folder, ".env"));
 });

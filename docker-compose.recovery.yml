@@ -1,0 +1,80 @@
+name: speak-recovery
+
+x-recovery-app: &recovery-app
+  image: ielts-interview:${APP_IMAGE_TAG:-local}
+  env_file: .env
+  init: true
+  volumes:
+    - recovered-data:/restore-data
+
+x-recovered-env: &recovered-env
+  NODE_ENV: production
+  DATABASE_URL: postgres://interview:${POSTGRES_PASSWORD:?Set POSTGRES_PASSWORD in .env}@db:5432/interview_recovered
+  DATA_DIR: /restore-data/recovered
+  LOCAL_STORAGE_DIR: /restore-data/recovered/storage
+  BETTER_AUTH_URL: ${RECOVERY_URL:-http://localhost:3101}
+  TIME_SCALE: "1"
+
+services:
+  db:
+    image: postgres:17-bookworm
+    environment:
+      POSTGRES_DB: interview_recovered
+      POSTGRES_USER: interview
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?Set POSTGRES_PASSWORD in .env}
+    volumes:
+      - recovered-postgres:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U interview -d interview_recovered"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+    restart: unless-stopped
+  restore:
+    <<: *recovery-app
+    profiles: ["ops"]
+    user: "0:0"
+    environment:
+      NODE_ENV: production
+      DATABASE_URL: postgres://interview:${POSTGRES_PASSWORD:?Set POSTGRES_PASSWORD in .env}@original-unmounted:5432/interview
+      DATA_DIR: /original-unmounted
+      LOCAL_STORAGE_DIR: /original-unmounted/storage
+      RESTORE_DATABASE_URL: postgres://interview:${POSTGRES_PASSWORD:?Set POSTGRES_PASSWORD in .env}@db:5432/interview_recovered
+      RESTORE_DATA_DIR: /restore-data/recovered
+      RESTORE_LATEST_DELETION_LOG: /backups/deletion-log.latest.jsonl
+    volumes:
+      - recovered-data:/restore-data
+      - ./backups:/backups:ro
+      - ./data/recovery-review:/control
+    command: ["node", "--import", "tsx", "scripts/restore.ts"]
+    depends_on:
+      db:
+        condition: service_healthy
+  web:
+    <<: *recovery-app
+    profiles: ["serve"]
+    environment: *recovered-env
+    ports:
+      - "127.0.0.1:${RECOVERY_PORT:-3101}:3000"
+    healthcheck:
+      test: ["CMD", "node", "-e", "fetch('http://127.0.0.1:3000/api/health').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))"]
+      interval: 15s
+      timeout: 5s
+      retries: 4
+    depends_on:
+      db:
+        condition: service_healthy
+    restart: unless-stopped
+  worker:
+    <<: *recovery-app
+    profiles: ["serve"]
+    environment: *recovered-env
+    command: ["npm", "run", "worker"]
+    depends_on:
+      db:
+        condition: service_healthy
+    restart: unless-stopped
+
+volumes:
+  recovered-postgres:
+  recovered-data:

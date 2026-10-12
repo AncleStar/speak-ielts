@@ -1,5 +1,7 @@
 import "./_env";
 import path from "node:path";
+import fs from "node:fs/promises";
+import { constants } from "node:fs";
 import { approveRestoreReview, prepareRestoreReview } from "@/lib/restore-review";
 
 try {
@@ -8,7 +10,9 @@ try {
   if (new URL(databaseUrl).pathname === new URL(process.env.DATABASE_URL!).pathname) throw new Error("恢复检查目标不能是当前业务库");
   if (action === "prepare") {
     const result = await prepareRestoreReview(databaseUrl, path.resolve(directory), process.argv[3]);
-    console.log(`检查表已生成：${result.file}。请逐一核对 ${result.accounts} 个账号、${result.costEntries} 项费用及部署配置；未开放服务。`);
+    const output = process.argv[4] ? path.resolve(process.argv[4]) : result.file;
+    if (output !== result.file) { await fs.copyFile(result.file, output, constants.COPYFILE_EXCL); await fs.chmod(output, 0o600); }
+    console.log(`检查表已生成：${output}。请逐一核对 ${result.accounts} 个账号、${result.costEntries} 项费用及部署配置；未开放服务。`);
   } else {
     const result = await approveRestoreReview(databaseUrl, path.resolve(directory), process.argv[3] || path.resolve(directory, "restore-review.json"));
     console.log(`恢复检查${result.alreadyApproved ? "已通过（重复操作未重复记费）" : "通过"}。私有临时凭据：${result.credentialsFile}。请私下交付本人，首次登录必须改密，个人 API Key 需重新填写。网页与 worker 未自动启动。`);
