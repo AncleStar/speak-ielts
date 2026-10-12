@@ -14,6 +14,32 @@ export async function createRhineStage(host: HTMLElement, props: () => DiscScene
   let destroyed=false, raf=0, mode="", lastId="", libraryKey="", entering=false, reduced=false, paused=false, playbackState="", intro=false;
   const motionQuery=matchMedia("(prefers-reduced-motion: reduce)");
   const events=new AbortController();
+  let artworkElement: HTMLElement | null = null;
+  const artworkResize = new ResizeObserver(refreshArtwork);
+  function clearArtwork() {
+    scene.setArtworkFrame();
+    for (const edge of ["top", "right", "bottom", "left"]) host.parentElement?.style.removeProperty(`--rhine-artwork-${edge}`);
+  }
+  function refreshArtwork() {
+    if (destroyed) return;
+    const responsive = host.clientWidth <= 767 || host.clientWidth <= 1100 && (host.clientWidth / host.clientHeight <= 1.05 || host.clientHeight <= 500);
+    const next = responsive ? host.closest(".rhine-root")?.querySelector<HTMLElement>(`.disc-scene-${props().variant}`) ?? null : null;
+    if (next !== artworkElement) { artworkResize.disconnect(); artworkElement = next; if (next) artworkResize.observe(next); }
+    scene.setInputSurface(next ?? undefined);
+    const world = host.parentElement;
+    if (!next) { clearArtwork(); return; }
+    const bounds = next.getBoundingClientRect(), origin = host.getBoundingClientRect();
+    const captions = Array.from(next.querySelectorAll<HTMLElement>(".disc-stage-meta,.disc-drive-status")).map(el => el.getBoundingClientRect()).filter(r => r.width > 0 && r.height > 0);
+    const bottom = Math.min(bounds.bottom - 8, ...captions.map(r => r.top - 10));
+    // Keep the real model inside its page slot, leaving caption and control space.
+    if (bounds.width <= 24 || bottom - bounds.top <= 40) { clearArtwork(); return; }
+    const frame = { left: bounds.left - origin.left + 8, top: bounds.top - origin.top + 6, width: bounds.width - 16, height: bottom - bounds.top - 6 };
+    scene.setArtworkFrame(frame);
+    world?.style.setProperty("--rhine-artwork-top", `${frame.top}px`);
+    world?.style.setProperty("--rhine-artwork-right", `${host.clientWidth - frame.left - frame.width}px`);
+    world?.style.setProperty("--rhine-artwork-bottom", `${frame.top + frame.height}px`);
+    world?.style.setProperty("--rhine-artwork-left", `${frame.left}px`);
+  }
   const overlay=document.createElementNS("http://www.w3.org/2000/svg","svg");
   overlay.classList.add("rhine-inspection"); overlay.setAttribute("aria-hidden","true");
   // Original model-space scan coordinates and timeline, projected through the live camera.
@@ -30,6 +56,7 @@ export async function createRhineStage(host: HTMLElement, props: () => DiscScene
   function wake(){if(!destroyed&&!raf&&!document.hidden)raf=requestAnimationFrame(frame);}
   function configure(){
     if(destroyed)return;
+    refreshArtwork();
     const p=props();
     if(p.variant==="library"){
       const key=p.ids.join("|")+p.columns?.join("|");
@@ -72,10 +99,10 @@ export async function createRhineStage(host: HTMLElement, props: () => DiscScene
     host.dataset.intro=String(intro);
     raf=requestAnimationFrame(frame);
   }
-  const resize=new ResizeObserver(()=>{host.dataset.layout=host.clientWidth/host.clientHeight<1.05?"portrait":host.clientWidth<1100?"compact":"desktop";scene.resize();wake();});
+  const resize=new ResizeObserver(()=>{host.dataset.layout=host.clientWidth/host.clientHeight<1.05?"portrait":host.clientWidth<1100?"compact":"desktop";refreshArtwork();scene.resize();wake();});
   const attributes=new MutationObserver(preferences);
   function dispose(){
-    if(destroyed)return;destroyed=true;cancelAnimationFrame(raf);events.abort();signal?.removeEventListener("abort",dispose);resize.disconnect();attributes.disconnect();motionQuery.removeEventListener("change",preferences);scene.dispose();overlay.remove();
+    if(destroyed)return;destroyed=true;cancelAnimationFrame(raf);events.abort();signal?.removeEventListener("abort",dispose);resize.disconnect();artworkResize.disconnect();clearArtwork();attributes.disconnect();motionQuery.removeEventListener("change",preferences);scene.dispose();overlay.remove();
   }
   signal?.addEventListener("abort",dispose,{once:true});
   try{
@@ -88,6 +115,7 @@ export async function createRhineStage(host: HTMLElement, props: () => DiscScene
     motionQuery.addEventListener("change",preferences);
     window.addEventListener("ambient-pause-change",preferences,{signal:events.signal});
     window.addEventListener("storage",preferences,{signal:events.signal});
+    document.addEventListener("scroll",()=>{refreshArtwork();wake();},{capture:true,passive:true,signal:events.signal});
     document.addEventListener("visibilitychange",()=>{if(document.hidden){cancelAnimationFrame(raf);raf=0;}else{scene.resumeAnimationClock();wake();}},{signal:events.signal});
     scene.renderer.domElement.addEventListener("webglcontextlost",event=>{event.preventDefault();failed();dispose();},{signal:events.signal});
     configure();wake();

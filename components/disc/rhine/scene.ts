@@ -33,7 +33,7 @@ import {
   type ArchiveCell,
   type ArchiveNavigation,
 } from "./archive-loop";
-import { archiveFraming } from "./viewport-layout";
+import { archiveFraming, type ArtworkFrame } from "./viewport-layout";
 import { ArchiveDrag, ArchivePlaneMomentum, type DragAxis, type DragProjection, type DragPosition } from "./archive-drag";
 import { assetUrl as publicAsset } from "./asset-url";
 import { fullMotion, reducedMotion, type MotionPreferences } from "./motion-preferences";
@@ -60,6 +60,17 @@ export class ArchiveScene {
   private playback = "idle";
   setPlayback(state: string) { this.playback = state; this.renderState.invalidate(); }
   private inputEvents = new AbortController();
+  private pointerEvents = new AbortController();
+  private inputSurface?: HTMLElement;
+  setInputSurface(surface?: HTMLElement) {
+    const next = surface ?? this.renderer.domElement;
+    if (next === this.inputSurface || this.disposed) return;
+    this.cancelPointer();
+    this.pointerEvents.abort();
+    this.pointerEvents = new AbortController();
+    this.inputSurface = next;
+    this.bindPointer();
+  }
   private assets = new AbortController();
   private disposed = false;
   private presence = 1;
@@ -80,6 +91,7 @@ export class ArchiveScene {
     this.disposed = true;
     this.assets.abort();
     this.inputEvents.abort();
+    this.pointerEvents.abort();
     this.cancelPointer();
     disposeThreeTree(this.scene);
     this.appearance.disposeSources();
@@ -260,6 +272,8 @@ export class ArchiveScene {
   private aoKernelSize = 32;
   private displayHeight = 0;
   private layoutKind = "";
+  private artworkFrame?: ArtworkFrame;
+  setArtworkFrame(frame?: ArtworkFrame) { this.artworkFrame = frame; }
   onSelect?: (index: number, cell?: ArchiveCell) => void;
   onHover?: (index: number | null) => void;
   onNavigate?: (axis: "row" | "lane", direction: number) => void;
@@ -973,7 +987,7 @@ export class ArchiveScene {
     this.archiveMomentum = null;
   }
   private bindPointer() {
-    const canvas = this.renderer.domElement;
+    const canvas = this.inputSurface ?? this.renderer.domElement;
     let activePointer: number | null = null;
     let previousX = 0,
       startX = 0,
@@ -992,7 +1006,7 @@ export class ArchiveScene {
         this.archiveMomentum
       )
         return;
-      const r = canvas.getBoundingClientRect();
+      const r = this.renderer.domElement.getBoundingClientRect();
       this.pointer.set(
         (e.clientX - r.left) / r.width - 0.5,
         (e.clientY - r.top) / r.height - 0.5,
@@ -1047,6 +1061,7 @@ export class ArchiveScene {
       });
     };
     canvas.addEventListener("pointerdown", (e) => {
+      if ((e.target as Element).closest("button,a,input,select,textarea")) return;
       if (e.pointerType === "mouse" && e.button !== 0) return;
       if (!this.canBrowse() && !this.canInspect) return;
       pointers.add(e.pointerId);
@@ -1073,7 +1088,7 @@ export class ArchiveScene {
       this.setHover(null);
       canvas.setPointerCapture(e.pointerId);
       if (this.relayActive) { this.holdingArchive = false; this.dragging = false; }
-    }, { signal: this.inputEvents.signal });
+    }, { signal: this.pointerEvents.signal });
     canvas.addEventListener("pointermove", (e) => {
       if (this.relayActive) {
         if (e.pointerId === activePointer) moved ||= Math.hypot(e.clientX - startX, e.clientY - startY) > 7;
@@ -1102,7 +1117,7 @@ export class ArchiveScene {
         );
         previousX = e.clientX;
       }
-    }, { signal: this.inputEvents.signal });
+    }, { signal: this.pointerEvents.signal });
     canvas.addEventListener("pointerup", (e) => {
       pointers.delete(e.pointerId);
       if (e.pointerId !== activePointer) return;
@@ -1128,25 +1143,25 @@ export class ArchiveScene {
         }
       }
       reset();
-    }, { signal: this.inputEvents.signal });
+    }, { signal: this.pointerEvents.signal });
     canvas.addEventListener("pointercancel", (e) => {
       pointers.delete(e.pointerId);
       if (e.pointerId === activePointer) {
         cancelled = true;
         reset();
       }
-    }, { signal: this.inputEvents.signal });
+    }, { signal: this.pointerEvents.signal });
     canvas.addEventListener("lostpointercapture", (e) => {
       pointers.delete(e.pointerId);
       if (e.pointerId === activePointer) {
         cancelled = true;
         reset();
       }
-    }, { signal: this.inputEvents.signal });
+    }, { signal: this.pointerEvents.signal });
     canvas.addEventListener("pointerleave", () => {
       this.pointer.set(0, 0);
       this.setHover(null);
-    }, { signal: this.inputEvents.signal });
+    }, { signal: this.pointerEvents.signal });
     canvas.addEventListener(
       "wheel",
       (e) => {
@@ -1166,7 +1181,7 @@ export class ArchiveScene {
             (e.deltaMode === 1
               ? 40
               : e.deltaMode === 2
-                ? canvas.clientHeight
+                ? this.renderer.domElement.clientHeight
                 : 1),
           -300,
           300,
@@ -1186,17 +1201,17 @@ export class ArchiveScene {
           this.navigatingDrag = false;
         }
       },
-      { ...{ passive: false }, signal: this.inputEvents.signal },
+      { ...{ passive: false }, signal: this.pointerEvents.signal },
     );
-    window.addEventListener("blur", () => this.cancelPointer(), { signal: this.inputEvents.signal });
+    window.addEventListener("blur", () => this.cancelPointer(), { signal: this.pointerEvents.signal });
     document.addEventListener("visibilitychange", () => {
       if (document.hidden) this.cancelPointer();
-    }, { signal: this.inputEvents.signal });
-    window.addEventListener("resize", () => this.cancelPointer(), { signal: this.inputEvents.signal });
+    }, { signal: this.pointerEvents.signal });
+    window.addEventListener("resize", () => this.cancelPointer(), { signal: this.pointerEvents.signal });
     // After multi-touch cancels capture, a finger can finish outside the canvas.
-    window.addEventListener("pointerup", (e) => pointers.delete(e.pointerId), { signal: this.inputEvents.signal });
+    window.addEventListener("pointerup", (e) => pointers.delete(e.pointerId), { signal: this.pointerEvents.signal });
     window.addEventListener("pointercancel", (e) =>
-      pointers.delete(e.pointerId), { signal: this.inputEvents.signal }
+      pointers.delete(e.pointerId), { signal: this.pointerEvents.signal }
     );
   }
   update(
@@ -1612,7 +1627,7 @@ export class ArchiveScene {
       cameraAim.lerp(anchorAim, ease((shot - 27.3) / 0.5));
     }
     const framing = archiveFraming(this.container.clientWidth, this.container.clientHeight, span, detail,
-      this.container.closest<HTMLElement>("[data-layout]")?.dataset.layout === "compact");
+      this.container.closest<HTMLElement>("[data-layout]")?.dataset.layout === "compact", this.artworkFrame);
     if (!cinematic) {
       const right = new THREE.Vector3()
         .crossVectors(new THREE.Vector3(0, 1, 0), viewDirection)
@@ -1622,10 +1637,11 @@ export class ArchiveScene {
         .normalize();
       const width = this.container.clientWidth, height = this.container.clientHeight;
       const pixelScale = height / framing.span;
-      if (framing.portrait) {
+      if (framing.portrait || framing.artwork) {
         // Keep the preview camera independent of the live lift, wave and rail.
         // Following model.position here would visually cancel those motions.
         const previewAim = new THREE.Vector3(0, -4.6 + settlingWave(0, 26.56) + 0.4 + 1.85, -2.17);
+        previewAim.addScaledVector(right, (0.5 - framing.previewX) * width / pixelScale);
         previewAim.addScaledVector(up, (framing.previewY - 0.5) * height / pixelScale);
         cameraAim.copy(previewAim);
       }

@@ -19,21 +19,28 @@ export function viewportLayout(width: number, height: number, coarse: boolean, c
     kind: portrait ? "portrait" as const : compact ? "compact" as const : "desktop" as const };
 }
 
+export interface ArtworkFrame { left: number; top: number; width: number; height: number }
+
 /** Preserve the long-lens perspective. Reframe only the camera, never the card. */
-export function archiveFraming(width: number, height: number, span: number, detail: number, compact: boolean) {
+export function archiveFraming(width: number, height: number, span: number, detail: number, compact: boolean, artwork?: ArtworkFrame) {
   const aspect = width / height;
   const portrait = aspect < 1.05;
   const baseSpan = span + (5.9 - span) * detail;
-  const portraitDetailSpan = Math.max(6.3 / aspect, 3.7 * height / Math.max(100, 0.54 * height - 156));
-  const viewSpan = portrait
+  const fittedSpan = artwork ? Math.max(6.3 * height / artwork.width, 4.2 * height / artwork.height) : 0;
+  const portraitDetailSpan = artwork ? fittedSpan : Math.max(6.3 / aspect, 3.7 * height / Math.max(100, 0.54 * height - 156));
+  const viewSpan = artwork
+    ? Math.max(baseSpan, Math.max(8.4 / aspect, fittedSpan) * (1 - detail) + fittedSpan * detail)
+    : portrait
     ? Math.max(baseSpan, 8.4 / aspect + (portraitDetailSpan - 8.4 / aspect) * detail)
     : Math.max(baseSpan, baseSpan * (16 / 9) / aspect);
   return {
     span: viewSpan,
     portrait,
+    artwork: Boolean(artwork),
     // Portrait selection is deliberately above its title and navigation.
-    previewY: portrait ? 0.36 : 0.5,
-    detailX: portrait ? 0.5 : compact ? 0.27 : 550 / 1920,
-    detailY: portrait ? 0.27 + 34 / height : compact ? 0.49 : 560 / 1080,
+    previewX: artwork ? (artwork.left + artwork.width / 2) / width : 0.5,
+    previewY: artwork ? (artwork.top + artwork.height / 2) / height : portrait ? 0.36 : 0.5,
+    detailX: artwork ? (artwork.left + artwork.width / 2) / width : portrait ? 0.5 : compact ? 0.27 : 550 / 1920,
+    detailY: artwork ? (artwork.top + artwork.height / 2) / height : portrait ? 0.27 + 34 / height : compact ? 0.49 : 560 / 1080,
   };
 }
