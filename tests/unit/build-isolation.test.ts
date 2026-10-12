@@ -27,10 +27,14 @@ async function checkDeployment(files: string[]) {
   }
 }
 it("refuses a real deployment trace that includes local test reports, caches and authoring files", async () => {
-  const { code, report } = await checkDeployment(["test-results/recording.webm", "playwright-report/index.html", ".next/cache/build.log", "art/local-disc.blend", "tsconfig.tsbuildinfo"]);
-  expect(code).toBe(1); expect(report.passed).toBe(false); expect(report.findings).toHaveLength(5);
+  const { code, report } = await checkDeployment(["test-results/recording.webm", "playwright-report/index.html", ".next/cache/build.log", ".next/dev/route.js", "art/local-disc.blend", "tsconfig.tsbuildinfo"]);
+  expect(code).toBe(1); expect(report.passed).toBe(false); expect(report.findings).toHaveLength(6);
 });
 it("accepts a trace of the compiled route, application manifest and necessary runtime dependency", async () => {
-  const { code, report } = await checkDeployment([".next/server/app/page.js", "package.json", "node_modules/pg/lib/index.js"]);
-  expect(code).toBe(0); expect(report.passed).toBe(true); expect(report.references).toBe(3); expect(report.findings).toEqual([]);
+  const { code, report } = await checkDeployment([".next/server/app/page.js", "package.json", "node_modules/pg/lib/index.js", "public/models/rhine/archive-cassette.glb"]);
+  expect(code).toBe(0); expect(report.passed).toBe(true); expect(report.references).toBe(4); expect(report.findings).toEqual([]);
+});
+it("refuses a real trace of authoring and test files after private directories were excluded", async () => {
+  const { code, report } = await checkDeployment(["README.md", "docs/guide.md", "tests/fixtures/sample.wav", "art/source.obj", "playwright.config.ts", "vitest.config.ts"]);
+  expect(code).toBe(1); expect(report.passed).toBe(false); expect(report.findings).toHaveLength(6);
 });

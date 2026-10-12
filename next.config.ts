@@ -10,6 +10,8 @@ const nextConfig: NextConfig = {
     "./test-results/**/*", "./playwright-report/**/*", "./blob-report/**/*", "./coverage/**/*",
     "./.pg-local/**/*", "./.codex/**/*", "./.claude/**/*", "./.next/cache/**/*",
     "./*.tsbuildinfo", "./**/*.blend", "./**/*.blend1", "./**/*.heapprofile", "./**/*.heapsnapshot",
+    // The app serves compiled pages and public assets; authoring and README images are not runtime inputs.
+    "./docs/**/*", "./tests/**/*", "./art/**/*", "./README.md",
   ] },
   // A stale broad filesystem trace made cache shutdown retain ~14 GB on Windows. Build without that cache.
   experimental: { turbopackFileSystemCacheForBuild: false },

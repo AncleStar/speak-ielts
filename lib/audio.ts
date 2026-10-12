@@ -70,7 +70,9 @@ export async function isFfmpegAvailable(): Promise<boolean> {
 }
 
 export async function makeTempDir(prefix = "ia-") {
-  return fs.mkdtemp(path.join(os.tmpdir(), prefix));
+  // These files are created at runtime in the OS temp directory, not deployment inputs.
+  const tempPrefix = path.join(/* turbopackIgnore: true */ os.tmpdir(), prefix);
+  return fs.mkdtemp(/* turbopackIgnore: true */ tempPrefix);
 }
 
 /** 转为单声道 16 kHz 16-bit PCM WAV */

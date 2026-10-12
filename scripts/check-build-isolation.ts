@@ -15,7 +15,8 @@ async function visit(directory: string) {
         references++;
         const relative = path.relative(root, path.resolve(directory, reference)).split(path.sep).join("/");
         if (relative.startsWith("../") || path.isAbsolute(relative)) findings.push({ trace: path.relative(root, file), rule: "引用工作区之外的文件" });
-        if (/^(?:data|backups|release|\.git|\.pg-local|\.codex|\.claude|test-results|playwright-report|blob-report|coverage|\.next\/cache)\//.test(relative) || /^\.env(?:$|\.)/.test(relative) || relative === "tsconfig.tsbuildinfo" || /\.(?:blend(?:\d+)?|heapprofile|heapsnapshot)$/i.test(relative)) findings.push({ trace: path.relative(root, file), rule: "引用私有配置、运行数据或验证产物" });
+        if (/^(?:data|backups|release|\.git|\.pg-local|\.codex|\.claude|test-results|playwright-report|blob-report|coverage|\.next\/(?:cache|dev))\//.test(relative) || /^\.env(?:$|\.)/.test(relative) || relative === "tsconfig.tsbuildinfo" || /\.(?:blend(?:\d+)?|heapprofile|heapsnapshot)$/i.test(relative)) findings.push({ trace: path.relative(root, file), rule: "引用私有配置、运行数据、开发缓存或验证产物" });
+        else if (/^(?:docs|tests|art)\//.test(relative) || /^(?:README\.md|playwright\.config\.ts|vitest\.config\.ts|design-qa\.md)$/.test(relative)) findings.push({ trace: path.relative(root, file), rule: "引用非运行时的说明、测试或创作源文件，可能存在全项目追踪" });
       }
     }
   }
