@@ -19,7 +19,9 @@ test("server-decoded time pauses AI when quota is unavailable, preserves replay 
     // Capture after real playback and the original reveal, not an intermediate loading curtain.
     await page.screenshot({ path: "data/verification/round9-quota-wait-desktop.png", fullPage: true });
     await page.setViewportSize({ width: 320, height: 740 }); await page.screenshot({ path: "data/verification/round9-quota-wait-320.png", fullPage: true }); expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth + 1)).toBe(true);
-    await page.getByRole("button", { name: "核对额度并继续" }).click(); await expect(page.getByText("录音实测时长还有 3 秒未覆盖", { exact: false })).toBeVisible();
+    await page.getByRole("button", { name: "核对额度并继续" }).click();
+    const quotaWarning = page.getByRole("status").filter({ has: page.getByText("等待录音额度", { exact: true }) });
+    await expect(quotaWarning).toBeVisible(); await expect(quotaWarning).toContainText("录音实测时长还有 3 秒未覆盖");
     const release = await page.request.post(`/api/sessions/${competitor.id}/events`, { data: { type: "pause", expectedVersion: 0, eventId: randomUUID() } }); expect(release.ok()).toBe(true);
     await page.getByRole("button", { name: "核对额度并继续" }).click(); await expect.poll(async () => (await (await page.request.get(`/api/answers/${ticket.answerId}`)).json()).answer.status).toBe("done");
     expect((await (await page.request.get("/api/me")).json()).quota).toMatchObject({ uncoveredSeconds: 0, extraSeconds: 1, reservedSeconds: 0 });

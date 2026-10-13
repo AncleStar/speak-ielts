@@ -13,7 +13,8 @@ let lastProgress = 0;
 function progress(event: VoiceProgress) {
   if (event.stage === "download" && Date.now() - lastProgress < 1000 && event.loaded > 0 && event.loaded < event.total) return;
   lastProgress = Date.now();
-  if (event.stage === "download") console.log(`下载 ${event.file}：${(event.loaded / 1024 / 1024).toFixed(1)} / ${(event.total / 1024 / 1024).toFixed(1)} MB · ${Math.floor(event.loaded / event.total * 100)}%`);
+  if (event.stage === "checking") console.log(`正在校验本机缓存：${event.file}`);
+  else if (event.stage === "download") console.log(`下载 ${event.file}：${(event.loaded / 1024 / 1024).toFixed(1)} / ${(event.total / 1024 / 1024).toFixed(1)} MB · ${Math.floor(event.loaded / event.total * 100)}%`);
   else if (event.stage === "cached") console.log(`已校验缓存：${event.file}`);
   else if (event.stage === "verified") console.log(`下载与校验完成：${event.file}`);
   else if (event.stage === "retry") console.log(`网络请求失败，重试 ${event.file}（第 ${event.attempt} 次）`);

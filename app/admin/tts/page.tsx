@@ -8,6 +8,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { ttsAsset } from "@/db/schema";
 import { db } from "@/lib/db";
 import { ttsStatusCounts } from "@/lib/services/tts";
+import { VoiceReadiness } from "@/components/admin/voice-readiness";
 
 export const metadata: Metadata = { title: "管理 · 考官音频" };
 
@@ -33,6 +34,7 @@ export default async function AdminTts() {
                 补齐缺失并重试失败的音频
               </Button>
             </form>
+            <VoiceReadiness />
           </CardContent>
         </Card>
         <Card>

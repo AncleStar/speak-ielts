@@ -28,12 +28,17 @@ async function checkDirectories(root: string, file: string, create: boolean) {
     if (stat && (!stat.isDirectory() || stat.isSymbolicLink())) throw new VoiceCacheError("unsafe", "模型缓存目录不能使用符号链接或普通文件。");
   }
 }
-async function verified(file: string, entry: VoiceFile) {
+async function verified(file: string, entry: VoiceFile, signal: AbortSignal) {
+  signal.throwIfAborted();
   const stat = await fs.lstat(/* turbopackIgnore: true */ file).catch((error: NodeJS.ErrnoException) => { if (error.code === "ENOENT") return null; throw error; });
+  signal.throwIfAborted();
   if (!stat) return false;
   if (!stat.isFile() || stat.isSymbolicLink()) throw new VoiceCacheError("unsafe", "模型缓存必须是普通文件，不能使用符号链接。");
   if (stat.size !== entry.bytes) return false;
-  const hash = createHash("sha256"); for await (const chunk of createReadStream(/* turbopackIgnore: true */ file)) hash.update(chunk as Buffer);
+  const hash = createHash("sha256");
+  try { for await (const chunk of createReadStream(/* turbopackIgnore: true */ file, { signal })) { signal.throwIfAborted(); hash.update(chunk as Buffer); } }
+  catch (error) { signal.throwIfAborted(); throw error; }
+  signal.throwIfAborted();
   return hash.digest("hex") === entry.sha256;
 }
 
@@ -64,7 +69,7 @@ export async function ensureNaturalVoiceCache(cacheRoot: string, options: VoiceC
       controller.signal.throwIfAborted();
       const destination = path.join(root, entry.file);
       await checkDirectories(cacheBase, destination, false); emit("checking", entry);
-      if (await verified(destination, entry)) { emit("cached", entry, entry.bytes); continue; }
+      if (await verified(destination, entry, controller.signal)) { emit("cached", entry, entry.bytes); controller.signal.throwIfAborted(); continue; }
       if (!options.allowDownload) throw new VoiceCacheError("missing", "本机自然语音模型缺失或校验失败，请部署者运行 npm run setup:voice；面试期间不会自动下载。");
       await checkDirectories(cacheBase, destination, true);
       for (let attempt = 1; attempt <= 2; attempt++) {
@@ -75,7 +80,7 @@ export async function ensureNaturalVoiceCache(cacheRoot: string, options: VoiceC
         const resetTimer = (duration: number) => { clearTimeout(timer); timer = setTimeout(() => attemptController.abort(new VoiceCacheError("timeout", "自然语音下载连接或传输停滞，正在停止本次请求。")), duration); };
         try {
           // Another preparation process may already have published the same verified immutable file.
-          if (await verified(destination, entry)) { emit("cached", entry, entry.bytes); break; }
+          if (await verified(destination, entry, signal)) { emit("cached", entry, entry.bytes); signal.throwIfAborted(); break; }
           resetTimer(connectTimeout); emit("download", entry, 0, attempt);
           const response = await (options.fetchFile ?? ((file, requestSignal) => fetch(`https://huggingface.co/${NATURAL_MODEL_ID}/resolve/${NATURAL_REVISION}/${file}`, { signal: requestSignal })))(entry.file, signal);
           if (!response.ok || !response.body) throw new VoiceCacheError("network", "自然语音下载失败，请检查网络后重试。");
@@ -95,11 +100,11 @@ export async function ensureNaturalVoiceCache(cacheRoot: string, options: VoiceC
           if (loaded !== entry.bytes || hash.digest("hex") !== entry.sha256) throw new VoiceCacheError("integrity", "模型下载不完整或校验失败，未写入正式缓存。");
           await handle.sync(); await handle.close(); handle = undefined;
           controller.signal.throwIfAborted();
-          if (!await verified(destination, entry)) {
+          if (!await verified(destination, entry, controller.signal)) {
             try { await fs.rename(/* turbopackIgnore: true */ temporary, /* turbopackIgnore: true */ destination); }
-            catch (error) { if (!await verified(destination, entry)) throw error; }
+            catch (error) { if (!await verified(destination, entry, controller.signal)) throw error; }
           }
-          emit("verified", entry, entry.bytes); break;
+          emit("verified", entry, entry.bytes); controller.signal.throwIfAborted(); break;
         } catch (error) {
           if (controller.signal.aborted) throw controller.signal.reason;
           const failure = attemptController.signal.aborted ? attemptController.signal.reason : error;
@@ -116,5 +121,6 @@ export async function ensureNaturalVoiceCache(cacheRoot: string, options: VoiceC
         }
       }
     }
+    controller.signal.throwIfAborted();
   } finally { clearTimeout(deadline); options.signal?.removeEventListener("abort", abort); }
 }

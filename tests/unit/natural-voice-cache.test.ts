@@ -83,3 +83,28 @@ it("a disk write failure stops without downloading again or replacing a valid ca
   finally { open.mockRestore(); }
   expect(requests - before).toBe(1); expect(await leftoverParts("full")).toEqual([]); expect(await fs.readFile(finalFile("valid"))).toEqual(body);
 });
+
+it("cancellation during the last cached-file check cannot report successful preparation", async () => {
+  const name = "cancel-last-cache"; await ensureNaturalVoiceCache(directory(name), options("/ok"));
+  const before = requests;
+  for (const stage of ["checking", "cached"] as const) {
+    const controller = new AbortController();
+    await expect(ensureNaturalVoiceCache(directory(name), { files: [entry], signal: controller.signal, onProgress: event => { if (event.stage === stage) controller.abort(); } })).rejects.toMatchObject({ code: "cancelled" });
+    expect(await fs.readFile(finalFile(name))).toEqual(body);
+  }
+  expect(requests).toBe(before);
+});
+it("cancellation after verified publication retains the valid cache but does not report overall success", async () => {
+  const name = "cancel-after-publish", controller = new AbortController();
+  await expect(ensureNaturalVoiceCache(directory(name), { ...options("/ok"), signal: controller.signal, onProgress: event => { if (event.stage === "verified") controller.abort(); } })).rejects.toMatchObject({ code: "cancelled" });
+  expect(await fs.readFile(finalFile(name))).toEqual(body); expect(await leftoverParts(name)).toEqual([]);
+  await ensureNaturalVoiceCache(directory(name), { files: [entry] });
+});
+it("the overall deadline also covers a slow last cache check without publishing a success", async () => {
+  const name = "deadline-cache-check"; await ensureNaturalVoiceCache(directory(name), options("/ok"));
+  const native = fs.lstat.bind(fs), slow = vi.spyOn(fs, "lstat").mockImplementation(async (...args: Parameters<typeof fs.lstat>) => {
+    const result = await native(...args); if (String(args[0]) === finalFile(name)) await new Promise(resolve => setTimeout(resolve, 35)); return result;
+  });
+  try { await expect(ensureNaturalVoiceCache(directory(name), { files: [entry], timeoutMs: 10 })).rejects.toMatchObject({ code: "timeout" }); } finally { slow.mockRestore(); }
+  expect(await fs.readFile(finalFile(name))).toEqual(body);
+});
