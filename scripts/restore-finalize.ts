@@ -9,6 +9,7 @@ import { replayDeletions } from "@/lib/services/deletion";
 import { runMigrations } from "./migrate";
 import { initializeRestoreReview } from "@/lib/restore-review";
 import { env } from "@/lib/env";
+import { TASK_RUNTIME_KEY } from "@/lib/task-runtime";
 
 try {
   const root = dataDir(), pending = path.join(root, "restore-pending.json");
@@ -20,6 +21,7 @@ try {
   await db.transaction(async tx => {
     await tx.delete(session);
     await tx.delete(appSetting).where(like(appSetting.key, "runtime:worker:%"));
+    await tx.delete(appSetting).where(eq(appSetting.key, TASK_RUNTIME_KEY));
     await tx.update(signupInvite).set({ revokedAt: new Date() }).where(and(isNull(signupInvite.usedAt), isNull(signupInvite.revokedAt)));
     await tx.update(practiceSession).set({ status: "interrupted", endedAt: new Date() }).where(eq(practiceSession.status, "active"));
   });

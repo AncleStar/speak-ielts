@@ -13,10 +13,10 @@ export async function hourlyMaintenance() {
   const abandoned = await abandonStaleSessions(settings.limits.abandonMinutes);
   const stuckBefore = new Date(Date.now() - 15 * 60_000);
   const stuck = await db
-    .select({ id: answer.id })
+    .select({ id: answer.id, corrected: answer.feedbackUsesCorrection })
     .from(answer)
     .where(and(inArray(answer.status, ["queued", "processing"]), lt(answer.updatedAt, stuckBefore)));
-  for (const a of stuck) await enqueue(QUEUES.processAnswer, { answerId: a.id, mode: "full" });
+  for (const a of stuck) await enqueue(QUEUES.processAnswer, { answerId: a.id, mode: a.corrected ? "correction" : "full" });
   const result = { abandoned, requeued: stuck.length };
   await logOps("info", "maintenance", null, `每小时维护：${JSON.stringify(result)}`);
   return result;

@@ -21,6 +21,7 @@
     "setup:voice": "tsx scripts/setup-voice.ts",
     "check:providers": "tsx scripts/check-providers.ts",
     "doctor": "tsx scripts/doctor.ts",
+    "queue:runtime": "tsx scripts/queue-runtime.ts",
     "check:practice": "tsx scripts/check-practice.ts",
     "check:content": "tsx scripts/check-content.ts",
     "check:recovery": "tsx scripts/check-recovery.ts",

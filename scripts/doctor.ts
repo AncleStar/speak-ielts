@@ -50,7 +50,13 @@ try {
       add("worker", "后台处理", state.ready ? "pass" : "fail", workerStateMessage(state.state), state.ready ? undefined : "统一网页/worker 配置和可见构建，停止旧后台后重启；旧心跳最多保留 60 秒。");
       const queues = await client.query("SELECT to_regclass('pgboss.queue') AS table_name");
       if (!queues.rows[0].table_name) add("queue", "任务队列", "fail", "任务队列表尚未准备", "先启动网页与 worker，再重试检查。");
-      else { const { QUEUES } = await import("@/lib/queue"); const names = new Set((await client.query("SELECT name FROM pgboss.queue")).rows.map(r => r.name)); const absent = Object.values(QUEUES).filter(name => !names.has(name)); add("queue", "任务队列", absent.length ? "fail" : "pass", absent.length ? `缺少 ${absent.length} 个所需队列` : "所需队列存在；不等于所有任务已处理", "启动当前版本的 worker；本命令不自动创建队列。"); }
+      else {
+        const { QUEUES, taskQueueName } = await import("@/lib/queue"), { TASK_RUNTIME_KEY, taskRuntimeId } = await import("@/lib/task-runtime");
+        const record = (await client.query("SELECT value FROM app_setting WHERE key=$1", [TASK_RUNTIME_KEY])).rows[0]?.value;
+        const matches = record?.protocol === 1 && record.id === taskRuntimeId();
+        const names = new Set((await client.query("SELECT name FROM pgboss.queue")).rows.map(r => r.name)), absent = Object.values(QUEUES).map(taskQueueName).filter(name => !names.has(name));
+        add("queue", "任务队列", !matches || absent.length ? "fail" : "pass", !matches ? "任务执行环境未匹配，原任务保留供核对" : absent.length ? `缺少 ${absent.length} 个当前环境队列` : "任务环境匹配且队列存在；不等于所有任务已处理", "首次安装启动当前网页与 worker；配置切换需暂停、停止旧后台并按部署说明明确启用。本命令不修改队列。");
+      }
     }
     await client.query("ROLLBACK");
   } catch { add("database_checks", "数据库检查", "fail", "无法完成数据库检查；未输出连接地址、密码或原始错误", "检查数据库服务、连接配置和权限后重试。"); }

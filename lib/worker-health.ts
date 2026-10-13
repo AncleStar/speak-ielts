@@ -3,6 +3,7 @@ import { appSetting } from "@/db/schema";
 import { db } from "@/lib/db";
 import { env } from "@/lib/env";
 import { evaluateWorkerHealth, runtimeConfigId } from "@/lib/worker-runtime";
+import { TASK_RUNTIME_KEY, taskRuntimeId } from "@/lib/task-runtime";
 export { WORKER_STALE_MS } from "@/lib/worker-runtime";
 
 export function workerConfigId() {
@@ -10,7 +11,10 @@ export function workerConfigId() {
 }
 export async function getWorkerHealth(now = new Date()) {
   const rows = await db.select({ value: appSetting.value, at: appSetting.updatedAt }).from(appSetting).where(like(appSetting.key, "runtime:worker:%"));
-  return evaluateWorkerHealth(rows, workerConfigId(), now);
+  const health = evaluateWorkerHealth(rows, workerConfigId(), now);
+  const [contract] = await db.select({ value: appSetting.value }).from(appSetting).where(eq(appSetting.key, TASK_RUNTIME_KEY));
+  if (contract && (!contract.value || typeof contract.value !== "object" || !("protocol" in contract.value) || contract.value.protocol !== 1 || !("id" in contract.value) || contract.value.id !== taskRuntimeId())) return { ...health, ready: false, state: "task_mismatch" as const };
+  return health;
 }
 export async function startWorkerHeartbeat() {
   const key = `runtime:worker:${process.pid}:${crypto.randomUUID()}`;

@@ -195,6 +195,7 @@ it("restores the complete archive to a new database and replays newer deletion i
   expect(report.oldPasswordsDisabled).toBe(true); expect(report.openingReviewRequired).toBe(true);
   expect((await query(restoreUrl, "SELECT password FROM account WHERE user_id=$1", [ownerId])).rows[0].password).toBeNull();
   expect((await query(restoreUrl, "SELECT value FROM app_setting WHERE key='pauseNewSessions'")).rows[0].value).toBe(true);
+  expect((await query(restoreUrl, "SELECT count(*)::int AS n FROM app_setting WHERE key='runtime:task-contract:v1'")).rows[0].n).toBe(0);
   expect(await fs.stat(path.join(restored.directory, "restore-review-pending.json"))).toBeTruthy();
   expect((await query(sourceUrl, 'SELECT count(*)::int AS n FROM "session"')).rows[0].n).toBe(1);
   expect((await query(sourceUrl, "SELECT revoked_at FROM signup_invite WHERE id=$1", [inviteId])).rows[0].revoked_at).toBeNull();

@@ -79,6 +79,7 @@ export function InterviewRoom({ sessionId, subtitlePref, userId }: { sessionId: 
   const rhine = useRhine();
   const stopDiscPlayback = rhine?.stopPlayback;
   const exitBusy = useRef(false);
+  const finishAttempt = useRef(false);
   const versionRef = useRef<number | null>(null), startEventRef = useRef<string | undefined>(undefined), exitPauseRef = useRef<PendingSessionPause | null>(null);
   const retryExitRef = useRef<() => void>(() => {});
   const privateEnded = useRef(false);
@@ -270,7 +271,8 @@ export function InterviewRoom({ sessionId, subtitlePref, userId }: { sessionId: 
         if (ended()) return;
         if (state.stateVersion < (versionRef.current ?? 0)) return;
         const ownPendingStart = phaseRef.current === "starting" && (state.stateVersion === versionRef.current || state.activationId === startEventRef.current);
-        if (["starting", "running", "finishing"].includes(phaseRef.current) && (state.status !== "active" || !ownPendingStart && state.activationId !== startEventRef.current)) {
+        const ownCompletion = phaseRef.current === "finishing" && finishAttempt.current && state.status === "completed" && state.activationId === startEventRef.current;
+        if (!ownCompletion && ["starting", "running", "finishing"].includes(phaseRef.current) && (state.status !== "active" || !ownPendingStart && state.activationId !== startEventRef.current)) {
           const r = rt.current!; r.aborted = true; r.audio.stop(); stopDiscPlayback?.(); r.waiter?.resolve("exit"); r.waiter = null;
           setStep("idle"); setTimer(null); setPartInfo(null); setActions([]); setExaminer("waiting");
           const recording = await r.recorder.stop({ interrupted: true }); r.recorder.release(); await r.wake.release();
@@ -467,11 +469,15 @@ export function InterviewRoom({ sessionId, subtitlePref, userId }: { sessionId: 
   }
 
   async function sendEvent(type: string, extra: Record<string, unknown> = {}) {
-    const result = await api<{ partDeadlines?: Record<string, string>; finished?: boolean; missing?: unknown[]; status?: string; stateVersion?: number; activationId?: string }>(`/api/sessions/${sessionId}/events`, {
-      body: { eventId: randomId("ev"), type, expectedVersion: versionRef.current, startEventId: startEventRef.current, ...extra },
-    });
-    if (result.stateVersion !== undefined && result.stateVersion >= (versionRef.current ?? 0)) versionRef.current = result.stateVersion;
-    return result;
+    if (type === "finish") finishAttempt.current = true;
+    try {
+      const result = await api<{ partDeadlines?: Record<string, string>; finished?: boolean; missing?: unknown[]; status?: string; stateVersion?: number; activationId?: string }>(`/api/sessions/${sessionId}/events`, {
+        body: { eventId: randomId("ev"), type, expectedVersion: versionRef.current, startEventId: startEventRef.current, ...extra },
+      });
+      if (type === "finish" && result.status !== "completed") finishAttempt.current = false;
+      if (result.stateVersion !== undefined && result.stateVersion >= (versionRef.current ?? 0)) versionRef.current = result.stateVersion;
+      return result;
+    } catch (error) { if (type === "finish") finishAttempt.current = false; throw error; }
   }
 
   // ---------- 开始面试（用户手势） ----------

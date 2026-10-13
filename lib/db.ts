@@ -2,6 +2,7 @@ import { drizzle, type NodePgDatabase } from "drizzle-orm/node-postgres";
 import pg from "pg";
 import { schema } from "@/db/schema";
 import { env } from "@/lib/env";
+import { currentTaskContext } from "@/lib/task-context";
 
 export type DB = NodePgDatabase<typeof schema> & { $client: pg.Pool };
 
@@ -23,6 +24,7 @@ export function getPool(): pg.Pool {
 
 export function getDb(): DB {
   env(); // Recheck restore gates even after this process cached a database connection.
+  const task = currentTaskContext(); if (task) return task.database as DB;
   if (!globalForDb.__db) {
     globalForDb.__db = drizzle(getPool(), { schema }) as DB;
   }
@@ -39,6 +41,7 @@ export const db: DB = new Proxy({} as DB, {
 });
 
 export async function closeDb() {
+  await (await import("@/lib/task-runtime")).closeTaskRuntime();
   if (globalForDb.__lockPool) {
     await globalForDb.__lockPool.end();
     globalForDb.__lockPool = undefined;

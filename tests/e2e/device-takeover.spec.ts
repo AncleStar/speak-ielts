@@ -48,8 +48,19 @@ for (const offline of [false, true]) test(`${offline ? "offline" : "online"} ori
     await expect.poll(async () => (await view(peer, id)).answers.some((a: { interrupted: boolean; recordingSource: string; status: string }) => a.interrupted && a.recordingSource === "previous_device" && a.status !== "created"), { timeout: 30000 }).toBe(true);
     await page.getByTestId("exit-interview").click(); await expect(page).toHaveURL(/\/practice/); expect((await view(peer, id)).session.activationId).toBe(taken.session.activationId); expect((await view(peer, id)).session.status).toBe("active");
     await peer.getByRole("button", { name: "开始回答", exact: true }).click(); await expect(peer.getByTestId("recording-indicator")).toBeVisible(); await peer.waitForTimeout(4500); await peer.getByRole("button", { name: "我答完了", exact: true }).click();
+    let completedSnapshots = 0, finishRaceExercised = false;
+    peer.on("response", async response => { if (response.url().endsWith(`/api/sessions/${id}/state`) && response.ok()) { const state = await response.json().catch(() => null); if (state?.status === "completed") completedSnapshots++; } });
+    await peer.route(`**/api/sessions/${id}/events`, async route => {
+      if (route.request().postDataJSON()?.type !== "finish") { await route.continue(); return; }
+      const response = await route.fetch(); expect(response.ok()).toBe(true); expect((await response.json()).status).toBe("completed");
+      // Commit has happened, but this page has not received its own completion response.
+      await expect.poll(async () => { await peer.evaluate(() => window.dispatchEvent(new Event("focus"))); return completedSnapshots; }).toBeGreaterThan(0);
+      await peer.waitForTimeout(100); await expect(peer.getByTestId("interview-room")).toHaveAttribute("data-phase", "finishing");
+      finishRaceExercised = true; await route.fulfill({ response });
+    });
     await peer.getByRole("button", { name: "完成本关", exact: true }).click();
     await expect(peer.getByTestId("interview-room")).toHaveAttribute("data-phase", "done", { timeout: 45000 });
+    expect(finishRaceExercised).toBe(true);
     const saved = await view(peer, id); expect(saved.answers.some((a: { interrupted: boolean; recordingSource: string }) => !a.interrupted && a.recordingSource === "current_device")).toBe(true);
     const old = saved.answers.find((a: { recordingSource: string }) => a.recordingSource === "previous_device");
     const detail = await (await peer.request.get(`/api/answers/${old.id}`)).json(); expect(detail.answer.durationMs).toBeGreaterThan(1000); expect(detail.answer.hasAudio).toBe(true);

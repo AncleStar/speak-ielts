@@ -1,5 +1,7 @@
 import { PgBoss } from "pg-boss";
 import { env } from "@/lib/env";
+import { taskRuntimeId, taskEnvelope, withTaskRuntime } from "@/lib/task-runtime";
+import { checkedTaskPayload } from "@/lib/task-schema";
 
 export const QUEUES = {
   processAnswer: "answer-process",
@@ -12,6 +14,7 @@ export const QUEUES = {
 } as const;
 
 export type QueueName = (typeof QUEUES)[keyof typeof QUEUES];
+export function taskQueueName(name: QueueName) { return `speak-v1-${taskRuntimeId()}-${name}`; }
 
 /** 失败自动重试最多 2 次（指数退避） */
 const QUEUE_OPTIONS = { retryLimit: 2, retryDelay: 5, retryBackoff: true, retryDelayMax: 120, expireInSeconds: 600 };
@@ -30,7 +33,7 @@ async function createBoss(worker: boolean): Promise<PgBoss> {
   boss.on("error", (err) => console.error("[queue]", err instanceof Error ? err.message : err));
   await boss.start();
   for (const name of Object.values(QUEUES)) {
-    await boss.createQueue(name, QUEUE_OPTIONS);
+    await boss.createQueue(taskQueueName(name), QUEUE_OPTIONS);
   }
   return boss;
 }
@@ -38,17 +41,17 @@ async function createBoss(worker: boolean): Promise<PgBoss> {
 export function getBoss(opts: { worker?: boolean } = {}): Promise<PgBoss> {
   if (!g.__boss) {
     g.__bossWorker = !!opts.worker;
-    g.__boss = createBoss(!!opts.worker).catch((e) => {
+    g.__boss = withTaskRuntime(() => createBoss(!!opts.worker), !opts.worker).catch((e) => {
       g.__boss = undefined;
       throw e;
     });
   }
-  return g.__boss;
+  return withTaskRuntime(async () => (await g.__boss)!, !opts.worker);
 }
 
 export async function enqueue(name: QueueName, data: object, options: { startAfter?: number; singletonKey?: string } = {}) {
   const boss = await getBoss();
-  return boss.send(name, data, options);
+  return withTaskRuntime(() => boss.send(taskQueueName(name), taskEnvelope(name, checkedTaskPayload(name, data)), options));
 }
 
 export async function stopBoss() {

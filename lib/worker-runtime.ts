@@ -34,7 +34,7 @@ export function runtimeConfigId(e: Env, buildId = capturedWorkerBuildId) {
 }
 
 export const WORKER_STALE_MS = 60000, WORKER_FUTURE_TOLERANCE_MS = 5000;
-export type WorkerState = "ready" | "missing" | "stale" | "mismatch" | "mixed" | "clock";
+export type WorkerState = "ready" | "missing" | "stale" | "mismatch" | "mixed" | "clock" | "task_mismatch";
 export function evaluateWorkerHealth(rows: { value: unknown; at: Date }[], configId: string, now = new Date()) {
   const time = now.getTime(), future = rows.filter(r => r.at.getTime() > time + WORKER_FUTURE_TOLERANCE_MS);
   const fresh = rows.filter(r => Number.isFinite(r.at.getTime()) && r.at.getTime() <= time + WORKER_FUTURE_TOLERANCE_MS && time - r.at.getTime() < WORKER_STALE_MS);
@@ -44,5 +44,5 @@ export function evaluateWorkerHealth(rows: { value: unknown; at: Date }[], confi
   return { ready: state === "ready", state, lastHeartbeat: matching[0]?.at ?? null, compatibleHeartbeats: matching.length, incompatibleHeartbeats: different.length, futureHeartbeats: future.length };
 }
 export function workerStateMessage(state: WorkerState) {
-  return ({ ready: "后台心跳与当前配置匹配", missing: "未收到后台心跳，请启动 worker", stale: "后台心跳已过期，请检查或重启 worker", mismatch: "近期后台心跳与网页配置或可见构建不匹配，请统一配置并重启网页和全部 worker", mixed: "近期心跳同时包含匹配与不匹配的后台，请停止旧后台并统一重启；旧心跳停止后最多等待 60 秒", clock: "后台心跳时间异常，请核对网页、数据库和后台的系统时钟" })[state];
+  return ({ task_mismatch: "任务执行环境与当前配置不匹配，请暂停新会话并核对部署；已有录音和费用记录保留", ready: "后台心跳与当前配置匹配", missing: "未收到后台心跳，请启动 worker", stale: "后台心跳已过期，请检查或重启 worker", mismatch: "近期后台心跳与网页配置或可见构建不匹配，请统一配置并重启网页和全部 worker", mixed: "近期心跳同时包含匹配与不匹配的后台，请停止旧后台并统一重启；旧心跳停止后最多等待 60 秒", clock: "后台心跳时间异常，请核对网页、数据库和后台的系统时钟" })[state];
 }

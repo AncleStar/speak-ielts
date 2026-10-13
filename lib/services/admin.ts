@@ -3,7 +3,7 @@ import { answer, opsLog, practiceSession, questionVersion, usageEvent, user } fr
 import { db } from "@/lib/db";
 import { env } from "@/lib/env";
 import { providers } from "@/lib/providers";
-import { getBoss, QUEUES } from "@/lib/queue";
+import { getBoss, QUEUES, taskQueueName } from "@/lib/queue";
 import { activeSessionCount } from "@/lib/quota";
 import { getSettings } from "@/lib/settings";
 import { startOfDayShanghai, startOfMonthShanghai } from "@/lib/timing";
@@ -23,8 +23,8 @@ export async function serviceStatus() {
   let queueOk = true;
   try {
     const boss = await getBoss();
-    const rows = await boss.getQueues(Object.values(QUEUES));
-    queues = rows.map((q) => ({ name: q.name, queued: q.queuedCount, active: q.activeCount, failed: q.failedCount }));
+    const rows = await boss.getQueues(Object.values(QUEUES).map(taskQueueName));
+    queues = rows.map((q) => ({ name: Object.values(QUEUES).find(name => taskQueueName(name) === q.name) ?? "当前环境任务", queued: q.queuedCount, active: q.activeCount, failed: q.failedCount }));
   } catch {
     queueOk = false;
   }

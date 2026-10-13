@@ -13,6 +13,7 @@ import { QUEUES, enqueue } from "@/lib/queue";
 import { storage, ttsKey } from "@/lib/storage";
 import { metered } from "@/lib/providers/metered";
 import { notFound } from "@/lib/errors";
+import { withTaskRuntime } from "@/lib/task-runtime";
 
 export function ttsHash(text: string, model: string, voice: string, answerId?: string) {
   const input = answerId ? "speak-private-reference-v1\n" + JSON.stringify([model, voice, answerId, text.trim()]) : `${model}|${voice}|${text.trim()}`;
@@ -68,6 +69,9 @@ const inflight = new Map<string, Promise<void>>();
 
 /** 生成并转存一条考官音频；已就绪则跳过。 */
 export async function generateTtsAsset(assetId: string, opts: { force?: boolean } = {}): Promise<void> {
+  return withTaskRuntime(() => generateTtsAssetBound(assetId, opts));
+}
+async function generateTtsAssetBound(assetId: string, opts: { force?: boolean } = {}): Promise<void> {
   const existing = inflight.get(assetId);
   if (existing) return existing;
   const p = (async () => {
