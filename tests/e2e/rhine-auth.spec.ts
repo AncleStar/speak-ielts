@@ -6,7 +6,7 @@ async function capture(page:Page,name:string){
 }
 // Isolate this intentional failed-login sequence from other tests' login quota.
 // Keep the application's production rate limit enabled.
-test.use({viewport:{width:1600,height:900},video:{mode:"on",size:{width:1280,height:720}},extraHTTPHeaders:{"x-forwarded-for":"192.0.2.43"}});
+test.use({viewport:{width:1600,height:900},video:{mode:"on",size:{width:1280,height:720}},extraHTTPHeaders:{Origin: "http://127.0.0.1:3100", "x-forwarded-for":"192.0.2.43"}});
 test("terminal login only authorizes after real credentials and keeps narrow layouts usable",async({page})=>{
   const errors:string[]=[];page.on("pageerror",e=>errors.push(e.message));
   await page.goto("/login");

@@ -7,6 +7,7 @@ import { getAuth } from "@/lib/auth";
 import { db } from "@/lib/db";
 import { AppError } from "@/lib/errors";
 import { assertRecoveryReady } from "@/lib/recovery-state";
+import { assertRequestOrigin } from "@/lib/request-origin";
 
 export type CurrentUser = typeof user.$inferSelect & { isAdmin: boolean };
 
@@ -68,6 +69,7 @@ export function handle<A extends unknown[]>(fn: (...args: A) => Promise<Response
   return async (...args: A): Promise<Response> => {
     try {
       await assertRecoveryReady();
+      if (args[0] instanceof Request) assertRequestOrigin(args[0]);
       return await fn(...args);
     } catch (e) {
       if (e instanceof AppError) {

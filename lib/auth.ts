@@ -5,12 +5,11 @@ import { admin } from "better-auth/plugins";
 import { account, session, user, verification } from "@/db/schema";
 import { getDb } from "@/lib/db";
 import { authSecret, env } from "@/lib/env";
+import { trustedRequestOrigins } from "@/lib/request-origin";
 
 function createAuth() {
   const e = env();
-  const origins = new Set<string>([e.BETTER_AUTH_URL]);
-  if (e.APP_DOMAIN && e.APP_DOMAIN !== "localhost") origins.add(`https://${e.APP_DOMAIN}`);
-  for (const o of (process.env.TRUSTED_ORIGINS ?? "").split(",")) if (o.trim()) origins.add(o.trim());
+  const origins = trustedRequestOrigins(e);
   return betterAuth({
     appName: "雅思口语模拟面试",
     secret: authSecret(),

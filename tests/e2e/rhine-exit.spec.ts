@@ -1,5 +1,5 @@
 import {test,expect,type Page} from "@playwright/test";
-test.use({viewport:{width:1600,height:900},extraHTTPHeaders:{"x-forwarded-for":"192.0.2.44"}});
+test.use({viewport:{width:1600,height:900},extraHTTPHeaders:{Origin: "http://127.0.0.1:3100", "x-forwarded-for":"192.0.2.44"}});
 async function login(page:Page,name="outsider"){
   await page.context().addInitScript(()=>{
     const observed=window as typeof window&{observedTracks:MediaStreamTrack[];observedAudio:HTMLMediaElement[];permissionDelay?:number};

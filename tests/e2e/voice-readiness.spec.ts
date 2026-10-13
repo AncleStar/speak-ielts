@@ -1,6 +1,6 @@
 import fs from "node:fs/promises";
 import { test, expect, type Page } from "@playwright/test";
-test.use({ extraHTTPHeaders: { "x-forwarded-for": "192.0.2.141" } });
+test.use({ extraHTTPHeaders: {Origin: "http://127.0.0.1:3100",  "x-forwarded-for": "192.0.2.141" } });
 async function login(page: Page, name: string) {
   await page.goto("/login"); await page.getByLabel("邮箱", { exact: true }).fill(`${name}@example.test`); await page.getByLabel("密码", { exact: true }).fill("Browser-test-123!"); await page.getByRole("button", { name: "登录", exact: true }).click(); await expect(page).not.toHaveURL(/\/login$/);
 }
@@ -13,6 +13,6 @@ test("admin sees a truthful mock status, retries a failed check and follows the 
   await section.getByRole("link", { name: "去试听考官" }).click(); await expect(page).toHaveURL(/device-check/); await expect(page.getByTestId("voice-test")).toBeVisible();
 });
 test("ordinary accounts cannot query voice files or inspect the admin page", async ({ page, browser }) => {
-  const anonymous = await browser.newContext(); try { expect((await anonymous.request.get("http://127.0.0.1:3100/api/admin/voice-status")).status()).toBe(401); } finally { await anonymous.close(); }
+  const anonymous = await browser.newContext({ extraHTTPHeaders: { Origin: "http://127.0.0.1:3100" } }); try { expect((await anonymous.request.get("http://127.0.0.1:3100/api/admin/voice-status")).status()).toBe(401); } finally { await anonymous.close(); }
   await login(page, "outsider"); expect((await page.request.get("/api/admin/voice-status")).status()).toBe(404); await page.goto("/admin/tts"); await expect(page).not.toHaveURL(/\/admin\//); await expect(page.getByTestId("voice-readiness")).toHaveCount(0);
 });

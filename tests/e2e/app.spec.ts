@@ -50,7 +50,7 @@ test("level recording, report, replay, retry, ownership and deletion", async ({ 
   await page.getByRole("button", { name: "朗读参考回答" }).click();
   await expect(page.getByRole("button", { name: "朗读参考回答" })).toBeEnabled({ timeout: 30000 });
   await page.screenshot({ path: "data/verification/answer-report.png", fullPage: true });
-  const other = await browser.newContext(); const outsider = await other.newPage(); await login(outsider, "outsider");
+  const other = await browser.newContext({ extraHTTPHeaders: { Origin: "http://127.0.0.1:3100" } }); const outsider = await other.newPage(); await login(outsider, "outsider");
   expect((await other.request.get(`/api/answers/${answerId}`)).status()).toBe(404); expect((await other.request.get(`/api/answers/${answerId}/audio`)).status()).toBe(404); await other.close();
   await start(page, { mode: "retry", sourceAnswerId: answerId });
   await page.getByRole("button", { name: "完成本关", exact: true }).click(); await expect(page.getByText("本次练习完成！", { exact: true })).toBeVisible();
@@ -100,7 +100,7 @@ test("check-in, admin compensation, redemption, calendar and appearance", async 
   await expect(page.getByTestId("reward-checkin")).toBeDisabled();
   await page.goto("/rewards"); await expect(page.getByTestId("points-balance")).toHaveText("5");
   expect((await page.request.post("/api/rewards", { data: { action: "checkin" }, headers: { Origin: "https://untrusted.example" } })).status()).toBe(403);
-  const adminContext = await browser.newContext(); const admin = await adminContext.newPage(); await login(admin, "admin");
+  const adminContext = await browser.newContext({ extraHTTPHeaders: { Origin: "http://127.0.0.1:3100" } }); const admin = await adminContext.newPage(); await login(admin, "admin");
   await admin.goto("/admin/rewards"); await admin.getByLabel("用户", { exact: true }).selectOption({ label: "outsider · outsider@example.test" });
   await admin.getByLabel("调整积分（负数表示扣回）").fill("100"); await admin.getByLabel("调整原因", { exact: true }).fill("浏览器验收积分补发"); await admin.getByRole("button", { name: "提交积分调整" }).click(); await expect(admin.getByText("积分已调整，原因和管理员标识已记入流水。")).toBeVisible();
   await admin.getByRole("button", { name: "保存奖励规则" }).click(); await expect(admin.getByText("奖励规则已保存。", { exact: false })).toBeVisible();

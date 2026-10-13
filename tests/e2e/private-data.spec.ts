@@ -1,5 +1,5 @@
 import { test, expect, type Page } from "@playwright/test";
-test.use({ reducedMotion: "reduce", extraHTTPHeaders: { "x-forwarded-for": "192.0.2.90" } });
+test.use({ reducedMotion: "reduce", extraHTTPHeaders: {Origin: "http://127.0.0.1:3100",  "x-forwarded-for": "192.0.2.90" } });
 const origin = { Origin: "http://127.0.0.1:3100" };
 let unfinished: { id: string; email: string }[] = [];
 test.beforeEach(() => { unfinished = []; });

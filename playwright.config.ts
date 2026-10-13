@@ -7,6 +7,7 @@ export default defineConfig({
   use: {
     baseURL: "http://127.0.0.1:3100", channel: process.platform === "win32" ? "msedge" : "chromium",
     viewport: { width: 1440, height: 1000 }, permissions: ["microphone"],
+    extraHTTPHeaders: { Origin: "http://127.0.0.1:3100" },
     launchOptions: { args: ["--use-fake-device-for-media-stream", "--use-fake-ui-for-media-stream", `--use-file-for-fake-audio-capture=${path.resolve("tests/fixtures/microphone.wav")}`, "--autoplay-policy=no-user-gesture-required"] },
     screenshot: "only-on-failure", trace: "retain-on-failure",
   },

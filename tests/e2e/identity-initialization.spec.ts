@@ -1,5 +1,5 @@
 import { test, expect, type Page } from "@playwright/test";
-test.use({ reducedMotion: "reduce", extraHTTPHeaders: { "x-forwarded-for": "192.0.2.92" } });
+test.use({ reducedMotion: "reduce", extraHTTPHeaders: {Origin: "http://127.0.0.1:3100",  "x-forwarded-for": "192.0.2.92" } });
 const origin = { Origin: "http://127.0.0.1:3100" };
 async function signIn(page: Page, email: string) {
   expect((await page.request.post("/api/auth/sign-in/email", { data: { email, password: "Browser-test-123!" }, headers: origin })).ok()).toBe(true);

@@ -1,5 +1,5 @@
 import {test,expect,type Page} from "@playwright/test";
-test.use({extraHTTPHeaders:{"x-forwarded-for":"192.0.2.45"}});
+test.use({extraHTTPHeaders:{Origin: "http://127.0.0.1:3100", "x-forwarded-for":"192.0.2.45"}});
 async function login(page:Page,email="outsider@example.test"){
   await page.goto("/login");await page.getByLabel("邮箱",{exact:true}).fill(email);await page.getByLabel("密码",{exact:true}).fill("Browser-test-123!");await page.getByRole("button",{name:"登录",exact:true}).click();await expect(page).not.toHaveURL(/\/login$/);
 }
@@ -18,8 +18,8 @@ test("personal API settings stay private, save models, delete without fallback, 
   expect(await page.evaluate(()=>JSON.stringify(localStorage)+JSON.stringify(sessionStorage))).not.toContain(key);
   await page.reload();await expect(page.getByLabel("百炼 API Key",{exact:true})).toHaveValue("");
   await page.screenshot({path:"data/verification/personal-ai-desktop.png",fullPage:true});
-  const guest=await browser.newContext();expect((await guest.request.get("http://127.0.0.1:3100/api/ai-settings")).status()).toBe(401);await guest.close();
-  const other=await browser.newContext({extraHTTPHeaders:{"x-forwarded-for":"192.0.2.46"}});const otherPage=await other.newPage();await otherPage.goto("http://127.0.0.1:3100/login");
+  const guest=await browser.newContext({ extraHTTPHeaders: { Origin: "http://127.0.0.1:3100" } });expect((await guest.request.get("http://127.0.0.1:3100/api/ai-settings")).status()).toBe(401);await guest.close();
+  const other=await browser.newContext({extraHTTPHeaders:{Origin: "http://127.0.0.1:3100", "x-forwarded-for":"192.0.2.46"}});const otherPage=await other.newPage();await otherPage.goto("http://127.0.0.1:3100/login");
   await otherPage.getByLabel("邮箱",{exact:true}).fill("learner@example.test");await otherPage.getByLabel("密码",{exact:true}).fill("Browser-test-123!");await otherPage.getByRole("button",{name:"登录",exact:true}).click();await expect(otherPage).not.toHaveURL(/\/login$/);
   expect((await(await other.request.get("http://127.0.0.1:3100/api/ai-settings")).json()).config.hasKey).toBe(false);await other.close();
   await page.setViewportSize({width:390,height:844});expect(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth)).toBe(true);

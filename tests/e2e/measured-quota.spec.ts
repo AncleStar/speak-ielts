@@ -1,7 +1,7 @@
 import { test, expect } from "@playwright/test";
 import { randomUUID } from "node:crypto";
 import { pcmFixture } from "../../scripts/make-fixtures";
-test.use({ extraHTTPHeaders: { "x-forwarded-for": "192.0.2.49" } });
+test.use({ extraHTTPHeaders: {Origin: "http://127.0.0.1:3100",  "x-forwarded-for": "192.0.2.49" } });
 test("server-decoded time pauses AI when quota is unavailable, preserves replay and resumes after another hold is released", async ({ page }) => {
   await page.goto("/login"); await page.getByLabel("邮箱", { exact: true }).fill("measured-quota@example.test"); await page.getByLabel("密码", { exact: true }).fill("Browser-test-123!"); await page.getByRole("button", { name: "登录", exact: true }).click(); await expect(page).not.toHaveURL(/\/login$/);
   const me = await (await page.request.get("/api/me")).json(), submissionId = randomUUID();

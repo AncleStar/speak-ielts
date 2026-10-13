@@ -2,7 +2,7 @@ import fs from "node:fs/promises";
 import pg from "pg";
 import { test, expect, type Page, type BrowserContext } from "@playwright/test";
 
-test.use({ extraHTTPHeaders: { "x-forwarded-for": "192.0.2.121" }, actionTimeout: 20000 });
+test.use({ extraHTTPHeaders: {Origin: "http://127.0.0.1:3100",  "x-forwarded-for": "192.0.2.121" }, actionTimeout: 20000 });
 let owned: string | null = null;
 test.beforeEach(() => { owned = null; });
 test.afterEach(async ({ context }) => { if (owned) expect([200, 404]).toContain((await context.request.delete(`/api/sessions/${owned}`)).status()); });
@@ -34,7 +34,7 @@ async function stopped(page: Page) {
 for (const offline of [false, true]) test(`${offline ? "offline" : "online"} original device preserves real audio after explicit takeover in an independent browser context`, async ({ page, context, browser }) => {
   const errors: string[] = []; page.on("pageerror", e => errors.push(e.message));
   await login(page, offline ? "device-offline" : "device-online"); const id = await create(page), original = await view(page, id);
-  const peerContext = await browser.newContext({ storageState: await context.storageState(), permissions: ["microphone"], extraHTTPHeaders: { "x-forwarded-for": "192.0.2.122" } });
+  const peerContext = await browser.newContext({ storageState: await context.storageState(), permissions: ["microphone"], extraHTTPHeaders: {Origin: "http://127.0.0.1:3100",  "x-forwarded-for": "192.0.2.122" } });
   try {
     const peer = await peerContext.newPage(); peer.on("pageerror", e => errors.push(e.message)); await peer.goto(`http://127.0.0.1:3100/interview/${id}`);
     await expect(peer.getByTestId("start-interview")).toHaveText(/接管这次练习/);
@@ -73,7 +73,7 @@ for (const offline of [false, true]) test(`${offline ? "offline" : "online"} ori
 });
 test("viewing a started mock on another device does not interrupt it; ending it requires confirmation", async ({ page, context, browser }) => {
   await login(page, "device-mock"); const id = await create(page, true), before = await view(page, id);
-  const peerContext = await browser.newContext({ storageState: await context.storageState() });
+  const peerContext = await browser.newContext({ extraHTTPHeaders: { Origin: "http://127.0.0.1:3100" },  storageState: await context.storageState() });
   try {
     const peer = await peerContext.newPage(); await peer.goto(`http://127.0.0.1:3100/interview/${id}`);
     await expect(peer.getByText("模考正在原设备进行", { exact: true })).toBeVisible(); await expect(peer.getByTestId("start-interview")).toHaveCount(0);

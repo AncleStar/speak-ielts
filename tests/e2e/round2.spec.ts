@@ -13,7 +13,7 @@ test("invited signup, password help, short first experience and ambient controls
   await login(page, "admin"); await page.goto("/admin/invites");
   await page.getByLabel("限定邮箱（可留空）").fill("invited@example.test"); await page.getByRole("button", { name: "生成邀请码" }).click();
   const code = (await page.getByTestId("invite-code").textContent())!;
-  const context = await browser.newContext({ viewport: { width: 390, height: 844 }, permissions: ["microphone"] }); const learner = await context.newPage();
+  const context = await browser.newContext({ extraHTTPHeaders: { Origin: "http://127.0.0.1:3100" },  viewport: { width: 390, height: 844 }, permissions: ["microphone"] }); const learner = await context.newPage();
   learner.on("pageerror", e => errors.push(e.message)); await learner.goto("/register");
   await learner.getByLabel("昵称", { exact: true }).fill("受邀学员"); await learner.getByLabel("邮箱", { exact: true }).fill("invited@example.test");
   await learner.getByLabel("设置密码").fill("Invited-browser-123!"); await learner.getByLabel("邀请码", { exact: true }).fill(code);

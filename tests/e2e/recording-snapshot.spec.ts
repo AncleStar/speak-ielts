@@ -4,7 +4,7 @@ import pg from "pg";
 import { test, expect, type Page } from "@playwright/test";
 import { pcmFixture } from "../../scripts/make-fixtures";
 
-test.use({ extraHTTPHeaders: { "x-forwarded-for": "192.0.2.131" }, actionTimeout: 20000 });
+test.use({ extraHTTPHeaders: {Origin: "http://127.0.0.1:3100",  "x-forwarded-for": "192.0.2.131" }, actionTimeout: 20000 });
 type Meta = { id: string; status: string; createdAt: number; interrupted: boolean; snapshotOf?: string; recordingGuard?: string; activationId?: string };
 type Stored = { meta: Meta; sequences: number[]; bytes: number; hash: string };
 let owned: string[] = [];

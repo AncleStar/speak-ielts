@@ -1,7 +1,7 @@
 import {test,expect,type Page} from "@playwright/test";
 import {writeFile} from "node:fs/promises";
 
-test.use({viewport:{width:1600,height:900},video:{mode:"on",size:{width:1280,height:720}},extraHTTPHeaders:{"x-forwarded-for":"192.0.2.46"}});
+test.use({viewport:{width:1600,height:900},video:{mode:"on",size:{width:1280,height:720}},extraHTTPHeaders:{Origin: "http://127.0.0.1:3100", "x-forwarded-for":"192.0.2.46"}});
 async function signIn(page:Page){
   await page.goto("/login");
   await page.getByLabel("邮箱",{exact:true}).fill("learner@example.test");

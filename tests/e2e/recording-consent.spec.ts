@@ -1,6 +1,6 @@
 import fs from "node:fs/promises";
 import { test, expect, type Page } from "@playwright/test";
-test.use({ reducedMotion: "reduce", extraHTTPHeaders: { "x-forwarded-for": "192.0.2.96" } });
+test.use({ reducedMotion: "reduce", extraHTTPHeaders: {Origin: "http://127.0.0.1:3100",  "x-forwarded-for": "192.0.2.96" } });
 const origin = { Origin: "http://127.0.0.1:3100" };
 async function login(page: Page, name: string) {
   await page.goto("/login"); await page.getByLabel("邮箱", { exact: true }).fill(`${name}@example.test`); await page.getByLabel("密码", { exact: true }).fill("Browser-test-123!");

@@ -2,7 +2,7 @@ import fs from "node:fs/promises";
 import { test, expect, type Page, type BrowserContext } from "@playwright/test";
 import pg from "pg";
 
-test.use({ extraHTTPHeaders: { "x-forwarded-for": "192.0.2.102" }, viewport: { width: 1440, height: 1000 } });
+test.use({ extraHTTPHeaders: {Origin: "http://127.0.0.1:3100",  "x-forwarded-for": "192.0.2.102" }, viewport: { width: 1440, height: 1000 } });
 type Local = { meta: { id: string; status: string; durationMs: number; interrupted: boolean; recordingGuard?: string }[]; chunks: number; bytes: number };
 let ownedSession: string | null = null;
 test.beforeEach(() => { ownedSession = null; });

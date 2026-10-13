@@ -1,5 +1,5 @@
 import { test, expect, type Page } from "@playwright/test";
-test.use({ extraHTTPHeaders: { "x-forwarded-for": "192.0.2.80" }, reducedMotion: "reduce" });
+test.use({ extraHTTPHeaders: {Origin: "http://127.0.0.1:3100",  "x-forwarded-for": "192.0.2.80" }, reducedMotion: "reduce" });
 const origin = { Origin: "http://127.0.0.1:3100" };
 async function login(page: Page, email = "learner@example.test") {
   await page.goto("/login"); await page.getByLabel("邮箱", { exact: true }).fill(email); await page.getByLabel("密码", { exact: true }).fill("Browser-test-123!");
@@ -44,8 +44,8 @@ test("API requires login and same origin; another account cannot open or alter p
   expect(created.status()).toBe(200); const t = await created.json();
   expect((await page.request.post("/api/thoughts", { headers: { Origin: "https://untrusted.example.test" }, data: { sourceText: "Opinion", requestId: crypto.randomUUID() } })).status()).toBe(403);
   expect((await page.request.post(`/api/thoughts/${t.id}/review`, { headers: { Origin: "https://untrusted.example.test" }, data: { action: "enroll", revision: 0 } })).status()).toBe(403);
-  const guest = await browser.newContext(); expect((await guest.request.get("http://127.0.0.1:3100/api/thoughts")).status()).toBe(401); expect((await guest.request.get("http://127.0.0.1:3100/api/vocabulary")).status()).toBe(401); await guest.close();
-  const context = await browser.newContext({ baseURL: "http://127.0.0.1:3100", reducedMotion: "reduce", extraHTTPHeaders: { "x-forwarded-for": "192.0.2.81" } });
+  const guest = await browser.newContext({ extraHTTPHeaders: { Origin: "http://127.0.0.1:3100" } }); expect((await guest.request.get("http://127.0.0.1:3100/api/thoughts")).status()).toBe(401); expect((await guest.request.get("http://127.0.0.1:3100/api/vocabulary")).status()).toBe(401); await guest.close();
+  const context = await browser.newContext({ baseURL: "http://127.0.0.1:3100", reducedMotion: "reduce", extraHTTPHeaders: {Origin: "http://127.0.0.1:3100",  "x-forwarded-for": "192.0.2.81" } });
   const other = await context.newPage(); await login(other, "outsider@example.test");
   expect((await context.request.get(`http://127.0.0.1:3100/api/thoughts/${t.id}`)).status()).toBe(404);
   expect((await context.request.delete(`http://127.0.0.1:3100/api/thoughts/${t.id}`, { headers: origin })).status()).toBe(404);

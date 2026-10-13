@@ -1,6 +1,6 @@
 import fs from "node:fs/promises";
 import { test, expect, type Page, type BrowserContext } from "@playwright/test";
-test.use({ extraHTTPHeaders: { "x-forwarded-for": "192.0.2.111" } });
+test.use({ extraHTTPHeaders: {Origin: "http://127.0.0.1:3100",  "x-forwarded-for": "192.0.2.111" } });
 type Local = { meta: { id: string; durationMs: number; mimeType: string; status: string }[]; chunks: number; bytes: number; discards: number };
 let owned: string[] = [];
 test.beforeEach(() => { owned = []; });
