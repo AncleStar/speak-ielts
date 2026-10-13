@@ -8,6 +8,7 @@ Object.assign(process.env, {
   DATABASE_URL: "postgres://postgres:postgres@127.0.0.1:5545/e2e",
   BETTER_AUTH_SECRET: "e2e-only-secret-00000000000000000000000", BETTER_AUTH_URL: "http://127.0.0.1:3100",
   AI_PROVIDER: "mock", TTS_PROVIDER: "mock", MOCK_TTS_TONE: "true", STORAGE_DRIVER: "local", DATA_DIR: root,
+  USER_API_KEY_SECRET: "e2e-only-encryption-secret-000000000000", DASHSCOPE_API_KEY: "", OSS_ACCESS_KEY_ID: "", OSS_ACCESS_KEY_SECRET: "",
   LOCAL_STORAGE_DIR: path.join(root, "storage"), CONTENT_REQUIRE_REVIEW: "false", SEED_PUBLISH_DRAFTS: "true",
   ADMIN_EMAIL: "", ADMIN_INITIAL_PASSWORD: "", TIME_SCALE: "0.08", NODE_ENV: "production", APP_DOMAIN: "localhost",
 });

@@ -97,6 +97,7 @@ it("counts idle workers as healthy, rejects stale or other-run heartbeats, and r
   expect((await getWorkerHealth()).ready).toBe(false);
   await db.insert(s.appSetting).values({ key: "runtime:worker:other", value: { configId: "another-run" } });
   expect((await getWorkerHealth()).ready).toBe(false);
+  await db.delete(s.appSetting).where(eq(s.appSetting.key, "runtime:worker:other"));
   const stop = await startWorkerHeartbeat(); expect((await getWorkerHealth()).ready).toBe(true);
   await db.update(s.appSetting).set({ updatedAt: new Date(Date.now() - WORKER_STALE_MS - 1000) }).where(like(s.appSetting.key, "runtime:worker:%"));
   expect((await getWorkerHealth()).ready).toBe(false);

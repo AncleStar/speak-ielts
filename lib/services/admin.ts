@@ -62,6 +62,7 @@ export async function serviceStatus() {
     errors,
     lastWorkerActivity: worker.lastHeartbeat,
     workerReady: worker.ready,
+    workerState: worker.state,
     activeSessions: await activeSessionCount(settings),
     paused: settings.pauseNewSessions,
     feedbackLatency: { avgSec: Number(latency?.avg ?? 0), p95Sec: Number(latency?.p95 ?? 0), n: Number(latency?.n ?? 0) },

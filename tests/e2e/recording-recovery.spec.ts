@@ -32,7 +32,11 @@ async function record(page: Page, mock = false) {
 }
 async function crash(page: Page, context: BrowserContext) {
   const before = await local(page); expect(before.meta[0]).toMatchObject({ status: "recording", interrupted: false, recordingGuard: "web-lock-v1" });
-  const event = page.waitForEvent("crash"), cdp = await context.newCDPSession(page); void cdp.send("Page.crash").catch(() => {}); await event; await page.close(); return before;
+  const event = page.waitForEvent("crash"), cdp = await context.newCDPSession(page); void cdp.send("Page.crash").catch(() => {}); await event; await page.close();
+  // A final chunk may commit after the pre-crash observation. Compare recovery to the stopped durable prefix.
+  const observer = await context.newPage();
+  try { await observer.goto("/"); const durable = await local(observer); expect(durable.bytes).toBeGreaterThanOrEqual(before.bytes); return durable; }
+  finally { await observer.close(); }
 }
 async function ready(page: Page, id: string) { await page.goto(`/interview/${id}`); await expect(page.getByTestId("ready-panel")).toBeVisible(); await expect(page.getByRole("button", { name: "恢复中断片段", exact: true })).toBeEnabled(); }
 async function saved(page: Page, id: string) {

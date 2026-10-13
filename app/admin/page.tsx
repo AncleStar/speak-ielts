@@ -7,6 +7,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Alert } from "@/components/ui/feedback";
 import { serviceStatus, trialMetrics } from "@/lib/services/admin";
 import { ANSWER_STATUS_LABEL, formatDateTime } from "@/lib/utils";
+import { workerStateMessage } from "@/lib/worker-runtime";
 
 export const metadata: Metadata = { title: "管理 · 服务状态" };
 
@@ -50,8 +51,9 @@ export default async function AdminHome() {
             </p>
             <p>
               数据库 {s.dbOk ? <Badge tone="success">正常</Badge> : <Badge tone="danger">异常</Badge>}　任务队列 {s.queueOk ? <Badge tone="success">正常</Badge> : <Badge tone="danger">异常</Badge>}
-              后台处理最近心跳 {s.lastWorkerActivity ? formatDateTime(s.lastWorkerActivity) : "无"} {workerStale ? <Badge tone="warning">后台未就绪，请检查或重启应用</Badge> : <Badge tone="success">在线</Badge>}
+              后台处理最近匹配心跳 {s.lastWorkerActivity ? formatDateTime(s.lastWorkerActivity) : "无"} {workerStale ? <Badge tone="warning">后台未就绪</Badge> : <Badge tone="success">在线</Badge>}
             </p>
+            {workerStale && <Alert tone="warning">{workerStateMessage(s.workerState)}</Alert>}
           </CardContent>
         </Card>
         <Card>

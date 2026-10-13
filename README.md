@@ -80,6 +80,8 @@ npm run setup:voice
 
 若浏览器显示“localhost 拒绝建立连接”，双击 **`查看应用状态.cmd`**；未运行时启动，持续异常时使用 **`重启应用.cmd`**。**`停止应用.cmd`** 只停止本入口管理的服务，保留账号、练习和录音。错误日志在 `data/run/app.err.log`，启动进度在 `app.out.log`。第一次或代码更新后会自动构建，可能需要一分钟。
 
+排查安装、配置或后台问题可运行 `npm run doctor`，Windows 也可双击 **`诊断应用.cmd`**。它只读检查，不自动迁移、改配置或调用付费服务；JSON 输出使用 `npm --silent run doctor -- --json`。检查范围和处理顺序见 [部署自检与故障自救](docs/部署自检与故障自救.md)。
+
 也可以在终端前台运行：
 
 ```powershell

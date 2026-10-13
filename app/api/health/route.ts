@@ -11,7 +11,7 @@ export async function GET() {
     await assertRecoveryReady();
     await db.execute(sql`select 1`);
     const worker = await getWorkerHealth();
-    return Response.json({ app: "ielts-speaking", ok: worker.ready, database: true, worker: worker.ready, time: Date.now() }, { status: worker.ready ? 200 : 503 });
+    return Response.json({ app: "ielts-speaking", ok: worker.ready, database: true, worker: worker.ready, workerState: worker.state, time: Date.now() }, { status: worker.ready ? 200 : 503, headers: { "Cache-Control": "no-store" } });
   } catch {
     return Response.json({ app: "ielts-speaking", ok: false, database: false, worker: false }, { status: 503 });
   }
