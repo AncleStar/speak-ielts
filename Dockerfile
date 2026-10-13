@@ -8,7 +8,7 @@ RUN mkdir -p /pg-client/bin /pg-client/lib && \
       done; \
     done
 
-FROM node:22-bookworm-slim AS base
+FROM node:22-bookworm-slim AS system
 RUN --mount=type=cache,target=/var/cache/apt,sharing=locked \
     --mount=type=cache,target=/var/lib/apt/lists,sharing=locked \
     rm -f /etc/apt/apt.conf.d/docker-clean && \
@@ -23,13 +23,38 @@ RUN for tool in pg_dump pg_restore; do \
       chmod 755 "/usr/local/bin/$tool"; \
     done && pg_dump --version && pg_restore --version
 WORKDIR /app
+
+FROM system AS dependencies
 COPY package.json package-lock.json ./
-RUN npm ci --ignore-scripts
+RUN --mount=type=cache,id=speak-npm,target=/root/.npm,sharing=locked \
+    npm ci --ignore-scripts --no-fund --no-audit --fetch-retries=2 --fetch-timeout=120000
+
+FROM dependencies AS builder
 COPY . .
-ENV NEXT_TELEMETRY_DISABLED=1
+ENV NEXT_TELEMETRY_DISABLED=1 SPEAK_STANDALONE=1
 RUN npm run build
+# The runtime receives complete production dependencies below, not traced duplicates.
+RUN test -f /app/.next/standalone/server.js && rm -rf /app/.next/standalone/node_modules
+
+FROM system AS production-dependencies
+COPY package.json package-lock.json ./
+RUN --mount=type=cache,id=speak-npm,target=/root/.npm,sharing=locked \
+    npm ci --omit=dev --ignore-scripts --no-fund --no-audit --fetch-retries=2 --fetch-timeout=120000
+
+FROM system AS runtime
+COPY --from=builder /app/.next/standalone ./
+COPY --from=builder /app/.next/static ./.next/static
+COPY --from=production-dependencies /app/node_modules ./node_modules
+COPY --from=builder /app/package.json /app/package-lock.json /app/tsconfig.json /app/next.config.ts ./
+COPY --from=builder /app/lib ./lib
+COPY --from=builder /app/db ./db
+COPY --from=builder /app/worker ./worker
+COPY --from=builder /app/scripts ./scripts
+COPY --from=builder /app/content ./content
+COPY --from=builder /app/public ./public
+COPY --from=builder /app/LICENSE /app/THIRD_PARTY_NOTICES.md ./
 RUN mkdir -p /app/data/storage && chown -R node:node /app/data /app/.next
 USER node
-ENV NODE_ENV=production HOSTNAME=0.0.0.0 PORT=3000
+ENV NODE_ENV=production HOSTNAME=0.0.0.0 PORT=3000 NEXT_TELEMETRY_DISABLED=1
 EXPOSE 3000
-CMD ["npm", "start", "--", "--hostname", "0.0.0.0"]
+CMD ["node", "server.js"]

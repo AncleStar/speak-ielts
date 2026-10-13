@@ -1,6 +1,8 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
+  // Docker packages a standalone server; local builds keep their usual output.
+  output: process.env.SPEAK_STANDALONE === "1" ? "standalone" : undefined,
   // Each checkout uses its own dependencies, including nested clean-install verification copies.
   turbopack: { root: process.cwd() },
   outputFileTracingRoot: process.cwd(),
