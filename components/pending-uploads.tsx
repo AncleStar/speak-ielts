@@ -3,7 +3,8 @@
 import { useEffect, useRef, useState } from "react";
 import { LinkButton, Button } from "@/components/ui/button";
 import { Alert } from "@/components/ui/feedback";
-import { getBlob, listRecordings, localIdentity, purgeExpired, recordingRecoveryState, recoverRecording, type RecordingMeta, type RecordingRecoveryState } from "@/lib/client/idb";
+import { copyRecordingSnapshot, getBlob, listRecordings, localIdentity, purgeExpired, recordingRecoveryState, recoverRecording, type RecordingMeta, type RecordingRecoveryState } from "@/lib/client/idb";
+import { downloadRecordingAudio, downloadRecordingBackup } from "@/lib/client/recording-download";
 import { PRIVATE_SESSION_EVENT, RECORDING_CONSENT_EVENT } from "@/lib/client/private-session";
 import { uploadQueue } from "@/lib/client/uploader";
 import { requestUploadDiscard } from "@/lib/client/upload-discard";
@@ -62,13 +63,17 @@ export function PendingUploads({ userId, sessionId, onChange, onUploaded, onBusy
         return <li key={meta.id} data-testid={`local-recording-${meta.id}`} className="min-w-0 space-y-2 border-t border-current/15 pt-2">
           <p className="break-words">第 {meta.planIndex + 1} 题 · {Math.round(meta.durationMs / 1000)} 秒 · {meta.promptText.slice(0, 80)}</p>
           {meta.recovery === "live" && <p>另一页面正在录音或保存，此处不能恢复或丢弃。</p>}
-          {meta.recovery === "unverified" && <p>无法确认录音占用：旧片段或当前浏览器没有占用锁。请保留数据并关闭旧页面；这类片段暂不支持安全接管。</p>}
+          {meta.recovery === "unverified" && <p>无法确认旧页面是否停止。可以保留已写入片段的中断副本，或下载原始备份；这些操作不改动原录音。</p>}
+          {meta.snapshotOf && <p>已保留中断副本，不代表完整作答。显示时长为本机估计，上传后以实际音频检测为准。{meta.snapshotMemoryOnly ? "副本仅在内存，请下载备份并保持页面打开。" : "原片段和副本沿用原来的 24 小时保留期限。"}</p>}
           {meta.interrupted && meta.recovery === "ready" && <p>已恢复为中断片段，不计为完整作答。</p>}
           {meta.lastError && <p className="break-words">{meta.lastError}</p>}
           <div className="flex flex-wrap gap-2">
             {meta.status === "recording" ? <Button size="sm" variant="secondary" disabled={waiting || !stopped} onClick={() => void act(meta, async () => { const result = await recoverRecording(meta.id); await playLocal(result.meta); return "已恢复本机现有片段。可以回放后重试上传；也可以丢弃，再重新回答。"; })}>恢复中断片段</Button>
               : <><Button size="sm" variant="secondary" disabled={waiting} onClick={() => void act(meta, async () => { await uploadQueue.enqueue(meta); clearPreview(); await uploaded.current?.(); return "上传成功，反馈将在后台生成。"; })}>{uploadQueue.isPending(meta.id) ? "正在上传…" : "重试上传"}</Button>
                 <Button size="sm" variant="outline" disabled={waiting} onClick={() => void act(meta, async () => { await playLocal(meta); return "正在回放本机保留片段。"; })}>回放片段</Button></>}
+            {meta.status === "recording" && (meta.recovery === "unverified" || meta.recovery === "live") && <Button size="sm" variant="outline" disabled={waiting} onClick={() => void act(meta, async () => { const copy = await copyRecordingSnapshot(meta.id); await playLocal(copy.meta); return "中断副本已保留，可以回放、下载或重试上传；原录音未改变。同一批分片重复保存不会产生多份副本。"; })}>保留中断副本</Button>}
+            {meta.status !== "recording" && <Button size="sm" variant="outline" disabled={waiting} onClick={() => void act(meta, async () => { await downloadRecordingAudio(meta.id); return "已发起录音下载，请在浏览器下载列表确认。文件不会随本机暂存到期或退出登录而自动删除。"; })}>下载录音</Button>}
+            <Button size="sm" variant="ghost" disabled={waiting} onClick={() => void act(meta, async () => { await downloadRecordingBackup(meta.id); return "已发起原始分片备份下载，原录音未改变。备份包含个人录音，请保存在自己的设备上；此格式用于保留原始数据，暂不自动导入。"; })}>下载原始备份</Button>
             <Button size="sm" variant="ghost" disabled={waiting || !stopped} onClick={() => { if (confirm("丢弃这段本机录音？丢弃后无法恢复。")) void act(meta, async () => {
               const result = await requestUploadDiscard(meta, clearPreview);
               if (!result.receipt) return result.persistent ? "本机片段已丢弃，取消任务已保留。上传暂记尚未确认释放，联网后自动同步。" : "本机片段已丢弃，服务器暂记尚未确认释放。浏览器无法持久保存取消任务，请保持此页并联网；未上传满 24 小时后自动释放。";

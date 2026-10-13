@@ -56,6 +56,7 @@ export interface TicketInput {
   interrupted?: boolean;
   consentVersion?: number;
   activationId?: string | null;
+  fragmentCopy?: boolean;
 }
 
 /**
@@ -80,6 +81,7 @@ async function createUploadTicketLocked(userId: string, input: TicketInput, vers
     .from(answer)
     .where(and(eq(answer.sessionId, s.id), eq(answer.submissionId, input.submissionId)));
   if (existing) {
+    if (input.fragmentCopy && !existing.interrupted) throw conflict("此提交已经登记为完整回答，不能按中断副本改写；请刷新后查看原记录。", "submission_changed");
     if (existing.processingStage === "upload_discarded") throw new AppError(410, "upload_discarded", "该片段已经丢弃，旧上传凭证不能继续使用。");
     if (!existing.storageKey && existing.processingStage === "consent_wait") throw forbidden("这次录音的授权已撤回，请开始新的录音", "consent_required");
     if (!existing.storageKey && existing.createdAt.getTime() + PENDING_UPLOAD_TTL_MS <= Date.now()) throw new AppError(410, "upload_expired", "未上传片段已超过 24 小时补传期，请重新录音。");
@@ -96,9 +98,9 @@ async function createUploadTicketLocked(userId: string, input: TicketInput, vers
     sql`exists (select 1 from jsonb_array_elements(coalesce(${sessionEvent.result}->'retainedUploads', '[]'::jsonb)) p where p->>'submissionId' = ${input.submissionId} and p->>'planIndex' = ${String(input.planIndex)} and p->>'kind' = ${input.kind} and coalesce(p->>'followUpId', '') = ${input.followUpId ?? ""} and p->>'consentVersion' = ${String(version)})`,
   )).limit(1);
   const [capture] = input.activationId ? await db.select({ id: sessionEvent.id }).from(sessionEvent).where(and(eq(sessionEvent.sessionId, s.id), eq(sessionEvent.id, input.activationId), eq(sessionEvent.type, "start"))).limit(1) : [];
-  const closedFragment = input.interrupted && capture && s.endedAt && Date.now() - s.endedAt.getTime() < PENDING_UPLOAD_TTL_MS && ["paused", "interrupted", "abandoned"].includes(s.status);
+  const closedFragment = ((input.interrupted && !!capture) || input.fragmentCopy) && s.endedAt && Date.now() - s.endedAt.getTime() < PENDING_UPLOAD_TTL_MS && ["paused", "interrupted", "abandoned", "completed"].includes(s.status);
   if (s.status !== "active" && !allowed && !retained && !closedFragment) throw conflict("本次练习已暂停或结束；只有退出前保留的录音可补传，新录音请先继续练习。", "session_closed");
-  const source = recordingSource({ currentActivationId: s.activationId, recordingActivationId: input.activationId, started: !!s.startedAt, retainedBeforePause: !!allowed || !!retained, interrupted: !!input.interrupted });
+  const source = input.fragmentCopy ? { source: "local_snapshot" as const, interrupted: true } : recordingSource({ currentActivationId: s.activationId, recordingActivationId: input.activationId, started: !!s.startedAt, retainedBeforePause: !!allowed || !!retained, interrupted: !!input.interrupted });
   const item = plan.items[input.planIndex];
   if (!item) throw badRequest("无效的题目位置");
   const kind = input.kind;

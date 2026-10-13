@@ -112,6 +112,7 @@ class UploadQueue {
             interrupted: meta.interrupted,
             consentVersion: meta.consentVersion,
             activationId: meta.activationId,
+            fragmentCopy: !!meta.snapshotOf,
           },
         });
         if (signal.aborted) throw new LocalSessionEnded();

@@ -6,6 +6,7 @@ import { RECORDING_GUARD, withStoppedRecording } from "./recording-owner";
 /** Every private write checks its login epoch in the same IndexedDB transaction. */
 export interface RecordingMeta {
   activationId?: string | null; recordingSource?: string;
+  snapshotOf?: string; snapshotAt?: number; snapshotMemoryOnly?: boolean;
   userId?: string; localEpoch?: string; consentVersion?: number; id: string; sessionId: string; planIndex: number;
   kind: "main" | "followup" | "rounding"; followUpId: string | null; promptText: string; mimeType: string;
   durationMs: number; createdAt: number; status: "recording" | "pending" | "failed"; interrupted: boolean; lastError?: string;
@@ -195,13 +196,66 @@ export async function putChunk(recId: string, seq: number, blob: Blob) {
   await write(["chunks"], scope, t => { t.objectStore("chunks").put({ recId, seq, blob }); });
   const list = memChunks.get(recId) ?? []; list[seq] = blob; memChunks.set(recId, list);
 }
-export async function getBlob(recId: string, mimeType: string): Promise<Blob | null> {
-  if (!await getMeta(recId)) return null;
-  const memory = memChunks.get(recId), db = await open();
-  if (!db || !persistent && memory?.length) return memory?.length ? new Blob(memory.filter(Boolean), { type: mimeType }) : null;
-  const rows = await transaction<{ seq: number; blob: Blob }[]>(db, ["chunks"], "readonly", (t, done) => { const request = t.objectStore("chunks").index("recId").getAll(IDBKeyRange.only(recId)); request.onsuccess = () => done(request.result); });
-  rows.sort((a, b) => a.seq - b.seq);
-  return rows.length ? new Blob(rows.map(row => row.blob), { type: mimeType }) : null;
+export interface RecordingSnapshot { meta: RecordingMeta; chunks: { seq: number; blob: Blob }[]; blob: Blob; scope: LocalIdentity; capturedAt: number }
+export async function assertRecordingSnapshotScope(scope: LocalIdentity) {
+  const stored = await readLocalIdentity();
+  if (!matches(scope, identity) || !matches(scope, stored)) throw new LocalSessionEnded();
+  if (identity?.consentAllowed !== true || stored?.consentAllowed !== true || identity.consentVersion !== scope.consentVersion || stored.consentVersion !== scope.consentVersion) throw new LocalConsentEnded();
+}
+/** Identity, metadata and chunks share one read transaction, never a mixed-account file. */
+export async function readRecordingSnapshot(recId: string): Promise<RecordingSnapshot | null> {
+  const scope = localIdentity(); if (!scope?.consentAllowed) return null;
+  const db = await open();
+  const memory = () => {
+    const meta = memMeta.get(recId); if (!recordingOwned(meta, scope)) return null;
+    return { meta: { ...meta! }, chunks: (memChunks.get(recId) ?? []).flatMap((blob, seq) => blob ? [{ seq, blob }] : []) };
+  };
+  const row = db ? await transaction<{ meta: RecordingMeta; chunks: { seq: number; blob: Blob }[] } | null>(db, ["privateSession", "recordings", "chunks"], "readonly", (t, done, fail) => {
+    const current = t.objectStore("privateSession").get("current"); current.onsuccess = () => {
+      if (!matches(scope, current.result)) { fail(new LocalSessionEnded()); return; }
+      if (current.result?.consentAllowed !== true || current.result.consentVersion !== scope.consentVersion) { fail(new LocalConsentEnded()); return; }
+      if (!persistent && recordingOwned(memMeta.get(recId), scope) && memChunks.get(recId)?.length) { done(memory()); return; }
+      const request = t.objectStore("recordings").get(recId); request.onsuccess = () => {
+        if (!recordingOwned(request.result, scope)) { done(null); return; }
+        const meta = request.result as RecordingMeta, chunks = t.objectStore("chunks").index("recId").getAll(IDBKeyRange.only(recId));
+        chunks.onsuccess = () => done({ meta, chunks: chunks.result });
+      };
+    };
+  }) : memory();
+  await assertRecordingSnapshotScope(scope);
+  if (!row) return null;
+  if (!Number.isFinite(row.meta.createdAt) || Date.now() - row.meta.createdAt >= LOCAL_TTL_MS) throw new Error("片段已超过 24 小时本机保留期。");
+  row.chunks.sort((a, b) => a.seq - b.seq);
+  return { ...row, blob: new Blob(row.chunks.map(c => c.blob), { type: row.meta.mimeType }), scope, capturedAt: Date.now() };
+}
+export async function getBlob(recId: string, _mimeType: string): Promise<Blob | null> {
+  const snapshot = await readRecordingSnapshot(recId); return snapshot?.blob.size ? snapshot.blob : null;
+}
+/** Make an immutable interrupted copy; the original recorder and its chunks are never changed. */
+export async function copyRecordingSnapshot(id: string) {
+  const snapshot = await readRecordingSnapshot(id);
+  if (!snapshot || snapshot.meta.status !== "recording") throw new Error("录音状态已改变，请重新载入。");
+  if (!snapshot.blob.size) throw new Error("没有已写入的录音分片，原片段仍保留。");
+  if (snapshot.blob.size > 25 * 1024 * 1024) throw new Error("片段超过 25 MB，请先下载原始备份。");
+  if (snapshot.chunks.some((c, i) => c.seq !== i || !(c.blob instanceof Blob))) throw new Error("分片不连续，暂不能生成可补传副本；请下载原始备份，原片段保持不变。");
+  const seed = JSON.stringify([snapshot.scope.userId, snapshot.scope.epoch, snapshot.scope.consentVersion, id]);
+  const digest = await crypto.subtle.digest("SHA-256", await new Blob([seed, snapshot.blob]).arrayBuffer());
+  const copyId = "copy_" + [...new Uint8Array(digest)].map(b => b.toString(16).padStart(2, "0")).join("");
+  await assertRecordingSnapshotScope(snapshot.scope);
+  let copied: RecordingMeta = { ...snapshot.meta, id: copyId, status: "pending", interrupted: true, snapshotOf: id, snapshotAt: snapshot.capturedAt, lastError: undefined, recordingGuard: undefined };
+  const durable = await write(["recordings", "chunks"], snapshot.scope, (t, fail) => {
+    const store = t.objectStore("recordings"), request = store.get(copyId); request.onsuccess = () => {
+      if (request.result) {
+        if (!recordingOwned(request.result, snapshot.scope) || request.result.snapshotOf !== id) { fail(new LocalSessionEnded()); return; }
+        copied = request.result; return;
+      }
+      store.put(copied); for (const c of snapshot.chunks) t.objectStore("chunks").put({ recId: copyId, seq: c.seq, blob: c.blob });
+    };
+  });
+  await assertRecordingSnapshotScope(snapshot.scope);
+  if (!durable) copied = memMeta.get(copyId) ?? { ...copied, snapshotMemoryOnly: true };
+  memMeta.set(copyId, { ...copied }); memChunks.set(copyId, snapshot.chunks.map(c => c.blob));
+  return { meta: copied, blob: snapshot.blob };
 }
 export async function listRecordings(sessionId?: string) {
   if (!identity?.userId) return [];

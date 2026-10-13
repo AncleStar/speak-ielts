@@ -13,6 +13,7 @@ import type { getSessionReport } from "@/lib/services/reports";
 import { formatDateTime, formatDuration, MODE_LABEL, SESSION_STATUS_LABEL } from "@/lib/utils";
 import { AnswerCard, type AnswerView, type FeedbackView } from "./answer-card";
 import { canResumeSession } from "@/lib/sessions/lifecycle";
+import { replayAttempts } from "@/lib/sessions/replay-order";
 
 type Report = Awaited<ReturnType<typeof getSessionReport>>;
 
@@ -114,7 +115,7 @@ export function SessionReport({ initial }: { initial: Report }) {
               </span>
             )}
             <span className="flex items-center gap-1 text-sm text-muted">
-              <Clock className="h-4 w-4" /> 作答 {formatDuration(summary.durationSec)} · 有效语音 {formatDuration(summary.speechSec)}
+              <Clock className="h-4 w-4" /> 保存录音累计 {formatDuration(summary.durationSec)} · 有效语音 {formatDuration(summary.speechSec)}
             </span>
           </div>
           {g.applicable ? (
@@ -186,9 +187,9 @@ export function SessionReport({ initial }: { initial: Report }) {
                       ) : null}
                     </div>
                   ) : (
-                    [...it.attempts].reverse().map((a, i) => (
+                    replayAttempts(it.attempts).map((a, i) => (
                       <div key={a.answer.id} className={i > 0 ? "border-t border-dashed border-line pt-4 opacity-90" : ""}>
-                        {i === 1 ? <p className="mb-2 text-xs font-medium text-muted">之前的作答</p> : null}
+                        {i === 1 ? <p className="mb-2 text-xs font-medium text-muted">其他作答与中断片段</p> : null}
                         <AnswerCard answer={a.answer as unknown as AnswerView} feedback={a.feedback as FeedbackView | null} onChanged={refresh} compact={i > 0} resumeSessionId={session.mode !== "mock" && a.answer.kind === "main" && canResumeSession(session) ? session.id : undefined} />
                       </div>
                     ))

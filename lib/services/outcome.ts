@@ -85,7 +85,7 @@ export function summarize(plan: SessionPlan, status: string, answers: AnswerLite
   const speechSec = uploaded.reduce((s, a) => s + (((a.metrics as { speechSec?: number } | null)?.speechSec as number) ?? 0), 0);
   let met: boolean | null = null;
   if (plan.mode === "mock") met = status === "completed";
-  else if (applicable && pending === 0 && status === "completed" && items.some(i => i.evaluated)) met = metCount >= goal!.requiredMet;
+  else if (applicable && !uploaded.some(a => !a.interrupted && goal!.countKinds.includes(a.kind as never) && (PENDING_STATUSES as readonly string[]).includes(a.status)) && status === "completed" && items.some(i => i.evaluated)) met = metCount >= goal!.requiredMet;
   return {
     answers: uploaded.length,
     done: uploaded.filter((a) => a.status === "done").length,

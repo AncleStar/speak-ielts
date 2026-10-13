@@ -116,3 +116,36 @@ it("admits a known inactive interrupted batch without reopening or reserving the
   await answers.receiveAudio(owner.id, t.answerId, t.ticket, pcmFixture(6)); await (await import("@/lib/jobs/process-answer")).processAnswer({ answerId: t.answerId }, { finalAttempt: true });
   expect(await (await import("@/lib/quota")).dailyUsageSeconds(owner.id, new Date(), db, undefined, false)).toBe(6);
 });
+
+it("closed legacy copies are forced interrupted, decode and charge actual time without reopening", async () => {
+  const s = await practice(), a = randomUUID(); await event(s.id, { type: "start", eventId: a, expectedVersion: 0 });
+  await event(s.id, { type: "pause", expectedVersion: 1, startEventId: a });
+  const copy = await ticket(s.id, undefined, { fragmentCopy: true, interrupted: false });
+  expect(copy).toMatchObject({ interrupted: true, recordingSource: "local_snapshot" });
+  await answers.receiveAudio(owner.id, copy.answerId, copy.ticket, pcmFixture(6)); await (await import("@/lib/jobs/process-answer")).processAnswer({ answerId: copy.answerId }, { finalAttempt: true });
+  expect(await sessions.getSessionState(owner.id, s.id)).toMatchObject({ status: "paused", stateVersion: 2 });
+  const q = await (await import("@/lib/quota")).getQuotaStatus(owner.id); expect(q.reservedSeconds).toBe(0); expect(q.usedSeconds).toBe(6);
+  expect((await answers.getAnswerDetail({ id: owner.id, isAdmin: false }, copy.answerId)).answer).toMatchObject({ hasAudio: true, durationMs: 6000, interrupted: true });
+});
+it("late old-device audio preserves a completed session and its full answer's synthetic evaluation", async () => {
+  const s = await practice(), a = randomUUID(); await event(s.id, { type: "start", eventId: a, expectedVersion: 0 });
+  const b = await event(s.id, { type: "start", expectedVersion: 1, takeover: true, expectedActivationId: a }), full = await ticket(s.id, b.activationId);
+  await answers.receiveAudio(owner.id, full.answerId, full.ticket, pcmFixture(6)); await (await import("@/lib/jobs/process-answer")).processAnswer({ answerId: full.answerId }, { finalAttempt: true });
+  // Protocol fixture only: a known non-mock evaluation marker, not a real teaching-quality claim.
+  await db.update(schema.feedback).set({ mock: false, goalMet: true, goalReason: "Synthetic protocol evaluation" }).where(eq(schema.feedback.answerId, full.answerId));
+  await event(s.id, { type: "finish", expectedVersion: 2, startEventId: b.activationId! });
+  const late = await ticket(s.id, a, { interrupted: true }); expect(late).toMatchObject({ interrupted: true, recordingSource: "previous_device" });
+  await answers.receiveAudio(owner.id, late.answerId, late.ticket, pcmFixture(6));
+  const report = await (await import("@/lib/services/reports")).getSessionReport(owner.id, s.id); expect(report.session.status).toBe("completed"); expect(report.summary.pending).toBe(1); expect(report.summary.goal.met).toBe(true);
+  expect((await (await import("@/lib/quota")).getQuotaStatus(owner.id)).reservedSeconds).toBe(0);
+});
+it("copy declarations cannot rewrite prior full tickets or bypass expired, deleted and foreign session scope", async () => {
+  const s = await practice(), nonce = randomUUID(), full = await ticket(s.id, undefined, { submissionId: nonce });
+  await expect(ticket(s.id, undefined, { submissionId: nonce, fragmentCopy: true })).rejects.toMatchObject({ code: "submission_changed" });
+  expect((await db.select().from(schema.answer).where(eq(schema.answer.id, full.answerId)))[0].interrupted).toBe(false);
+  await event(s.id, { type: "pause", expectedVersion: 0 }); await db.update(schema.practiceSession).set({ endedAt: new Date(Date.now() - 25 * 3600000) }).where(eq(schema.practiceSession.id, s.id));
+  await expect(ticket(s.id, undefined, { fragmentCopy: true })).rejects.toMatchObject({ code: "session_closed" });
+  await db.update(schema.practiceSession).set({ deletedAt: new Date() }).where(eq(schema.practiceSession.id, s.id)); await expect(ticket(s.id, undefined, { fragmentCopy: true })).rejects.toMatchObject({ status: 404 });
+  const u = await (await import("@/lib/auth")).createAccount({ email: `copy-foreign-${sequence}@example.test`, password: "Device-test-only-123!", name: "Synthetic foreign" }); await (await import("@/lib/services/recording-consent")).grantRecordingConsent(u.id, { targetBand: "7", selfLevel: "intermediate" });
+  await expect(answers.createUploadTicket(u.id, { sessionId: s.id, planIndex: 0, kind: "main", submissionId: randomUUID(), clientDurationMs: 6000, fragmentCopy: true })).rejects.toMatchObject({ status: 404 });
+});

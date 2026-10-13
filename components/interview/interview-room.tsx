@@ -8,6 +8,7 @@ import { Badge, DraftBadge } from "@/components/ui/badge";
 import { Button, LinkButton } from "@/components/ui/button";
 import { Alert, Progress, Spinner } from "@/components/ui/feedback";
 import { PendingUploads } from "@/components/pending-uploads";
+import { StartSessionButton } from "@/components/start-session-button";
 import { ApiError, api, randomId, serverNow } from "@/lib/client/api";
 import { ExaminerAudio } from "@/lib/client/examiner-audio";
 import { deleteRecording, getBlob, isPersistent, listRecordings, localIdentity, purgeExpired, recordingRecoveryState, type PendingSessionPause, type RecordingMeta } from "@/lib/client/idb";
@@ -109,6 +110,8 @@ export function InterviewRoom({ sessionId, subtitlePref, userId }: { sessionId: 
   const [takeoverConfirm, setTakeoverConfirm] = useState(false);
   const [foreignMock, setForeignMock] = useState(false);
   const [endMockConfirm, setEndMockConfirm] = useState(false);
+  const [endPracticeConfirm, setEndPracticeConfirm] = useState(false);
+  const [endPracticeBusy, setEndPracticeBusy] = useState(false);
   useEffect(() => {
     const network = () => setOnline(navigator.onLine);
     const storageLimited = () => setPersistent(false);
@@ -484,6 +487,23 @@ export function InterviewRoom({ sessionId, subtitlePref, userId }: { sessionId: 
       announceSessionState(); setForeignMock(false); setEndMockConfirm(false); setPhase("interrupted");
       setMessage("本次模考已明确结束。原设备已录的片段可补传与复盘；再次模考需开始新的考试。");
     } catch (e) { setError(e instanceof Error ? e.message : "结束失败，请联网后重试。"); }
+  }
+
+  async function endViewedPractice() {
+    if (!view || view.plan.mode === "mock" || view.session.status !== "active" || endPracticeBusy) return;
+    const scope = localIdentity();
+    setEndPracticeBusy(true);
+    try {
+      if (!scope?.consentAllowed || scope.consentVersion === undefined) throw new Error("请先确认录音授权。");
+      const rows = await listRecordings(sessionId);
+      const paused = await requestSessionPause({ id: `pause:${sessionId}`, kind: "session-pause", userId: scope.userId!, epoch: scope.epoch, consentVersion: scope.consentVersion, sessionId, eventId: randomId("ev"), expectedVersion: versionRef.current!, startEventId: view.session.activationId ?? undefined, pendingUploads: rows.filter(m => m.status !== "recording").map(m => ({ submissionId: m.id, planIndex: m.planIndex, kind: m.kind, followUpId: m.followUpId, consentVersion: m.consentVersion! })), savedAt: Date.now() });
+      if (!paused.synced) throw new Error(paused.persistent ? "结束请求已在本机保留，请联网后确认同步。副本与原始分片仍保留，预留暂未释放。" : "浏览器无法保存结束请求，请保持页面打开并联网后重试。预留尚未确认释放。");
+      const latest = await api<SessionView>(`/api/sessions/${sessionId}`);
+      if (privateEnded.current || consentEnded.current || localIdentity()?.epoch !== scope.epoch) return;
+      versionRef.current = latest.session.stateVersion; setView(latest);
+      setEndPracticeConfirm(false); setPhase("closed"); setMessage("这次练习已结束，整题预留已释放。中断副本可补传或下载；原始分片未改动，可开始一份新的练习。");
+    } catch (e) { if (!privateEnded.current && !consentEnded.current && localIdentity()?.epoch === scope?.epoch) setError(e instanceof Error ? e.message : "结束失败，请联网后重试。"); }
+    finally { setEndPracticeBusy(false); }
   }
 
   async function startInterview(takeover = false) {
@@ -1052,6 +1072,8 @@ export function InterviewRoom({ sessionId, subtitlePref, userId }: { sessionId: 
             />
           ) : null}
 
+          {phase === "ready" && !isMock && view.session.status === "active" && localPending.some(m => m.status === "recording") && (endPracticeConfirm ? <div role="alertdialog" aria-label="结束当前练习" className="space-y-3 rounded-xl border border-amber-300 p-4"><p>结束这次练习并释放整题预留？联网的原页面会停止，未确认占用的原始录音仍保留。请在旧页面停止录音，副本可在补传期内保存。</p><div className="flex flex-wrap gap-2"><Button autoFocus variant="outline" disabled={endPracticeBusy} onClick={() => setEndPracticeConfirm(false)}>取消</Button><Button disabled={endPracticeBusy} onClick={() => { void endViewedPractice(); }}>{endPracticeBusy ? "正在结束…" : "确认结束这次练习"}</Button></div></div> : <Button variant="outline" onClick={() => setEndPracticeConfirm(true)}>结束当前练习</Button>)}
+
           {phase === "running" || phase === "finishing" ? (
             <>
               {item && (showText || showCard) ? (
@@ -1140,6 +1162,7 @@ export function InterviewRoom({ sessionId, subtitlePref, userId }: { sessionId: 
           {phase === "closed" ? (
             <div className="space-y-3"><EndPanel tone="info" title={consentEnded.current ? "录音授权已改变，面试已停止" : foreignMock ? "模考正在原设备进行" : "当前练习已停止"} text={message ?? "可以在报告中回听录音、查看反馈，或重新开始。"} sessionId={sessionId} />{consentEnded.current ? <LinkButton href="/settings" variant="outline">前往设置与录音授权</LinkButton> : !foreignMock && canResumeSession(view.session) && <Button variant="outline" onClick={() => location.reload()}>重新载入并继续</Button>}
               {foreignMock && (endMockConfirm ? <div role="alertdialog" aria-label="结束当前模考" className="space-y-3 rounded-xl border border-amber-300 p-4"><p>结束后，本次模考会标记为中断，考试计时不能恢复。原设备尚未上传的录音仍需在原设备补传。</p><div className="flex gap-2"><Button autoFocus variant="outline" onClick={() => setEndMockConfirm(false)}>取消</Button><Button onClick={() => { void endForeignMock(); }}>确认结束本次模考</Button></div></div> : <Button variant="outline" onClick={() => setEndMockConfirm(true)}>结束当前模考</Button>)}
+              {!isMock && <StartSessionButton input={{ mode: "practice", questionId: plan.items[0]?.questionId, fresh: true }} variant="outline">重新练习此题</StartSessionButton>}
               {error && <Alert tone="danger">{error}</Alert>}
             </div>
           ) : null}
