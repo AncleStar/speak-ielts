@@ -79,8 +79,10 @@ for (const file of required.filter(file => file.endsWith(".md"))) {
     check(await exists(path.resolve(directory, local)), `Broken document link: ${file} -> ${local}`);
   }
 }
-const readiness = await read<{ devices: { mac: { available: boolean }; iphone: { inspected: boolean; nativeValidated: boolean } }; domain: { purchaseAllowedIfNeeded: boolean; registered: boolean; publicServiceOpened: boolean }; gates: Record<string, boolean>; evidenceLimits: Record<string, boolean> }>("docs/ios/readiness.json");
-check(!readiness.devices.mac.available && !readiness.devices.iphone.inspected && !readiness.devices.iphone.nativeValidated, "Preparation must preserve current unverified device status");
+const readiness = await read<{ devices: { mac: { available: boolean; configured: boolean; inspected: boolean }; iphone: { inspected: boolean; nativeValidated: boolean } }; domain: { purchaseAllowedIfNeeded: boolean; registered: boolean; publicServiceOpened: boolean }; gates: Record<string, boolean>; evidenceLimits: Record<string, boolean> }>("docs/ios/readiness.json");
+const mac = readiness.devices.mac;
+check([mac.available, mac.configured, mac.inspected].every(value => typeof value === "boolean") && (!mac.configured || (mac.available && mac.inspected)), "A configured Mac must be available and inspected; hardware availability alone is not setup evidence");
+check(typeof readiness.devices.iphone.inspected === "boolean" && readiness.devices.iphone.nativeValidated === false, "Preparation must preserve pending native iPhone validation");
 check(readiness.domain.purchaseAllowedIfNeeded && !readiness.domain.registered && !readiness.domain.publicServiceOpened, "Domain decision must not imply purchase/public exposure");
 check(Object.values(readiness.gates).every(value => value === false) && Object.values(readiness.evidenceLimits).every(value => value === false), "Preparation must not pass native/human/release gates");
 check(await exists(path.join(root, "lib/ios/ports.ts")), "Missing candidate capability interfaces");
@@ -95,7 +97,7 @@ for (const fixture of fixtureManifest.fixtures) {
   const bytes = await fs.readFile(path.join(fixtureDirectory, fixture.file));
   check(hash(bytes) === fixture.sha256 && bytes.length === fixture.bytes && bytes.subarray(0, 4).toString() === "RIFF" && bytes.subarray(8, 12).toString() === "WAVE", `Fixture integrity failed: ${fixture.file}`);
 }
-const report = { format: "speak-ios-preparation-check-v1", checkedAt: new Date().toISOString(), node: process.version, checks, windowsPreparationConsistent: failures.length === 0, sourceCounts: actualInventory.counts, proposedOperations: operationIds.size, questions: queue.total, pilotQuestions: queue.pilotMainQuestions, nativeValidated: false, humanReviewed: false, allMaterialsApproved: false, databaseTouched: false, paidCalls: 0, failures };
+const report = { format: "speak-ios-preparation-check-v1", checkedAt: new Date().toISOString(), platform: process.platform, node: process.version, checks, preparationConsistent: failures.length === 0, sourceCounts: actualInventory.counts, proposedOperations: operationIds.size, questions: queue.total, pilotQuestions: queue.pilotMainQuestions, nativeValidated: false, humanReviewed: false, allMaterialsApproved: false, databaseTouched: false, paidCalls: 0, failures };
 await fs.mkdir(path.join(root, "data/verification"), { recursive: true });
 await fs.writeFile(path.join(root, "data/verification/ios-prep-current.json"), JSON.stringify(report, null, 2) + "\n");
 console.log(JSON.stringify(report, null, 2));
