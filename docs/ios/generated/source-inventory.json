@@ -1,0 +1,6137 @@
+{
+  "format": "speak-ios-source-inventory-v1",
+  "scanKind": "static source inventory, not a native build",
+  "contentFingerprint": "921537daf2ce8ec84320a020da03bbe966efb2f1d0d327d6877246a15d6f58a2",
+  "counts": {
+    "files": 252,
+    "routes": 32,
+    "operations": 46,
+    "serverActionFiles": 3,
+    "browserRecordingFiles": 4,
+    "browserStorageFiles": 15
+  },
+  "routes": [
+    {
+      "source": "app/api/admin/import/route.ts",
+      "path": "/api/admin/import",
+      "methods": [
+        "POST"
+      ]
+    },
+    {
+      "source": "app/api/admin/invites/route.ts",
+      "path": "/api/admin/invites",
+      "methods": [
+        "POST"
+      ]
+    },
+    {
+      "source": "app/api/admin/voice-status/route.ts",
+      "path": "/api/admin/voice-status",
+      "methods": [
+        "GET"
+      ]
+    },
+    {
+      "source": "app/api/ai-settings/route.ts",
+      "path": "/api/ai-settings",
+      "methods": [
+        "DELETE",
+        "GET",
+        "PUT"
+      ]
+    },
+    {
+      "source": "app/api/ai-settings/test/route.ts",
+      "path": "/api/ai-settings/test",
+      "methods": [
+        "POST"
+      ]
+    },
+    {
+      "source": "app/api/answers/[id]/audio/route.ts",
+      "path": "/api/answers/{id}/audio",
+      "methods": [
+        "GET",
+        "HEAD",
+        "PUT"
+      ]
+    },
+    {
+      "source": "app/api/answers/[id]/correction/route.ts",
+      "path": "/api/answers/{id}/correction",
+      "methods": [
+        "POST"
+      ]
+    },
+    {
+      "source": "app/api/answers/[id]/reference-audio/route.ts",
+      "path": "/api/answers/{id}/reference-audio",
+      "methods": [
+        "POST"
+      ]
+    },
+    {
+      "source": "app/api/answers/[id]/retry/route.ts",
+      "path": "/api/answers/{id}/retry",
+      "methods": [
+        "POST"
+      ]
+    },
+    {
+      "source": "app/api/answers/[id]/route.ts",
+      "path": "/api/answers/{id}",
+      "methods": [
+        "GET"
+      ]
+    },
+    {
+      "source": "app/api/answers/[id]/submit/route.ts",
+      "path": "/api/answers/{id}/submit",
+      "methods": [
+        "POST"
+      ]
+    },
+    {
+      "source": "app/api/answers/discard-pending/route.ts",
+      "path": "/api/answers/discard-pending",
+      "methods": [
+        "POST"
+      ]
+    },
+    {
+      "source": "app/api/answers/upload-ticket/route.ts",
+      "path": "/api/answers/upload-ticket",
+      "methods": [
+        "POST"
+      ]
+    },
+    {
+      "source": "app/api/auth/[...all]/route.ts",
+      "path": "/api/auth/{all}",
+      "methods": [
+        "GET",
+        "POST"
+      ]
+    },
+    {
+      "source": "app/api/health/route.ts",
+      "path": "/api/health",
+      "methods": [
+        "GET"
+      ]
+    },
+    {
+      "source": "app/api/levels/route.ts",
+      "path": "/api/levels",
+      "methods": [
+        "GET"
+      ]
+    },
+    {
+      "source": "app/api/me/route.ts",
+      "path": "/api/me",
+      "methods": [
+        "GET"
+      ]
+    },
+    {
+      "source": "app/api/register/route.ts",
+      "path": "/api/register",
+      "methods": [
+        "POST"
+      ]
+    },
+    {
+      "source": "app/api/retry-items/route.ts",
+      "path": "/api/retry-items",
+      "methods": [
+        "DELETE",
+        "POST"
+      ]
+    },
+    {
+      "source": "app/api/rewards/route.ts",
+      "path": "/api/rewards",
+      "methods": [
+        "GET",
+        "POST"
+      ]
+    },
+    {
+      "source": "app/api/sessions/[id]/events/route.ts",
+      "path": "/api/sessions/{id}/events",
+      "methods": [
+        "POST"
+      ]
+    },
+    {
+      "source": "app/api/sessions/[id]/followup/route.ts",
+      "path": "/api/sessions/{id}/followup",
+      "methods": [
+        "POST"
+      ]
+    },
+    {
+      "source": "app/api/sessions/[id]/report/route.ts",
+      "path": "/api/sessions/{id}/report",
+      "methods": [
+        "GET"
+      ]
+    },
+    {
+      "source": "app/api/sessions/[id]/route.ts",
+      "path": "/api/sessions/{id}",
+      "methods": [
+        "DELETE",
+        "GET"
+      ]
+    },
+    {
+      "source": "app/api/sessions/[id]/state/route.ts",
+      "path": "/api/sessions/{id}/state",
+      "methods": [
+        "GET"
+      ]
+    },
+    {
+      "source": "app/api/sessions/route.ts",
+      "path": "/api/sessions",
+      "methods": [
+        "GET",
+        "POST"
+      ]
+    },
+    {
+      "source": "app/api/thoughts/[id]/review/route.ts",
+      "path": "/api/thoughts/{id}/review",
+      "methods": [
+        "POST"
+      ]
+    },
+    {
+      "source": "app/api/thoughts/[id]/route.ts",
+      "path": "/api/thoughts/{id}",
+      "methods": [
+        "DELETE",
+        "GET",
+        "PUT"
+      ]
+    },
+    {
+      "source": "app/api/thoughts/route.ts",
+      "path": "/api/thoughts",
+      "methods": [
+        "GET",
+        "POST"
+      ]
+    },
+    {
+      "source": "app/api/tts/[id]/route.ts",
+      "path": "/api/tts/{id}",
+      "methods": [
+        "GET"
+      ]
+    },
+    {
+      "source": "app/api/vocabulary/[id]/route.ts",
+      "path": "/api/vocabulary/{id}",
+      "methods": [
+        "DELETE",
+        "PUT"
+      ]
+    },
+    {
+      "source": "app/api/vocabulary/route.ts",
+      "path": "/api/vocabulary",
+      "methods": [
+        "GET",
+        "POST"
+      ]
+    }
+  ],
+  "files": [
+    {
+      "file": "app/(auth)/change-password/page.tsx",
+      "sha256": "c65bf76dbd183874ea594617295f56d068d77ce058e8af6ca920a69332993dc3",
+      "imports": [
+        "next",
+        "@/lib/auth-server",
+        "@/components/account/change-password-form"
+      ],
+      "exportedFunctions": [
+        "ChangePasswordPage"
+      ],
+      "apiMethods": [],
+      "clientDirective": false,
+      "serverAction": false,
+      "nextFramework": true,
+      "serverImports": [],
+      "browserRecording": false,
+      "browserStorage": false,
+      "browserLifecycle": false
+    },
+    {
+      "file": "app/(auth)/layout.tsx",
+      "sha256": "cbbfdd38888bb968535c4db4f1d7fb56bee330beab4ea0594501e2314a98bef3",
+      "imports": [
+        "@/components/auth/terminal-auth-shell"
+      ],
+      "exportedFunctions": [
+        "AuthLayout"
+      ],
+      "apiMethods": [],
+      "clientDirective": false,
+      "serverAction": false,
+      "nextFramework": false,
+      "serverImports": [],
+      "browserRecording": false,
+      "browserStorage": false,
+      "browserLifecycle": false
+    },
+    {
+      "file": "app/(auth)/login/login-form.tsx",
+      "sha256": "396f7a8c5ab8b4b0352f613ba1558aa2350383af66974e8e354ef26e1693bcfb",
+      "imports": [
+        "react",
+        "next/link",
+        "lucide-react",
+        "@/components/ui/feedback",
+        "@/components/ui/form",
+        "@/lib/auth-client",
+        "@/components/auth/terminal-scan",
+        "@/components/auth/terminal-entry",
+        "@/lib/client/private-session",
+        "@/lib/client/idb"
+      ],
+      "exportedFunctions": [
+        "LoginForm"
+      ],
+      "apiMethods": [],
+      "clientDirective": true,
+      "serverAction": false,
+      "nextFramework": true,
+      "serverImports": [],
+      "browserRecording": false,
+      "browserStorage": false,
+      "browserLifecycle": false
+    },
+    {
+      "file": "app/(auth)/login/page.tsx",
+      "sha256": "d2b8045958c091602cb9a5c0dfed9eb1adbe1604735f37ac95bf7dcceda52063",
+      "imports": [
+        "next",
+        "next/navigation",
+        "@/lib/auth-server",
+        "./login-form"
+      ],
+      "exportedFunctions": [
+        "LoginPage"
+      ],
+      "apiMethods": [],
+      "clientDirective": false,
+      "serverAction": false,
+      "nextFramework": true,
+      "serverImports": [],
+      "browserRecording": false,
+      "browserStorage": false,
+      "browserLifecycle": false
+    },
+    {
+      "file": "app/(auth)/password-help/page.tsx",
+      "sha256": "48f852708dbb53d28f9de01ba412f36e1d93e1b5c12af38e0140261b0761116e",
+      "imports": [
+        "@/components/ui/card",
+        "@/components/ui/button"
+      ],
+      "exportedFunctions": [
+        "PasswordHelp"
+      ],
+      "apiMethods": [],
+      "clientDirective": false,
+      "serverAction": false,
+      "nextFramework": false,
+      "serverImports": [],
+      "browserRecording": false,
+      "browserStorage": false,
+      "browserLifecycle": false
+    },
+    {
+      "file": "app/(auth)/register/page.tsx",
+      "sha256": "28f1e471e8c038f490b34866f08b61ae7984f1a8940453005adcf2b3df9ef2ad",
+      "imports": [
+        "@/components/account/register-form"
+      ],
+      "exportedFunctions": [
+        "RegisterPage"
+      ],
+      "apiMethods": [],
+      "clientDirective": false,
+      "serverAction": false,
+      "nextFramework": false,
+      "serverImports": [],
+      "browserRecording": false,
+      "browserStorage": false,
+      "browserLifecycle": false
+    },
+    {
+      "file": "app/(focus)/interview/[sessionId]/page.tsx",
+      "sha256": "c5647189e6c4b1874f3ad2e4bf07dd4ecdb0debb4abcdd210b4c741f9a79da09",
+      "imports": [
+        "next",
+        "@/components/interview/interview-room",
+        "@/lib/auth-server"
+      ],
+      "exportedFunctions": [
+        "InterviewPage"
+      ],
+      "apiMethods": [],
+      "clientDirective": false,
+      "serverAction": false,
+      "nextFramework": true,
+      "serverImports": [],
+      "browserRecording": false,
+      "browserStorage": false,
+      "browserLifecycle": false
+    },
+    {
+      "file": "app/(focus)/layout.tsx",
+      "sha256": "2ee5a675dcbee18cc359a51728352564215af7987ef5f72859dd711f1521b954",
+      "imports": [
+        "@/lib/auth-server",
+        "@/components/nav",
+        "@/components/account/private-session-boundary"
+      ],
+      "exportedFunctions": [
+        "FocusLayout"
+      ],
+      "apiMethods": [],
+      "clientDirective": false,
+      "serverAction": false,
+      "nextFramework": false,
+      "serverImports": [],
+      "browserRecording": false,
+      "browserStorage": false,
+      "browserLifecycle": false
+    },
+    {
+      "file": "app/(main)/answers/[id]/page.tsx",
+      "sha256": "5f31e33ad04d6b84512c0a04e31c88f50ce6aa49e83e69b50f028d0456d13235",
+      "imports": [
+        "next",
+        "next/navigation",
+        "@/lib/auth-server",
+        "@/lib/errors",
+        "@/lib/services/answers",
+        "@/components/report/processing-refresh",
+        "@/components/disc/record-archive",
+        "@/components/ui/feedback"
+      ],
+      "exportedFunctions": [
+        "AnswerDetailPage"
+      ],
+      "apiMethods": [],
+      "clientDirective": false,
+      "serverAction": false,
+      "nextFramework": true,
+      "serverImports": [],
+      "browserRecording": false,
+      "browserStorage": false,
+      "browserLifecycle": false
+    },
+    {
+      "file": "app/(main)/device-check/page.tsx",
+      "sha256": "0f35985edd2e23e25463c76b147f4ae8fcf9b8b3363b61fc3b6b4d132aa0a170",
+      "imports": [
+        "next",
+        "@/components/page-header",
+        "@/components/device-check",
+        "@/lib/content/load",
+        "@/lib/services/tts",
+        "@/lib/providers"
+      ],
+      "exportedFunctions": [
+        "DeviceCheckPage"
+      ],
+      "apiMethods": [],
+      "clientDirective": false,
+      "serverAction": false,
+      "nextFramework": true,
+      "serverImports": [],
+      "browserRecording": false,
+      "browserStorage": false,
+      "browserLifecycle": false
+    },
+    {
+      "file": "app/(main)/growth/page.tsx",
+      "sha256": "2ce79f1ac0681b16ca6e986cbc6c9915e3673b0f6894403413a3ef8b411e8f4b",
+      "imports": [
+        "next/link",
+        "@/lib/auth-server",
+        "@/lib/services/growth",
+        "@/components/growth-calendar",
+        "@/components/ui/card"
+      ],
+      "exportedFunctions": [
+        "GrowthPage"
+      ],
+      "apiMethods": [],
+      "clientDirective": false,
+      "serverAction": false,
+      "nextFramework": true,
+      "serverImports": [],
+      "browserRecording": false,
+      "browserStorage": false,
+      "browserLifecycle": false
+    },
+    {
+      "file": "app/(main)/history/page.tsx",
+      "sha256": "3b2117bc68db512a3488ed666e1014cc0decf7759c9b4e9b048d14dd4422ad30",
+      "imports": [
+        "next",
+        "next/link",
+        "@/components/delete-session-button",
+        "@/components/page-header",
+        "@/components/ui/badge",
+        "@/components/ui/feedback",
+        "@/lib/auth-server",
+        "@/lib/services/outcome",
+        "@/lib/services/sessions",
+        "@/lib/utils",
+        "@/lib/sessions/lifecycle"
+      ],
+      "exportedFunctions": [
+        "HistoryPage"
+      ],
+      "apiMethods": [],
+      "clientDirective": false,
+      "serverAction": false,
+      "nextFramework": true,
+      "serverImports": [],
+      "browserRecording": false,
+      "browserStorage": false,
+      "browserLifecycle": false
+    },
+    {
+      "file": "app/(main)/layout.tsx",
+      "sha256": "6dc0c133be05049d98d3925c64e82c0c082b178133e23bc7d3784725aa3f6825",
+      "imports": [
+        "@/components/nav",
+        "@/lib/auth-server",
+        "@/components/ambient-background",
+        "@/components/account/private-session-boundary"
+      ],
+      "exportedFunctions": [
+        "MainLayout"
+      ],
+      "apiMethods": [],
+      "clientDirective": false,
+      "serverAction": false,
+      "nextFramework": false,
+      "serverImports": [],
+      "browserRecording": false,
+      "browserStorage": false,
+      "browserLifecycle": false
+    },
+    {
+      "file": "app/(main)/levels/[id]/page.tsx",
+      "sha256": "10d68f5c60511a5b5cc77ad17df42cf37d66005f16338b81060832a3a51c5fe3",
+      "imports": [
+        "next",
+        "next/navigation",
+        "@/components/page-header",
+        "@/components/start-session-button",
+        "@/components/ui/badge",
+        "@/components/ui/button",
+        "@/components/ui/card",
+        "@/components/ui/feedback",
+        "@/lib/auth-server",
+        "@/lib/content/load",
+        "@/lib/content/types",
+        "@/lib/services/reports",
+        "@/lib/services/content"
+      ],
+      "exportedFunctions": [
+        "LevelDetailPage"
+      ],
+      "apiMethods": [],
+      "clientDirective": false,
+      "serverAction": false,
+      "nextFramework": true,
+      "serverImports": [],
+      "browserRecording": false,
+      "browserStorage": false,
+      "browserLifecycle": false
+    },
+    {
+      "file": "app/(main)/levels/page.tsx",
+      "sha256": "c4907340b7c50cb84bf2ffec8367bb21307fa67232cf683bb3caba92b2cb7285",
+      "imports": [
+        "lucide-react",
+        "next",
+        "next/link",
+        "@/components/page-header",
+        "@/components/ui/badge",
+        "@/lib/auth-server",
+        "@/lib/content/load",
+        "@/lib/services/reports",
+        "@/lib/utils"
+      ],
+      "exportedFunctions": [
+        "LevelsPage"
+      ],
+      "apiMethods": [],
+      "clientDirective": false,
+      "serverAction": false,
+      "nextFramework": true,
+      "serverImports": [],
+      "browserRecording": false,
+      "browserStorage": false,
+      "browserLifecycle": false
+    },
+    {
+      "file": "app/(main)/mock/page.tsx",
+      "sha256": "1b70f098f2af89ca6dae4f6bd138f4ad28b92c4d59ffd9a595eaf4c522075494",
+      "imports": [
+        "next/link",
+        "@/components/page-header",
+        "@/components/start-session-button",
+        "@/components/ui/badge",
+        "@/components/ui/button",
+        "@/lib/auth-server",
+        "@/lib/services/mock-selection",
+        "@/lib/utils"
+      ],
+      "exportedFunctions": [
+        "MockPage"
+      ],
+      "apiMethods": [],
+      "clientDirective": false,
+      "serverAction": false,
+      "nextFramework": true,
+      "serverImports": [],
+      "browserRecording": false,
+      "browserStorage": false,
+      "browserLifecycle": false
+    },
+    {
+      "file": "app/(main)/page.tsx",
+      "sha256": "117bb1890b0c5a60ed5e0ab33f492eaf76db058b8053418097a7589e43942028",
+      "imports": [
+        "lucide-react",
+        "next/link",
+        "@/components/pending-uploads",
+        "@/components/quota-card",
+        "@/components/start-session-button",
+        "@/components/rewards/reward-controls",
+        "@/components/ui/button",
+        "@/components/ui/card",
+        "@/lib/auth-server",
+        "@/lib/services/reports",
+        "@/lib/services/rewards",
+        "@/lib/services/growth",
+        "@/lib/services/reviews",
+        "@/lib/services/mock-selection",
+        "@/lib/utils"
+      ],
+      "exportedFunctions": [
+        "HomePage"
+      ],
+      "apiMethods": [],
+      "clientDirective": false,
+      "serverAction": false,
+      "nextFramework": true,
+      "serverImports": [],
+      "browserRecording": false,
+      "browserStorage": false,
+      "browserLifecycle": false
+    },
+    {
+      "file": "app/(main)/practice/page.tsx",
+      "sha256": "fc76023261f284a582dfe3c70baa3ff8d31d44d7f7ebbbefc8541a57a8fcacd1",
+      "imports": [
+        "next",
+        "drizzle-orm",
+        "@/db/schema",
+        "@/lib/db",
+        "@/lib/auth-server",
+        "@/lib/services/content",
+        "@/components/disc/disc-library"
+      ],
+      "exportedFunctions": [
+        "PracticePage"
+      ],
+      "apiMethods": [],
+      "clientDirective": false,
+      "serverAction": false,
+      "nextFramework": true,
+      "serverImports": [],
+      "browserRecording": false,
+      "browserStorage": false,
+      "browserLifecycle": false
+    },
+    {
+      "file": "app/(main)/review/page.tsx",
+      "sha256": "1a3d50f90b08d9c5654b265d1495522a62f4900d8cad64d8421a1de6cf29bb58",
+      "imports": [
+        "next/link",
+        "@/lib/auth-server",
+        "@/lib/services/reviews",
+        "@/components/ui/card",
+        "@/components/start-session-button",
+        "@/lib/utils"
+      ],
+      "exportedFunctions": [
+        "ReviewPage"
+      ],
+      "apiMethods": [],
+      "clientDirective": false,
+      "serverAction": false,
+      "nextFramework": true,
+      "serverImports": [],
+      "browserRecording": false,
+      "browserStorage": false,
+      "browserLifecycle": false
+    },
+    {
+      "file": "app/(main)/rewards/page.tsx",
+      "sha256": "3c81d381df5dbab6f22f35c7616437c7c91b819fa13378eb6f9ed11bb2ee2aa9",
+      "imports": [
+        "next/link",
+        "lucide-react",
+        "@/lib/auth-server",
+        "@/lib/services/rewards",
+        "@/lib/quota",
+        "@/components/rewards/reward-controls",
+        "@/components/ui/card",
+        "@/components/quota-card",
+        "@/lib/utils"
+      ],
+      "exportedFunctions": [
+        "RewardsPage"
+      ],
+      "apiMethods": [],
+      "clientDirective": false,
+      "serverAction": false,
+      "nextFramework": true,
+      "serverImports": [],
+      "browserRecording": false,
+      "browserStorage": false,
+      "browserLifecycle": false
+    },
+    {
+      "file": "app/(main)/sessions/[id]/page.tsx",
+      "sha256": "913ed822997ee20d1622df3aa6db55f8acf3d70d7be47d99ee59c8beaf0321c5",
+      "imports": [
+        "next",
+        "next/navigation",
+        "@/components/report/session-report",
+        "@/lib/auth-server",
+        "@/lib/errors",
+        "@/lib/services/reports"
+      ],
+      "exportedFunctions": [
+        "SessionReportPage"
+      ],
+      "apiMethods": [],
+      "clientDirective": false,
+      "serverAction": false,
+      "nextFramework": true,
+      "serverImports": [],
+      "browserRecording": false,
+      "browserStorage": false,
+      "browserLifecycle": false
+    },
+    {
+      "file": "app/(main)/settings/ai/page.tsx",
+      "sha256": "5e21e4116c397e282a180e6b342c90386e108f36f03df24fb05ff4e0085f1156",
+      "imports": [
+        "next",
+        "next/link",
+        "@/lib/auth-server",
+        "@/lib/ai/account",
+        "@/components/account/api-settings",
+        "@/components/page-header"
+      ],
+      "exportedFunctions": [
+        "AiSettingsPage"
+      ],
+      "apiMethods": [],
+      "clientDirective": false,
+      "serverAction": false,
+      "nextFramework": true,
+      "serverImports": [],
+      "browserRecording": false,
+      "browserStorage": false,
+      "browserLifecycle": false
+    },
+    {
+      "file": "app/(main)/settings/page.tsx",
+      "sha256": "00b4ff4ec79e5b66c01df0a2dd617c1a50e471dab4326664750f2f034f246255",
+      "imports": [
+        "next",
+        "@/components/account/settings-forms",
+        "@/components/page-header",
+        "@/lib/auth-server",
+        "@/lib/env",
+        "@/lib/quota",
+        "@/components/appearance",
+        "next/link",
+        "@/lib/ai/credentials"
+      ],
+      "exportedFunctions": [
+        "SettingsPage"
+      ],
+      "apiMethods": [],
+      "clientDirective": false,
+      "serverAction": false,
+      "nextFramework": true,
+      "serverImports": [],
+      "browserRecording": false,
+      "browserStorage": false,
+      "browserLifecycle": false
+    },
+    {
+      "file": "app/(main)/thoughts/page.tsx",
+      "sha256": "59bb7e63aa408334b4f1b517d5a1256f36f623adf198bb739e3b65156dc48387",
+      "imports": [
+        "next",
+        "next/navigation",
+        "@/lib/auth-server",
+        "@/lib/errors",
+        "@/lib/env",
+        "@/lib/ai/credentials",
+        "@/lib/services/thoughts",
+        "@/components/thoughts/thought-lab"
+      ],
+      "exportedFunctions": [
+        "ThoughtPage"
+      ],
+      "apiMethods": [],
+      "clientDirective": false,
+      "serverAction": false,
+      "nextFramework": true,
+      "serverImports": [],
+      "browserRecording": false,
+      "browserStorage": false,
+      "browserLifecycle": false
+    },
+    {
+      "file": "app/(main)/vocabulary/page.tsx",
+      "sha256": "3cbfe6d5eb496048df9d70464de4c9abf7e8e4f523f1b9f298377cba840cbeca",
+      "imports": [
+        "next",
+        "@/lib/auth-server",
+        "@/lib/services/thoughts",
+        "@/components/thoughts/vocabulary-bank"
+      ],
+      "exportedFunctions": [
+        "VocabularyPage"
+      ],
+      "apiMethods": [],
+      "clientDirective": false,
+      "serverAction": false,
+      "nextFramework": true,
+      "serverImports": [],
+      "browserRecording": false,
+      "browserStorage": false,
+      "browserLifecycle": false
+    },
+    {
+      "file": "app/(main)/welcome/page.tsx",
+      "sha256": "363357177c6e28cdd6ba1c9955adaa39013bbf28a5fe9bd7323d39a35bcc1f75",
+      "imports": [
+        "lucide-react",
+        "@/components/start-session-button",
+        "@/components/ui/button",
+        "@/lib/auth-server",
+        "@/lib/providers"
+      ],
+      "exportedFunctions": [
+        "WelcomePage"
+      ],
+      "apiMethods": [],
+      "clientDirective": false,
+      "serverAction": false,
+      "nextFramework": false,
+      "serverImports": [],
+      "browserRecording": false,
+      "browserStorage": false,
+      "browserLifecycle": false
+    },
+    {
+      "file": "app/(setup)/layout.tsx",
+      "sha256": "cc203725df1170137afc750d948a0f55290163ea7703e1a59cbf959488966c13",
+      "imports": [],
+      "exportedFunctions": [
+        "SetupLayout"
+      ],
+      "apiMethods": [],
+      "clientDirective": false,
+      "serverAction": false,
+      "nextFramework": false,
+      "serverImports": [],
+      "browserRecording": false,
+      "browserStorage": false,
+      "browserLifecycle": false
+    },
+    {
+      "file": "app/(setup)/onboarding/page.tsx",
+      "sha256": "43c02b26efc4b1e31493c1504583c48ac75df9dd9b55ffed2eff88d2118e5d64",
+      "imports": [
+        "next",
+        "next/navigation",
+        "@/components/account/onboarding-form",
+        "@/lib/auth-server",
+        "@/lib/env"
+      ],
+      "exportedFunctions": [
+        "OnboardingPage"
+      ],
+      "apiMethods": [],
+      "clientDirective": false,
+      "serverAction": false,
+      "nextFramework": true,
+      "serverImports": [],
+      "browserRecording": false,
+      "browserStorage": false,
+      "browserLifecycle": false
+    },
+    {
+      "file": "app/actions/account.ts",
+      "sha256": "2e5671154c9d62b16cc5557ca212cd78e314924ef57c464c69d3704ccc33e205",
+      "imports": [
+        "drizzle-orm",
+        "next/headers",
+        "next/navigation",
+        "zod",
+        "@/db/schema",
+        "@/lib/auth",
+        "@/lib/auth-server",
+        "@/lib/db",
+        "@/lib/services/deletion",
+        "@/lib/services/recording-consent"
+      ],
+      "exportedFunctions": [
+        "changePasswordAction",
+        "onboardingAction",
+        "updateSettingsAction",
+        "withdrawConsentAction",
+        "deleteAccountAction",
+        "signOutAction"
+      ],
+      "apiMethods": [],
+      "clientDirective": false,
+      "serverAction": true,
+      "nextFramework": true,
+      "serverImports": [
+        "next/headers"
+      ],
+      "browserRecording": false,
+      "browserStorage": false,
+      "browserLifecycle": false
+    },
+    {
+      "file": "app/actions/admin.ts",
+      "sha256": "0746da4eb89c38cd6d703efcfd61f15402eefea925bc16ac2baaf30c89c85daa",
+      "imports": [
+        "drizzle-orm",
+        "next/cache",
+        "zod",
+        "@/db/schema",
+        "@/lib/auth",
+        "@/lib/auth-server",
+        "@/lib/content/types",
+        "@/lib/db",
+        "@/lib/errors",
+        "@/lib/ops",
+        "@/lib/queue",
+        "@/lib/services/content",
+        "@/lib/services/deletion",
+        "@/lib/services/tts",
+        "@/lib/settings"
+      ],
+      "exportedFunctions": [
+        "createUserAction",
+        "resetPasswordAction",
+        "setBannedAction",
+        "setQuotaAction",
+        "deleteUserAction",
+        "setReviewAction",
+        "setPublishedAction",
+        "publishApprovedAction",
+        "regenerateTtsAction",
+        "togglePauseAction",
+        "updateBudgetAction"
+      ],
+      "apiMethods": [],
+      "clientDirective": false,
+      "serverAction": true,
+      "nextFramework": true,
+      "serverImports": [],
+      "browserRecording": false,
+      "browserStorage": false,
+      "browserLifecycle": false
+    },
+    {
+      "file": "app/actions/rewards.ts",
+      "sha256": "988249eb694f2c90838f0adfbc6e46273f0b6bd8d0158f6c1a2bb850abab06b8",
+      "imports": [
+        "next/cache",
+        "drizzle-orm",
+        "@/db/schema",
+        "@/lib/db",
+        "@/lib/auth-server",
+        "@/lib/errors",
+        "@/lib/settings",
+        "@/lib/services/rewards"
+      ],
+      "exportedFunctions": [
+        "updateRewardsAction",
+        "adjustPointsAction",
+        "extendCreditAction"
+      ],
+      "apiMethods": [],
+      "clientDirective": false,
+      "serverAction": true,
+      "nextFramework": true,
+      "serverImports": [],
+      "browserRecording": false,
+      "browserStorage": false,
+      "browserLifecycle": false
+    },
+    {
+      "file": "app/admin/invites/page.tsx",
+      "sha256": "4445605592625eb44db7de10b92329efbafd182315793513b31a10f85ad46f6a",
+      "imports": [
+        "@/lib/auth-server",
+        "@/lib/services/invites",
+        "@/components/admin/invite-manager"
+      ],
+      "exportedFunctions": [
+        "InvitePage"
+      ],
+      "apiMethods": [],
+      "clientDirective": false,
+      "serverAction": false,
+      "nextFramework": false,
+      "serverImports": [],
+      "browserRecording": false,
+      "browserStorage": false,
+      "browserLifecycle": false
+    },
+    {
+      "file": "app/admin/layout.tsx",
+      "sha256": "135cbd1326b27c25e77a45e0245895e53ffa217799ff27a7bd388051285dc539",
+      "imports": [
+        "next/link",
+        "@/components/nav",
+        "@/lib/auth-server",
+        "@/components/account/private-session-boundary"
+      ],
+      "exportedFunctions": [
+        "AdminLayout"
+      ],
+      "apiMethods": [],
+      "clientDirective": false,
+      "serverAction": false,
+      "nextFramework": true,
+      "serverImports": [],
+      "browserRecording": false,
+      "browserStorage": false,
+      "browserLifecycle": false
+    },
+    {
+      "file": "app/admin/page.tsx",
+      "sha256": "0e786cb6113c84cf73eb024477fee708037354698b4e708956c1631d55947684",
+      "imports": [
+        "next",
+        "@/app/actions/admin",
+        "@/components/page-header",
+        "@/components/ui/badge",
+        "@/components/ui/button",
+        "@/components/ui/card",
+        "@/components/ui/feedback",
+        "@/lib/services/admin",
+        "@/lib/utils",
+        "@/lib/worker-runtime"
+      ],
+      "exportedFunctions": [
+        "AdminHome"
+      ],
+      "apiMethods": [],
+      "clientDirective": false,
+      "serverAction": false,
+      "nextFramework": true,
+      "serverImports": [],
+      "browserRecording": false,
+      "browserStorage": false,
+      "browserLifecycle": false
+    },
+    {
+      "file": "app/admin/questions/page.tsx",
+      "sha256": "4c731a5d1a7e300e437665350fdbb9e19da25cd7a1f3738841456bee1112063b",
+      "imports": [
+        "next",
+        "next/link",
+        "@/app/actions/admin",
+        "@/components/admin/question-forms",
+        "@/components/page-header",
+        "@/components/ui/badge",
+        "@/components/ui/button",
+        "@/components/ui/card",
+        "@/components/ui/feedback",
+        "@/components/ui/form",
+        "@/lib/content/types",
+        "@/lib/env",
+        "@/lib/services/admin",
+        "@/lib/utils"
+      ],
+      "exportedFunctions": [
+        "AdminQuestions"
+      ],
+      "apiMethods": [],
+      "clientDirective": false,
+      "serverAction": false,
+      "nextFramework": true,
+      "serverImports": [],
+      "browserRecording": false,
+      "browserStorage": false,
+      "browserLifecycle": false
+    },
+    {
+      "file": "app/admin/rewards/page.tsx",
+      "sha256": "97ed3d7362dc5f9c8affb553daa00d9cddbd5117ae314285a989a42aab7cf942",
+      "imports": [
+        "drizzle-orm",
+        "@/db/schema",
+        "@/lib/db",
+        "@/lib/auth-server",
+        "@/lib/settings",
+        "@/components/rewards/admin-forms",
+        "@/lib/utils"
+      ],
+      "exportedFunctions": [
+        "AdminRewardsPage"
+      ],
+      "apiMethods": [],
+      "clientDirective": false,
+      "serverAction": false,
+      "nextFramework": false,
+      "serverImports": [],
+      "browserRecording": false,
+      "browserStorage": false,
+      "browserLifecycle": false
+    },
+    {
+      "file": "app/admin/tts/page.tsx",
+      "sha256": "8e698fd5f7e46b3a689fec040efd8b2e7899c7cd7159ff13ef87ee97e63c6d82",
+      "imports": [
+        "drizzle-orm",
+        "next",
+        "@/app/actions/admin",
+        "@/components/page-header",
+        "@/components/ui/badge",
+        "@/components/ui/button",
+        "@/components/ui/card",
+        "@/db/schema",
+        "@/lib/db",
+        "@/lib/services/tts",
+        "@/components/admin/voice-readiness"
+      ],
+      "exportedFunctions": [
+        "AdminTts"
+      ],
+      "apiMethods": [],
+      "clientDirective": false,
+      "serverAction": false,
+      "nextFramework": true,
+      "serverImports": [],
+      "browserRecording": false,
+      "browserStorage": false,
+      "browserLifecycle": false
+    },
+    {
+      "file": "app/admin/usage/page.tsx",
+      "sha256": "3a381b729548f550689348a352add122a65248d3e381c7d9434f17c6fde853e6",
+      "imports": [
+        "next",
+        "@/components/admin/budget-form",
+        "@/components/page-header",
+        "@/components/ui/card",
+        "@/components/ui/feedback",
+        "@/lib/services/admin"
+      ],
+      "exportedFunctions": [
+        "AdminUsage"
+      ],
+      "apiMethods": [],
+      "clientDirective": false,
+      "serverAction": false,
+      "nextFramework": true,
+      "serverImports": [],
+      "browserRecording": false,
+      "browserStorage": false,
+      "browserLifecycle": false
+    },
+    {
+      "file": "app/admin/users/page.tsx",
+      "sha256": "f605c342ad7f1f4a83c69f08c68d97ace951fffce7b262b0ad0688920e6cf267",
+      "imports": [
+        "next",
+        "next/link",
+        "@/app/actions/admin",
+        "@/components/admin/user-forms",
+        "@/components/page-header",
+        "@/components/ui/badge",
+        "@/components/ui/button",
+        "@/components/ui/card",
+        "@/components/ui/form",
+        "@/lib/auth-server",
+        "@/lib/services/admin",
+        "@/lib/settings",
+        "@/lib/utils"
+      ],
+      "exportedFunctions": [
+        "AdminUsers"
+      ],
+      "apiMethods": [],
+      "clientDirective": false,
+      "serverAction": false,
+      "nextFramework": true,
+      "serverImports": [],
+      "browserRecording": false,
+      "browserStorage": false,
+      "browserLifecycle": false
+    },
+    {
+      "file": "app/api/admin/import/route.ts",
+      "sha256": "e59e1fcaf9c520b1ab448fe7a7be5680dc0faf558cd730f83d8b864a227813c6",
+      "imports": [
+        "@/lib/auth-server",
+        "@/lib/errors",
+        "@/lib/services/content"
+      ],
+      "exportedFunctions": [],
+      "apiMethods": [
+        "POST"
+      ],
+      "clientDirective": false,
+      "serverAction": false,
+      "nextFramework": false,
+      "serverImports": [],
+      "browserRecording": false,
+      "browserStorage": false,
+      "browserLifecycle": false
+    },
+    {
+      "file": "app/api/admin/invites/route.ts",
+      "sha256": "1a1f5c6da105125e338629902fc164198131bb405cd7ecbfd7ec5dd4f1206842",
+      "imports": [
+        "zod",
+        "@/lib/auth-server",
+        "@/lib/errors",
+        "@/lib/request-origin",
+        "@/lib/services/invites"
+      ],
+      "exportedFunctions": [],
+      "apiMethods": [
+        "POST"
+      ],
+      "clientDirective": false,
+      "serverAction": false,
+      "nextFramework": false,
+      "serverImports": [],
+      "browserRecording": false,
+      "browserStorage": false,
+      "browserLifecycle": false
+    },
+    {
+      "file": "app/api/admin/voice-status/route.ts",
+      "sha256": "4b5adfe348f02f08991fe2d3afa8b001e6eec4ffa19f38a7e0c556b88271ac9a",
+      "imports": [
+        "@/lib/auth-server",
+        "@/lib/services/voice-readiness"
+      ],
+      "exportedFunctions": [],
+      "apiMethods": [
+        "GET"
+      ],
+      "clientDirective": false,
+      "serverAction": false,
+      "nextFramework": false,
+      "serverImports": [],
+      "browserRecording": false,
+      "browserStorage": false,
+      "browserLifecycle": false
+    },
+    {
+      "file": "app/api/ai-settings/route.ts",
+      "sha256": "b4b9f42a840ac55ff0dfb25a89876187c60b4d26bb52d2b0f0f49e4ab8a8596a",
+      "imports": [
+        "@/lib/auth-server",
+        "@/lib/request-origin",
+        "@/lib/ai/credentials",
+        "@/lib/ai/account"
+      ],
+      "exportedFunctions": [],
+      "apiMethods": [
+        "DELETE",
+        "GET",
+        "PUT"
+      ],
+      "clientDirective": false,
+      "serverAction": false,
+      "nextFramework": false,
+      "serverImports": [],
+      "browserRecording": false,
+      "browserStorage": false,
+      "browserLifecycle": false
+    },
+    {
+      "file": "app/api/ai-settings/test/route.ts",
+      "sha256": "06ac537b48688a613a9637e1192996d2bdbd7f79e4e4d2fdd29ed9ae200f2666",
+      "imports": [
+        "@/lib/auth-server",
+        "@/lib/request-origin",
+        "@/lib/ai/account"
+      ],
+      "exportedFunctions": [],
+      "apiMethods": [
+        "POST"
+      ],
+      "clientDirective": false,
+      "serverAction": false,
+      "nextFramework": false,
+      "serverImports": [],
+      "browserRecording": false,
+      "browserStorage": false,
+      "browserLifecycle": false
+    },
+    {
+      "file": "app/api/answers/[id]/audio/route.ts",
+      "sha256": "0e09dc3ba4ebe68ffa6a35de68a07811f156158ff59ead04a15f360dbeb830b2",
+      "imports": [
+        "node:stream",
+        "@/lib/auth-server",
+        "@/lib/audio",
+        "@/lib/errors",
+        "@/lib/services/answers",
+        "@/lib/storage"
+      ],
+      "exportedFunctions": [],
+      "apiMethods": [
+        "GET",
+        "HEAD",
+        "PUT"
+      ],
+      "clientDirective": false,
+      "serverAction": false,
+      "nextFramework": false,
+      "serverImports": [
+        "node:stream"
+      ],
+      "browserRecording": false,
+      "browserStorage": false,
+      "browserLifecycle": false
+    },
+    {
+      "file": "app/api/answers/[id]/correction/route.ts",
+      "sha256": "cadcea2b946b0b0ba4d7532a17157c533100e78b18fb9adf6a944d1014ddea23",
+      "imports": [
+        "zod",
+        "@/lib/auth-server",
+        "@/lib/errors",
+        "@/lib/services/answers"
+      ],
+      "exportedFunctions": [],
+      "apiMethods": [
+        "POST"
+      ],
+      "clientDirective": false,
+      "serverAction": false,
+      "nextFramework": false,
+      "serverImports": [],
+      "browserRecording": false,
+      "browserStorage": false,
+      "browserLifecycle": false
+    },
+    {
+      "file": "app/api/answers/[id]/reference-audio/route.ts",
+      "sha256": "5f7c068232bd14843cd9ca865c6dc3f4e4b1e3b4db2a2f4150e1a2cda40b4f5a",
+      "imports": [
+        "@/lib/auth-server",
+        "@/lib/services/answers",
+        "@/lib/services/tts",
+        "@/lib/errors"
+      ],
+      "exportedFunctions": [],
+      "apiMethods": [
+        "POST"
+      ],
+      "clientDirective": false,
+      "serverAction": false,
+      "nextFramework": false,
+      "serverImports": [],
+      "browserRecording": false,
+      "browserStorage": false,
+      "browserLifecycle": false
+    },
+    {
+      "file": "app/api/answers/[id]/retry/route.ts",
+      "sha256": "037b787ee25a714bc55117a6b3e1fb4112e07d1985bb33a1d78753e1596aeb82",
+      "imports": [
+        "@/lib/auth-server",
+        "@/lib/services/answers"
+      ],
+      "exportedFunctions": [],
+      "apiMethods": [
+        "POST"
+      ],
+      "clientDirective": false,
+      "serverAction": false,
+      "nextFramework": false,
+      "serverImports": [],
+      "browserRecording": false,
+      "browserStorage": false,
+      "browserLifecycle": false
+    },
+    {
+      "file": "app/api/answers/[id]/route.ts",
+      "sha256": "ef256b1a29f248917a30f6f3e7b5380a6308e939b2447a4fba1c81b5eeb1c2b7",
+      "imports": [
+        "@/lib/auth-server",
+        "@/lib/services/answers"
+      ],
+      "exportedFunctions": [],
+      "apiMethods": [
+        "GET"
+      ],
+      "clientDirective": false,
+      "serverAction": false,
+      "nextFramework": false,
+      "serverImports": [],
+      "browserRecording": false,
+      "browserStorage": false,
+      "browserLifecycle": false
+    },
+    {
+      "file": "app/api/answers/[id]/submit/route.ts",
+      "sha256": "e145b72071e0b2eb096898554acd13785cc1efb49479e9b17d564775df41ac92",
+      "imports": [
+        "@/lib/auth-server",
+        "@/lib/services/answers"
+      ],
+      "exportedFunctions": [],
+      "apiMethods": [
+        "POST"
+      ],
+      "clientDirective": false,
+      "serverAction": false,
+      "nextFramework": false,
+      "serverImports": [],
+      "browserRecording": false,
+      "browserStorage": false,
+      "browserLifecycle": false
+    },
+    {
+      "file": "app/api/answers/discard-pending/route.ts",
+      "sha256": "bd1166cc9140c2cc2c104e184c8c8f48a1f71f12a3cb6256701ef1a862e8aa7a",
+      "imports": [
+        "zod",
+        "@/lib/auth-server",
+        "@/lib/errors",
+        "@/lib/services/answers"
+      ],
+      "exportedFunctions": [],
+      "apiMethods": [
+        "POST"
+      ],
+      "clientDirective": false,
+      "serverAction": false,
+      "nextFramework": false,
+      "serverImports": [],
+      "browserRecording": false,
+      "browserStorage": false,
+      "browserLifecycle": false
+    },
+    {
+      "file": "app/api/answers/upload-ticket/route.ts",
+      "sha256": "f868ea1631b90cbdceca633c9bf589900095bf9b34692ed6703461c414c20a48",
+      "imports": [
+        "zod",
+        "@/lib/auth-server",
+        "@/lib/errors",
+        "@/lib/services/answers"
+      ],
+      "exportedFunctions": [],
+      "apiMethods": [
+        "POST"
+      ],
+      "clientDirective": false,
+      "serverAction": false,
+      "nextFramework": false,
+      "serverImports": [],
+      "browserRecording": false,
+      "browserStorage": false,
+      "browserLifecycle": false
+    },
+    {
+      "file": "app/api/auth/[...all]/route.ts",
+      "sha256": "8979b52f8f08882befc943b5586d184470a87f159eb4d9352756cd47bd97cdb4",
+      "imports": [
+        "@/lib/auth",
+        "@/lib/auth-server"
+      ],
+      "exportedFunctions": [],
+      "apiMethods": [
+        "GET",
+        "POST"
+      ],
+      "clientDirective": false,
+      "serverAction": false,
+      "nextFramework": false,
+      "serverImports": [],
+      "browserRecording": false,
+      "browserStorage": false,
+      "browserLifecycle": false
+    },
+    {
+      "file": "app/api/health/route.ts",
+      "sha256": "1b4d4598da8c2e6b3ed0ccc42d49e33eae953492c257a668e49343ac40a8d63b",
+      "imports": [
+        "drizzle-orm",
+        "@/lib/db",
+        "@/lib/worker-health",
+        "@/lib/recovery-state",
+        "@/lib/task-runtime",
+        "@/lib/errors"
+      ],
+      "exportedFunctions": [
+        "GET"
+      ],
+      "apiMethods": [
+        "GET"
+      ],
+      "clientDirective": false,
+      "serverAction": false,
+      "nextFramework": false,
+      "serverImports": [],
+      "browserRecording": false,
+      "browserStorage": false,
+      "browserLifecycle": false
+    },
+    {
+      "file": "app/api/levels/route.ts",
+      "sha256": "ce7114563f2bae946d2be71f95261cd4d4f69c1ca0b9e11ec606e9423ddd8c13",
+      "imports": [
+        "@/lib/auth-server",
+        "@/lib/services/reports"
+      ],
+      "exportedFunctions": [],
+      "apiMethods": [
+        "GET"
+      ],
+      "clientDirective": false,
+      "serverAction": false,
+      "nextFramework": false,
+      "serverImports": [],
+      "browserRecording": false,
+      "browserStorage": false,
+      "browserLifecycle": false
+    },
+    {
+      "file": "app/api/me/route.ts",
+      "sha256": "35058a7fd7789ba0a78fbbf1dca688503d7b6b862a843475ad2fb8b7251fe729",
+      "imports": [
+        "@/lib/auth-server",
+        "@/lib/quota"
+      ],
+      "exportedFunctions": [],
+      "apiMethods": [
+        "GET"
+      ],
+      "clientDirective": false,
+      "serverAction": false,
+      "nextFramework": false,
+      "serverImports": [],
+      "browserRecording": false,
+      "browserStorage": false,
+      "browserLifecycle": false
+    },
+    {
+      "file": "app/api/register/route.ts",
+      "sha256": "b560827969aa769dc45933680453dd438a39991edbde257a046bb79d61e2d977",
+      "imports": [
+        "zod",
+        "@/lib/auth-server",
+        "@/lib/errors",
+        "@/lib/request-origin",
+        "@/lib/services/invites"
+      ],
+      "exportedFunctions": [],
+      "apiMethods": [
+        "POST"
+      ],
+      "clientDirective": false,
+      "serverAction": false,
+      "nextFramework": false,
+      "serverImports": [],
+      "browserRecording": false,
+      "browserStorage": false,
+      "browserLifecycle": false
+    },
+    {
+      "file": "app/api/retry-items/route.ts",
+      "sha256": "dff5ba42bdc22ce792ab3f60d66003dc2ca559f88af16c85f70ab095beff9d84",
+      "imports": [
+        "zod",
+        "@/lib/auth-server",
+        "@/lib/errors",
+        "@/lib/services/answers"
+      ],
+      "exportedFunctions": [],
+      "apiMethods": [
+        "DELETE",
+        "POST"
+      ],
+      "clientDirective": false,
+      "serverAction": false,
+      "nextFramework": false,
+      "serverImports": [],
+      "browserRecording": false,
+      "browserStorage": false,
+      "browserLifecycle": false
+    },
+    {
+      "file": "app/api/rewards/route.ts",
+      "sha256": "562b0952266ee14541b7004d011e5a1193e8845887de58d7fa21af4422640b43",
+      "imports": [
+        "zod",
+        "@/lib/auth-server",
+        "@/lib/errors",
+        "@/lib/services/rewards"
+      ],
+      "exportedFunctions": [],
+      "apiMethods": [
+        "GET",
+        "POST"
+      ],
+      "clientDirective": false,
+      "serverAction": false,
+      "nextFramework": false,
+      "serverImports": [],
+      "browserRecording": false,
+      "browserStorage": false,
+      "browserLifecycle": false
+    },
+    {
+      "file": "app/api/sessions/[id]/events/route.ts",
+      "sha256": "a9543fba8dd48daf12ce2764fea612ca28ba351d8a602453932659f3f7875ba1",
+      "imports": [
+        "zod",
+        "@/lib/auth-server",
+        "@/lib/errors",
+        "@/lib/services/sessions"
+      ],
+      "exportedFunctions": [],
+      "apiMethods": [
+        "POST"
+      ],
+      "clientDirective": false,
+      "serverAction": false,
+      "nextFramework": false,
+      "serverImports": [],
+      "browserRecording": false,
+      "browserStorage": false,
+      "browserLifecycle": false
+    },
+    {
+      "file": "app/api/sessions/[id]/followup/route.ts",
+      "sha256": "ff59899443cd077c6379205e000c0782f4ce69e38e631e7258dedf5463cb8af3",
+      "imports": [
+        "zod",
+        "@/lib/auth-server",
+        "@/lib/errors",
+        "@/lib/services/sessions"
+      ],
+      "exportedFunctions": [],
+      "apiMethods": [
+        "POST"
+      ],
+      "clientDirective": false,
+      "serverAction": false,
+      "nextFramework": false,
+      "serverImports": [],
+      "browserRecording": false,
+      "browserStorage": false,
+      "browserLifecycle": false
+    },
+    {
+      "file": "app/api/sessions/[id]/report/route.ts",
+      "sha256": "898a2a848665260bad087664d8efbc1a19cf3036be061b6636ca47f3ee93fb38",
+      "imports": [
+        "@/lib/auth-server",
+        "@/lib/services/reports"
+      ],
+      "exportedFunctions": [],
+      "apiMethods": [
+        "GET"
+      ],
+      "clientDirective": false,
+      "serverAction": false,
+      "nextFramework": false,
+      "serverImports": [],
+      "browserRecording": false,
+      "browserStorage": false,
+      "browserLifecycle": false
+    },
+    {
+      "file": "app/api/sessions/[id]/route.ts",
+      "sha256": "ff0a0f628a140217e463d09e84d7417dcb1fba32f8f969c7d061f4b715d6b1dd",
+      "imports": [
+        "@/lib/auth-server",
+        "@/lib/services/deletion",
+        "@/lib/services/sessions"
+      ],
+      "exportedFunctions": [],
+      "apiMethods": [
+        "DELETE",
+        "GET"
+      ],
+      "clientDirective": false,
+      "serverAction": false,
+      "nextFramework": false,
+      "serverImports": [],
+      "browserRecording": false,
+      "browserStorage": false,
+      "browserLifecycle": false
+    },
+    {
+      "file": "app/api/sessions/[id]/state/route.ts",
+      "sha256": "7650722454a6621ee94336cb68aa24fc1af8af3815860b5c43d616d7bb0269df",
+      "imports": [
+        "@/lib/auth-server",
+        "@/lib/services/sessions"
+      ],
+      "exportedFunctions": [],
+      "apiMethods": [
+        "GET"
+      ],
+      "clientDirective": false,
+      "serverAction": false,
+      "nextFramework": false,
+      "serverImports": [],
+      "browserRecording": false,
+      "browserStorage": false,
+      "browserLifecycle": false
+    },
+    {
+      "file": "app/api/sessions/route.ts",
+      "sha256": "2f5cabbcfb228ca98926516003ab79d9313d43e6b23b26c2289e55f5ea047d27",
+      "imports": [
+        "zod",
+        "@/lib/auth-server",
+        "@/lib/errors",
+        "@/lib/services/sessions"
+      ],
+      "exportedFunctions": [],
+      "apiMethods": [
+        "GET",
+        "POST"
+      ],
+      "clientDirective": false,
+      "serverAction": false,
+      "nextFramework": false,
+      "serverImports": [],
+      "browserRecording": false,
+      "browserStorage": false,
+      "browserLifecycle": false
+    },
+    {
+      "file": "app/api/thoughts/[id]/review/route.ts",
+      "sha256": "cc8a4034ec722793191c75a44945ab9e19fa4defe140b9fc37112b81227e0e85",
+      "imports": [
+        "@/lib/auth-server",
+        "@/lib/request-origin",
+        "@/lib/errors",
+        "@/lib/services/thoughts",
+        "@/lib/thoughts/schema"
+      ],
+      "exportedFunctions": [],
+      "apiMethods": [
+        "POST"
+      ],
+      "clientDirective": false,
+      "serverAction": false,
+      "nextFramework": false,
+      "serverImports": [],
+      "browserRecording": false,
+      "browserStorage": false,
+      "browserLifecycle": false
+    },
+    {
+      "file": "app/api/thoughts/[id]/route.ts",
+      "sha256": "9655c98eda1a3627ef2ab88513317ede2837155ea46baf1b7d8ad07a09e0d8e9",
+      "imports": [
+        "@/lib/auth-server",
+        "@/lib/request-origin",
+        "@/lib/services/thoughts"
+      ],
+      "exportedFunctions": [],
+      "apiMethods": [
+        "DELETE",
+        "GET",
+        "PUT"
+      ],
+      "clientDirective": false,
+      "serverAction": false,
+      "nextFramework": false,
+      "serverImports": [],
+      "browserRecording": false,
+      "browserStorage": false,
+      "browserLifecycle": false
+    },
+    {
+      "file": "app/api/thoughts/route.ts",
+      "sha256": "389eac5b913af838356c85a12ffb79f3e4bd73aeba39303ad6ff0d544f97ddb6",
+      "imports": [
+        "@/lib/auth-server",
+        "@/lib/request-origin",
+        "@/lib/services/thoughts",
+        "@/lib/thoughts/schema"
+      ],
+      "exportedFunctions": [],
+      "apiMethods": [
+        "GET",
+        "POST"
+      ],
+      "clientDirective": false,
+      "serverAction": false,
+      "nextFramework": false,
+      "serverImports": [],
+      "browserRecording": false,
+      "browserStorage": false,
+      "browserLifecycle": false
+    },
+    {
+      "file": "app/api/tts/[id]/route.ts",
+      "sha256": "2eac5a7507456d75a8e478e62e217ed8e8a37a1b87ef5dae7ddad96d7ae06e14",
+      "imports": [
+        "@/lib/auth-server",
+        "@/lib/errors",
+        "@/lib/services/tts",
+        "@/lib/providers",
+        "@/lib/storage"
+      ],
+      "exportedFunctions": [],
+      "apiMethods": [
+        "GET"
+      ],
+      "clientDirective": false,
+      "serverAction": false,
+      "nextFramework": false,
+      "serverImports": [],
+      "browserRecording": false,
+      "browserStorage": false,
+      "browserLifecycle": false
+    },
+    {
+      "file": "app/api/vocabulary/[id]/route.ts",
+      "sha256": "92abf8b60d0cf02d2e7b5f0b272a787f24114a593ac4cd53bd85493d469df012",
+      "imports": [
+        "@/lib/auth-server",
+        "@/lib/request-origin",
+        "@/lib/services/thoughts"
+      ],
+      "exportedFunctions": [],
+      "apiMethods": [
+        "DELETE",
+        "PUT"
+      ],
+      "clientDirective": false,
+      "serverAction": false,
+      "nextFramework": false,
+      "serverImports": [],
+      "browserRecording": false,
+      "browserStorage": false,
+      "browserLifecycle": false
+    },
+    {
+      "file": "app/api/vocabulary/route.ts",
+      "sha256": "257c02221ad0e82fcf607c79739d38d48ee32dc52172e48dcfb3fa9fe986be8a",
+      "imports": [
+        "@/lib/auth-server",
+        "@/lib/request-origin",
+        "@/lib/services/thoughts",
+        "@/lib/thoughts/schema"
+      ],
+      "exportedFunctions": [],
+      "apiMethods": [
+        "GET",
+        "POST"
+      ],
+      "clientDirective": false,
+      "serverAction": false,
+      "nextFramework": false,
+      "serverImports": [],
+      "browserRecording": false,
+      "browserStorage": false,
+      "browserLifecycle": false
+    },
+    {
+      "file": "app/error.tsx",
+      "sha256": "14700bfe8f29510cb89ee2c5ad0eb2c54eb4118a16edbbb603b3ac33b7e32108",
+      "imports": [
+        "@/components/ui/button"
+      ],
+      "exportedFunctions": [
+        "ErrorPage"
+      ],
+      "apiMethods": [],
+      "clientDirective": true,
+      "serverAction": false,
+      "nextFramework": false,
+      "serverImports": [],
+      "browserRecording": false,
+      "browserStorage": false,
+      "browserLifecycle": false
+    },
+    {
+      "file": "app/layout.tsx",
+      "sha256": "abe53ebfec78fddc81ffdbbb3d832bce4998ab4ca9d85c63a2d06d914510ac65",
+      "imports": [
+        "next",
+        "@/lib/env",
+        "@/lib/errors",
+        "./globals.css",
+        "./terminal.css",
+        "./rhine-fonts.css",
+        "./rhine.css",
+        "./ai-account.css",
+        "./thought-lab.css",
+        "@/components/appearance",
+        "@/components/disc/rhine-provider",
+        "@/components/auth/terminal-entry",
+        "./terminal-entry.css"
+      ],
+      "exportedFunctions": [
+        "RootLayout"
+      ],
+      "apiMethods": [],
+      "clientDirective": false,
+      "serverAction": false,
+      "nextFramework": true,
+      "serverImports": [],
+      "browserRecording": false,
+      "browserStorage": false,
+      "browserLifecycle": false
+    },
+    {
+      "file": "app/maintenance/page.tsx",
+      "sha256": "53c2621c81ea32fa29ae83c7c51f3013ec5f0f190745e3f1ddb5ee56661062d7",
+      "imports": [
+        "next/link"
+      ],
+      "exportedFunctions": [
+        "Maintenance"
+      ],
+      "apiMethods": [],
+      "clientDirective": false,
+      "serverAction": false,
+      "nextFramework": true,
+      "serverImports": [],
+      "browserRecording": false,
+      "browserStorage": false,
+      "browserLifecycle": false
+    },
+    {
+      "file": "app/not-found.tsx",
+      "sha256": "65bc9190115b10bdb70cd181c42fd0dc40dba88b9584eb49b5ffcaad2d6bc551",
+      "imports": [
+        "@/components/ui/button"
+      ],
+      "exportedFunctions": [
+        "NotFound"
+      ],
+      "apiMethods": [],
+      "clientDirective": false,
+      "serverAction": false,
+      "nextFramework": false,
+      "serverImports": [],
+      "browserRecording": false,
+      "browserStorage": false,
+      "browserLifecycle": false
+    },
+    {
+      "file": "components/account/api-settings.tsx",
+      "sha256": "1cd5109063790dc43dd9754125686853665d29a541171889a384392df0ee16ff",
+      "imports": [
+        "react",
+        "lucide-react",
+        "@/lib/client/api",
+        "@/lib/ai/catalog",
+        "@/lib/ai/account",
+        "@/components/ui/button",
+        "@/components/ui/form",
+        "@/components/ui/feedback"
+      ],
+      "exportedFunctions": [
+        "ApiSettings"
+      ],
+      "apiMethods": [],
+      "clientDirective": true,
+      "serverAction": false,
+      "nextFramework": false,
+      "serverImports": [],
+      "browserRecording": false,
+      "browserStorage": false,
+      "browserLifecycle": false
+    },
+    {
+      "file": "components/account/change-password-form.tsx",
+      "sha256": "204d7113c40cb618ef909cdce94c8896bd1684fb1f31d87ad6b5e4bb2fc75a95",
+      "imports": [
+        "react",
+        "@/app/actions/account",
+        "./sign-out-button",
+        "@/components/ui/button",
+        "@/components/ui/card",
+        "@/components/ui/feedback",
+        "@/components/ui/form"
+      ],
+      "exportedFunctions": [
+        "ChangePasswordForm"
+      ],
+      "apiMethods": [],
+      "clientDirective": true,
+      "serverAction": false,
+      "nextFramework": false,
+      "serverImports": [],
+      "browserRecording": false,
+      "browserStorage": false,
+      "browserLifecycle": false
+    },
+    {
+      "file": "components/account/consent-notice.tsx",
+      "sha256": "4fee075142cb0a9957532cb4a175fd2152e7a75e772e1e03133cea37233325fc",
+      "imports": [],
+      "exportedFunctions": [
+        "ConsentNotice"
+      ],
+      "apiMethods": [],
+      "clientDirective": false,
+      "serverAction": false,
+      "nextFramework": false,
+      "serverImports": [],
+      "browserRecording": false,
+      "browserStorage": false,
+      "browserLifecycle": false
+    },
+    {
+      "file": "components/account/onboarding-form.tsx",
+      "sha256": "24ee9c2e0632ee15b7af710be5e4a06e53cd7ab877e5f5615715dd7621a2fba8",
+      "imports": [
+        "react",
+        "@/app/actions/account",
+        "@/components/account/consent-notice",
+        "@/components/ui/button",
+        "@/components/ui/card",
+        "@/components/ui/feedback",
+        "@/components/ui/form"
+      ],
+      "exportedFunctions": [
+        "OnboardingForm"
+      ],
+      "apiMethods": [],
+      "clientDirective": true,
+      "serverAction": false,
+      "nextFramework": false,
+      "serverImports": [],
+      "browserRecording": false,
+      "browserStorage": false,
+      "browserLifecycle": false
+    },
+    {
+      "file": "components/account/private-session-boundary.tsx",
+      "sha256": "648193b2856cdfe7bc730b62e73151cb7382d54276231eb083f5a66a48167d84",
+      "imports": [
+        "react",
+        "next/navigation",
+        "@/lib/client/idb",
+        "@/lib/client/private-session",
+        "@/lib/client/session-pause",
+        "@/lib/client/upload-discard"
+      ],
+      "exportedFunctions": [
+        "PrivateSessionBoundary"
+      ],
+      "apiMethods": [],
+      "clientDirective": true,
+      "serverAction": false,
+      "nextFramework": true,
+      "serverImports": [],
+      "browserRecording": false,
+      "browserStorage": true,
+      "browserLifecycle": true
+    },
+    {
+      "file": "components/account/register-form.tsx",
+      "sha256": "26f02152816c3e23f83a76680939092610d2382d3a1ec48c795d257b52049515",
+      "imports": [
+        "next/link",
+        "next/navigation",
+        "react",
+        "@/components/ui/button",
+        "@/components/ui/card",
+        "@/components/ui/feedback",
+        "@/components/ui/form",
+        "@/lib/auth-client"
+      ],
+      "exportedFunctions": [
+        "RegisterForm"
+      ],
+      "apiMethods": [],
+      "clientDirective": true,
+      "serverAction": false,
+      "nextFramework": true,
+      "serverImports": [],
+      "browserRecording": false,
+      "browserStorage": false,
+      "browserLifecycle": false
+    },
+    {
+      "file": "components/account/settings-forms.tsx",
+      "sha256": "39aacf3625d4ea701a2cac3b252da98d856e25954cbbc53b9ffc2249b1c190e9",
+      "imports": [
+        "next/link",
+        "react",
+        "@/app/actions/account",
+        "./withdraw-consent-button",
+        "./sign-out-button",
+        "@/components/account/consent-notice",
+        "@/components/account/onboarding-form",
+        "@/components/ui/button",
+        "@/components/ui/card",
+        "@/components/ui/feedback",
+        "@/components/ui/form",
+        "@/lib/utils"
+      ],
+      "exportedFunctions": [
+        "SettingsForms"
+      ],
+      "apiMethods": [],
+      "clientDirective": true,
+      "serverAction": false,
+      "nextFramework": true,
+      "serverImports": [],
+      "browserRecording": false,
+      "browserStorage": false,
+      "browserLifecycle": false
+    },
+    {
+      "file": "components/account/sign-out-button.tsx",
+      "sha256": "f43d009d375244b9924303be21beb0a175df7beee0dd6701edf5e88b8e6b8833",
+      "imports": [
+        "react",
+        "@/lib/client/private-session",
+        "@/lib/client/idb",
+        "@/components/ui/button"
+      ],
+      "exportedFunctions": [
+        "SignOutButton"
+      ],
+      "apiMethods": [],
+      "clientDirective": true,
+      "serverAction": false,
+      "nextFramework": false,
+      "serverImports": [],
+      "browserRecording": false,
+      "browserStorage": false,
+      "browserLifecycle": false
+    },
+    {
+      "file": "components/account/withdraw-consent-button.tsx",
+      "sha256": "3a22a224f333b3653414dbc6343c416d6e659e21bd7494ae6317ab1bec213c8e",
+      "imports": [
+        "react",
+        "@/app/actions/account",
+        "@/lib/client/private-session",
+        "@/components/ui/button",
+        "@/lib/client/idb"
+      ],
+      "exportedFunctions": [
+        "WithdrawConsentButton"
+      ],
+      "apiMethods": [],
+      "clientDirective": true,
+      "serverAction": false,
+      "nextFramework": false,
+      "serverImports": [],
+      "browserRecording": false,
+      "browserStorage": false,
+      "browserLifecycle": false
+    },
+    {
+      "file": "components/admin/budget-form.tsx",
+      "sha256": "bd1d7b91df4c0852eac21519379e1e961fe7b54719f5d063972cdd23f77b22ad",
+      "imports": [
+        "react",
+        "@/app/actions/admin",
+        "@/components/ui/button",
+        "@/components/ui/feedback",
+        "@/components/ui/form",
+        "@/lib/settings"
+      ],
+      "exportedFunctions": [
+        "BudgetForm"
+      ],
+      "apiMethods": [],
+      "clientDirective": true,
+      "serverAction": false,
+      "nextFramework": false,
+      "serverImports": [],
+      "browserRecording": false,
+      "browserStorage": false,
+      "browserLifecycle": false
+    },
+    {
+      "file": "components/admin/invite-manager.tsx",
+      "sha256": "2202b88b18d71b9bb51997df37fd1f2ed07f3ab97d0ba2cd3ea09d938e839904",
+      "imports": [
+        "react",
+        "next/navigation",
+        "@/components/ui/button",
+        "@/components/ui/card",
+        "@/components/ui/form",
+        "@/lib/client/api"
+      ],
+      "exportedFunctions": [
+        "InviteManager"
+      ],
+      "apiMethods": [],
+      "clientDirective": true,
+      "serverAction": false,
+      "nextFramework": true,
+      "serverImports": [],
+      "browserRecording": false,
+      "browserStorage": false,
+      "browserLifecycle": false
+    },
+    {
+      "file": "components/admin/question-forms.tsx",
+      "sha256": "f075885f16ec38bf878561f17a5e2fc55a075a906c26183488b5c14d2a8f688e",
+      "imports": [
+        "next/navigation",
+        "react",
+        "@/app/actions/admin",
+        "@/components/ui/button",
+        "@/components/ui/feedback"
+      ],
+      "exportedFunctions": [
+        "PublishToggle",
+        "ImportForm"
+      ],
+      "apiMethods": [],
+      "clientDirective": true,
+      "serverAction": false,
+      "nextFramework": true,
+      "serverImports": [],
+      "browserRecording": false,
+      "browserStorage": false,
+      "browserLifecycle": false
+    },
+    {
+      "file": "components/admin/user-forms.tsx",
+      "sha256": "33e68709c079d7a35cc2401734bdfd56a7ad512e4a5ab5ce8157a51581af24ce",
+      "imports": [
+        "react",
+        "@/app/actions/admin",
+        "@/components/ui/button",
+        "@/components/ui/feedback",
+        "@/components/ui/form"
+      ],
+      "exportedFunctions": [
+        "CreateUserForm",
+        "ResetPasswordForm"
+      ],
+      "apiMethods": [],
+      "clientDirective": true,
+      "serverAction": false,
+      "nextFramework": false,
+      "serverImports": [],
+      "browserRecording": false,
+      "browserStorage": false,
+      "browserLifecycle": false
+    },
+    {
+      "file": "components/admin/voice-readiness.tsx",
+      "sha256": "818707140c22b1899c583a35a536d21fd248c9864eb69ea8660cabffcbcc4a5f",
+      "imports": [
+        "react",
+        "@/components/ui/button",
+        "@/components/ui/feedback",
+        "@/lib/client/api",
+        "@/lib/client/private-session",
+        "@/lib/voice/status"
+      ],
+      "exportedFunctions": [
+        "VoiceReadiness"
+      ],
+      "apiMethods": [],
+      "clientDirective": true,
+      "serverAction": false,
+      "nextFramework": false,
+      "serverImports": [],
+      "browserRecording": false,
+      "browserStorage": false,
+      "browserLifecycle": false
+    },
+    {
+      "file": "components/ambient-background.tsx",
+      "sha256": "7a27a3ab2486384fd90776f67ec69a27e5cb0a8b9b751874b6dd3ec05b20df26",
+      "imports": [
+        "react",
+        "lucide-react"
+      ],
+      "exportedFunctions": [
+        "AmbientToggle",
+        "AmbientBackground"
+      ],
+      "apiMethods": [],
+      "clientDirective": true,
+      "serverAction": false,
+      "nextFramework": false,
+      "serverImports": [],
+      "browserRecording": false,
+      "browserStorage": true,
+      "browserLifecycle": false
+    },
+    {
+      "file": "components/appearance.tsx",
+      "sha256": "6a468b1502bd0e1329b6cae79cfbc4a129e0841622d6b10089f624193f05e6f1",
+      "imports": [
+        "react",
+        "@/components/ui/card"
+      ],
+      "exportedFunctions": [
+        "AppearanceInit",
+        "AppearanceSettings"
+      ],
+      "apiMethods": [],
+      "clientDirective": true,
+      "serverAction": false,
+      "nextFramework": false,
+      "serverImports": [],
+      "browserRecording": false,
+      "browserStorage": true,
+      "browserLifecycle": false
+    },
+    {
+      "file": "components/auth/terminal-auth-shell.tsx",
+      "sha256": "0e3944e28bfc149f538860bf5730d9256f3dd512cbd114553319fe01ba94ab12",
+      "imports": [
+        "next/navigation",
+        "next/link",
+        "@/components/nav",
+        "@/components/ambient-background"
+      ],
+      "exportedFunctions": [
+        "TerminalAuthShell"
+      ],
+      "apiMethods": [],
+      "clientDirective": true,
+      "serverAction": false,
+      "nextFramework": true,
+      "serverImports": [],
+      "browserRecording": false,
+      "browserStorage": false,
+      "browserLifecycle": false
+    },
+    {
+      "file": "components/auth/terminal-entry.tsx",
+      "sha256": "0e6a302fc49b40d63575bdbf0264734b4f407ec7f2a35593a1ff0b12859d4003",
+      "imports": [
+        "react",
+        "next/navigation",
+        "lucide-react",
+        "./terminal-scan",
+        "@/components/nav",
+        "@/lib/client/terminal-entry-timing"
+      ],
+      "exportedFunctions": [
+        "TerminalEntryProvider"
+      ],
+      "apiMethods": [],
+      "clientDirective": true,
+      "serverAction": false,
+      "nextFramework": true,
+      "serverImports": [],
+      "browserRecording": false,
+      "browserStorage": true,
+      "browserLifecycle": true
+    },
+    {
+      "file": "components/auth/terminal-scan.tsx",
+      "sha256": "879f98cb856d7aa9712de69a3b36adc7f9f283f31fb26c143c2ecb5504aa0c20",
+      "imports": [
+        "react",
+        "@/components/disc/rhine/boot-motion"
+      ],
+      "exportedFunctions": [],
+      "apiMethods": [],
+      "clientDirective": true,
+      "serverAction": false,
+      "nextFramework": false,
+      "serverImports": [],
+      "browserRecording": false,
+      "browserStorage": true,
+      "browserLifecycle": true
+    },
+    {
+      "file": "components/delete-session-button.tsx",
+      "sha256": "1318265227631d9145c77f15a8c079286a9af98ddd1f78339c21d06e966d7d9c",
+      "imports": [
+        "lucide-react",
+        "next/navigation",
+        "react",
+        "@/components/ui/button",
+        "@/lib/client/api"
+      ],
+      "exportedFunctions": [
+        "DeleteSessionButton"
+      ],
+      "apiMethods": [],
+      "clientDirective": true,
+      "serverAction": false,
+      "nextFramework": true,
+      "serverImports": [],
+      "browserRecording": false,
+      "browserStorage": false,
+      "browserLifecycle": false
+    },
+    {
+      "file": "components/device-check.tsx",
+      "sha256": "6f78130b44e28688b836f642f14572819ad742ebd103bf7f30d19cb3a59c4750",
+      "imports": [
+        "lucide-react",
+        "next/navigation",
+        "react",
+        "@/components/ui/button",
+        "@/components/ui/card",
+        "@/components/ui/feedback",
+        "@/components/ui/form",
+        "@/lib/client/examiner-audio",
+        "@/lib/client/recorder",
+        "./interview/waveform",
+        "@/lib/client/idb",
+        "@/lib/client/private-session"
+      ],
+      "exportedFunctions": [
+        "DeviceCheck"
+      ],
+      "apiMethods": [],
+      "clientDirective": true,
+      "serverAction": false,
+      "nextFramework": true,
+      "serverImports": [],
+      "browserRecording": true,
+      "browserStorage": true,
+      "browserLifecycle": false
+    },
+    {
+      "file": "components/disc/disc-library.tsx",
+      "sha256": "c4b6807fe34a24046677e77dd6553396b20a3c73d43daffe1101b47c4f1f6d5c",
+      "imports": [
+        "lucide-react",
+        "next/link",
+        "react",
+        "@/lib/content/types",
+        "@/components/start-session-button",
+        "@/components/ui/badge",
+        "./disc-scene",
+        "./rhine/catalog",
+        "./rhine/archive-loop",
+        "./rhine-provider",
+        "@/lib/client/practice-location",
+        "@/components/terminal-shortcuts",
+        "@/components/auth/terminal-entry"
+      ],
+      "exportedFunctions": [
+        "DiscLibrary"
+      ],
+      "apiMethods": [],
+      "clientDirective": true,
+      "serverAction": false,
+      "nextFramework": true,
+      "serverImports": [],
+      "browserRecording": false,
+      "browserStorage": false,
+      "browserLifecycle": false
+    },
+    {
+      "file": "components/disc/disc-scene.tsx",
+      "sha256": "6b5a6158840bfb7f8eff0f332e332b94c5a7706006e7de42bf749f23bba7efb3",
+      "imports": [
+        "react",
+        "./rhine-provider",
+        "./rhine/archive-loop"
+      ],
+      "exportedFunctions": [
+        "DiscScene"
+      ],
+      "apiMethods": [],
+      "clientDirective": true,
+      "serverAction": false,
+      "nextFramework": false,
+      "serverImports": [],
+      "browserRecording": false,
+      "browserStorage": false,
+      "browserLifecycle": false
+    },
+    {
+      "file": "components/disc/record-archive.tsx",
+      "sha256": "4117db0c6e4ea159ffde649218685de6bb26087b41f46124a82d07afbab82706",
+      "imports": [
+        "lucide-react",
+        "next/link",
+        "react",
+        "@/lib/content/types",
+        "@/lib/utils",
+        "@/components/report/answer-card",
+        "@/components/report/compare",
+        "@/components/report/reference-audio",
+        "@/components/rewards/reward-controls",
+        "./disc-scene",
+        "./rhine-provider",
+        "@/lib/sessions/lifecycle"
+      ],
+      "exportedFunctions": [
+        "RecordArchive"
+      ],
+      "apiMethods": [],
+      "clientDirective": true,
+      "serverAction": false,
+      "nextFramework": true,
+      "serverImports": [],
+      "browserRecording": false,
+      "browserStorage": false,
+      "browserLifecycle": false
+    },
+    {
+      "file": "components/disc/rhine-provider.tsx",
+      "sha256": "a29dd2b7dff19d009357fa3ea0c01a11a4631e060c4d9bb18745f2a7ff7d7ee7",
+      "imports": [
+        "react",
+        "next/navigation",
+        "./disc-scene",
+        "./rhine-runtime",
+        "@/lib/client/practice-location",
+        "@/components/auth/terminal-entry"
+      ],
+      "exportedFunctions": [
+        "RhineProvider"
+      ],
+      "apiMethods": [],
+      "clientDirective": true,
+      "serverAction": false,
+      "nextFramework": true,
+      "serverImports": [],
+      "browserRecording": false,
+      "browserStorage": true,
+      "browserLifecycle": false
+    },
+    {
+      "file": "components/disc/rhine-runtime.ts",
+      "sha256": "42c3fc65d9e861fbdaca3aee72025d8d8e2de3657091c45778c64d72a8447631",
+      "imports": [
+        "./rhine/scene",
+        "./rhine/catalog",
+        "./rhine/render-quality",
+        "./rhine/motion-preferences",
+        "./rhine/decryption",
+        "./disc-scene"
+      ],
+      "exportedFunctions": [
+        "createRhineStage"
+      ],
+      "apiMethods": [],
+      "clientDirective": false,
+      "serverAction": false,
+      "nextFramework": false,
+      "serverImports": [],
+      "browserRecording": false,
+      "browserStorage": true,
+      "browserLifecycle": true
+    },
+    {
+      "file": "components/disc/rhine/appearance.ts",
+      "sha256": "0c000bd78732450febd53eece405ab70f59fbf661e81cac4efcd23cf74d8f051",
+      "imports": [
+        "three",
+        "./glass-reveal",
+        "./internal-optics",
+        "./theme-material"
+      ],
+      "exportedFunctions": [],
+      "apiMethods": [],
+      "clientDirective": false,
+      "serverAction": false,
+      "nextFramework": false,
+      "serverImports": [],
+      "browserRecording": false,
+      "browserStorage": false,
+      "browserLifecycle": false
+    },
+    {
+      "file": "components/disc/rhine/archive-drag.ts",
+      "sha256": "f781eee93b260426f71f0d6047f4557202589c69bc849069a80f1782219a9a2c",
+      "imports": [],
+      "exportedFunctions": [],
+      "apiMethods": [],
+      "clientDirective": false,
+      "serverAction": false,
+      "nextFramework": false,
+      "serverImports": [],
+      "browserRecording": false,
+      "browserStorage": false,
+      "browserLifecycle": false
+    },
+    {
+      "file": "components/disc/rhine/archive-lighting.ts",
+      "sha256": "a3f9d2ee7fabb3786539e6f88802be17368f3671894cd12471225bc0c25e807b",
+      "imports": [
+        "three",
+        "three/addons/environments/RoomEnvironment.js"
+      ],
+      "exportedFunctions": [
+        "createArchiveLighting"
+      ],
+      "apiMethods": [],
+      "clientDirective": false,
+      "serverAction": false,
+      "nextFramework": false,
+      "serverImports": [],
+      "browserRecording": false,
+      "browserStorage": false,
+      "browserLifecycle": false
+    },
+    {
+      "file": "components/disc/rhine/archive-loop.ts",
+      "sha256": "df10710d8e8318fb702c5b3860e014b8c186df76f4b2b2153edb1c2343899ce3",
+      "imports": [],
+      "exportedFunctions": [],
+      "apiMethods": [],
+      "clientDirective": false,
+      "serverAction": false,
+      "nextFramework": false,
+      "serverImports": [],
+      "browserRecording": false,
+      "browserStorage": false,
+      "browserLifecycle": false
+    },
+    {
+      "file": "components/disc/rhine/archive-play-motion.ts",
+      "sha256": "830b1e0c4cf1c22675ce4628a384aaee537fc21817b838dffb91b36c1dde7008",
+      "imports": [],
+      "exportedFunctions": [
+        "musicDisplacement",
+        "rhythmDisplacement"
+      ],
+      "apiMethods": [],
+      "clientDirective": false,
+      "serverAction": false,
+      "nextFramework": false,
+      "serverImports": [],
+      "browserRecording": false,
+      "browserStorage": false,
+      "browserLifecycle": false
+    },
+    {
+      "file": "components/disc/rhine/archive-visibility.ts",
+      "sha256": "9373febf9babe99c1ff4ee90d8ffaf789c5002f938debbbf14c8897b69486f87",
+      "imports": [
+        "three",
+        "./archive-loop"
+      ],
+      "exportedFunctions": [],
+      "apiMethods": [],
+      "clientDirective": false,
+      "serverAction": false,
+      "nextFramework": false,
+      "serverImports": [],
+      "browserRecording": false,
+      "browserStorage": false,
+      "browserLifecycle": false
+    },
+    {
+      "file": "components/disc/rhine/asset-url.ts",
+      "sha256": "fc8184008db846950ddfecd180e1bbad123294176c0878ce31dc4cd6e0b1b5e2",
+      "imports": [],
+      "exportedFunctions": [],
+      "apiMethods": [],
+      "clientDirective": false,
+      "serverAction": false,
+      "nextFramework": false,
+      "serverImports": [],
+      "browserRecording": false,
+      "browserStorage": false,
+      "browserLifecycle": false
+    },
+    {
+      "file": "components/disc/rhine/boot-logo-tracks.ts",
+      "sha256": "8bb9d1ae992105ce022f2df596b9affb382cad9b5dc9dc11132d4ce488b5709f",
+      "imports": [
+        "./boot-tracks"
+      ],
+      "exportedFunctions": [
+        "bootLogoTrack"
+      ],
+      "apiMethods": [],
+      "clientDirective": false,
+      "serverAction": false,
+      "nextFramework": false,
+      "serverImports": [],
+      "browserRecording": false,
+      "browserStorage": false,
+      "browserLifecycle": false
+    },
+    {
+      "file": "components/disc/rhine/boot-motion.ts",
+      "sha256": "618bd70a4a7e3e43a638321bbb0e0e0edd161bdfa8d333c8da71c63acaf7ac7b",
+      "imports": [
+        "./boot-tracks",
+        "./boot-orbit-tracks",
+        "./boot-logo-tracks"
+      ],
+      "exportedFunctions": [
+        "bootMotion"
+      ],
+      "apiMethods": [],
+      "clientDirective": false,
+      "serverAction": false,
+      "nextFramework": false,
+      "serverImports": [],
+      "browserRecording": false,
+      "browserStorage": false,
+      "browserLifecycle": false
+    },
+    {
+      "file": "components/disc/rhine/boot-orbit-tracks.ts",
+      "sha256": "4675339fb34d642df865c05b74c1c912ee9771b39afa0e84526a1cb26e112fc2",
+      "imports": [
+        "./boot-tracks"
+      ],
+      "exportedFunctions": [
+        "scanOrbitTrack"
+      ],
+      "apiMethods": [],
+      "clientDirective": false,
+      "serverAction": false,
+      "nextFramework": false,
+      "serverImports": [],
+      "browserRecording": false,
+      "browserStorage": false,
+      "browserLifecycle": false
+    },
+    {
+      "file": "components/disc/rhine/boot-tracks.ts",
+      "sha256": "3f058f215ac2fdb32883bbcfd0688f38f97149acc688e646ab297f56014d6c77",
+      "imports": [],
+      "exportedFunctions": [
+        "track",
+        "scanTrack"
+      ],
+      "apiMethods": [],
+      "clientDirective": false,
+      "serverAction": false,
+      "nextFramework": false,
+      "serverImports": [],
+      "browserRecording": false,
+      "browserStorage": false,
+      "browserLifecycle": false
+    },
+    {
+      "file": "components/disc/rhine/catalog.ts",
+      "sha256": "1718cd282b2727808cbde984c7b89c356dad7958e99f88732212bd4a4d278714",
+      "imports": [
+        "./archive-loop"
+      ],
+      "exportedFunctions": [],
+      "apiMethods": [],
+      "clientDirective": false,
+      "serverAction": false,
+      "nextFramework": false,
+      "serverImports": [],
+      "browserRecording": false,
+      "browserStorage": false,
+      "browserLifecycle": false
+    },
+    {
+      "file": "components/disc/rhine/decryption.ts",
+      "sha256": "2f1b3acecee5b7465d86dd7f5d434e797c0ca295c4f4cec2fdfd7b88524ea7c9",
+      "imports": [],
+      "exportedFunctions": [
+        "sampleCurve",
+        "decryptionFrame"
+      ],
+      "apiMethods": [],
+      "clientDirective": false,
+      "serverAction": false,
+      "nextFramework": false,
+      "serverImports": [],
+      "browserRecording": false,
+      "browserStorage": false,
+      "browserLifecycle": false
+    },
+    {
+      "file": "components/disc/rhine/glass-reveal.ts",
+      "sha256": "5c072a446bb9afd87f8ef1566be3565434f61b2f4d83f884d224771169f7da1a",
+      "imports": [],
+      "exportedFunctions": [
+        "frostedTransmissionLod",
+        "glassRevealAtHeight"
+      ],
+      "apiMethods": [],
+      "clientDirective": false,
+      "serverAction": false,
+      "nextFramework": false,
+      "serverImports": [],
+      "browserRecording": false,
+      "browserStorage": false,
+      "browserLifecycle": false
+    },
+    {
+      "file": "components/disc/rhine/instance-updates.ts",
+      "sha256": "5394a6dd0608b52f2a1d1ede31b40fd026fea5aa507cbd1edb8de1967a521135",
+      "imports": [
+        "three"
+      ],
+      "exportedFunctions": [],
+      "apiMethods": [],
+      "clientDirective": false,
+      "serverAction": false,
+      "nextFramework": false,
+      "serverImports": [],
+      "browserRecording": false,
+      "browserStorage": false,
+      "browserLifecycle": false
+    },
+    {
+      "file": "components/disc/rhine/internal-optics.ts",
+      "sha256": "4691550f64cfe777348020fc63a75fcebf5846bda6c391c0c99a641578ad5cb3",
+      "imports": [
+        "three"
+      ],
+      "exportedFunctions": [
+        "configureInternalOptics",
+        "internalOpticsFragment"
+      ],
+      "apiMethods": [],
+      "clientDirective": false,
+      "serverAction": false,
+      "nextFramework": false,
+      "serverImports": [],
+      "browserRecording": false,
+      "browserStorage": false,
+      "browserLifecycle": false
+    },
+    {
+      "file": "components/disc/rhine/load-gltf.ts",
+      "sha256": "8a45c11549d9586c6e5e5ac19b44b3d1463a0c7b3ce94f7faedbca779385bb27",
+      "imports": [
+        "three/addons/loaders/GLTFLoader.js",
+        "./three-resources"
+      ],
+      "exportedFunctions": [
+        "loadGltf"
+      ],
+      "apiMethods": [],
+      "clientDirective": false,
+      "serverAction": false,
+      "nextFramework": false,
+      "serverImports": [],
+      "browserRecording": false,
+      "browserStorage": false,
+      "browserLifecycle": false
+    },
+    {
+      "file": "components/disc/rhine/motion-preferences.ts",
+      "sha256": "2749a54b54abdca75fc8744436cd50b2d3b07bc8e95a11999507715083bb9a1d",
+      "imports": [],
+      "exportedFunctions": [
+        "fullMotion",
+        "reducedMotion",
+        "motionPresetFor",
+        "createMotionPreferences",
+        "motionEnabled",
+        "motionSummary",
+        "motionSettingsMarkup"
+      ],
+      "apiMethods": [],
+      "clientDirective": false,
+      "serverAction": false,
+      "nextFramework": false,
+      "serverImports": [],
+      "browserRecording": false,
+      "browserStorage": false,
+      "browserLifecycle": false
+    },
+    {
+      "file": "components/disc/rhine/motion.ts",
+      "sha256": "2c3b214ffe13ce3f19f502f84a493e26817b68f8f62c71df90cea86eee2dba4d",
+      "imports": [],
+      "exportedFunctions": [
+        "archiveWave",
+        "extraction",
+        "settlingWave",
+        "baselineSelectionWave",
+        "selectionWave",
+        "rippleEnvelope",
+        "columnStrength",
+        "idleWave",
+        "cinematicField",
+        "returnStep",
+        "damp"
+      ],
+      "apiMethods": [],
+      "clientDirective": false,
+      "serverAction": false,
+      "nextFramework": false,
+      "serverImports": [],
+      "browserRecording": false,
+      "browserStorage": false,
+      "browserLifecycle": false
+    },
+    {
+      "file": "components/disc/rhine/quality-renderer.ts",
+      "sha256": "fccb19a31a7feb4de7c46bd94c852f6471da5216569d6e0425c9415d121a38c6",
+      "imports": [
+        "three",
+        "three/addons/postprocessing/EffectComposer.js",
+        "three/addons/postprocessing/RenderPass.js",
+        "three/addons/postprocessing/SMAAPass.js",
+        "three/addons/postprocessing/OutputPass.js",
+        "./render-quality"
+      ],
+      "exportedFunctions": [
+        "applyTextureQuality",
+        "resizeQuality",
+        "createViewerPipeline"
+      ],
+      "apiMethods": [],
+      "clientDirective": false,
+      "serverAction": false,
+      "nextFramework": false,
+      "serverImports": [],
+      "browserRecording": false,
+      "browserStorage": false,
+      "browserLifecycle": false
+    },
+    {
+      "file": "components/disc/rhine/render-quality.ts",
+      "sha256": "40853527b463b628f6fd2da536056e423cd11bee05e06f03f74308c41e3d5d16",
+      "imports": [],
+      "exportedFunctions": [
+        "normalizeQuality",
+        "matchingPreset",
+        "renderDimensions"
+      ],
+      "apiMethods": [],
+      "clientDirective": false,
+      "serverAction": false,
+      "nextFramework": false,
+      "serverImports": [],
+      "browserRecording": false,
+      "browserStorage": false,
+      "browserLifecycle": false
+    },
+    {
+      "file": "components/disc/rhine/render-state.ts",
+      "sha256": "8b57da74c863ae628993cc17abf7a5f758a2378d64d08dc0178f5e234e96eeef",
+      "imports": [],
+      "exportedFunctions": [],
+      "apiMethods": [],
+      "clientDirective": false,
+      "serverAction": false,
+      "nextFramework": false,
+      "serverImports": [],
+      "browserRecording": false,
+      "browserStorage": false,
+      "browserLifecycle": false
+    },
+    {
+      "file": "components/disc/rhine/scene.ts",
+      "sha256": "24a43fa06763f0b7f73bfab4cddc304fa46077c684f4f8e87700b624cc2edf22",
+      "imports": [
+        "three",
+        "@/lib/client/terminal-entry-timing",
+        "./archive-visibility",
+        "./instance-updates",
+        "./render-state",
+        "./shared-depth",
+        "./three-resources",
+        "./theme-motion",
+        "./theme-material",
+        "./archive-play-motion",
+        "./load-gltf",
+        "./archive-lighting",
+        "three/addons/postprocessing/EffectComposer.js",
+        "three/addons/postprocessing/RenderPass.js",
+        "three/addons/postprocessing/OutputPass.js",
+        "three/addons/postprocessing/BokehPass.js",
+        "three/addons/postprocessing/SMAAPass.js",
+        "./render-quality",
+        "./quality-renderer",
+        "./appearance",
+        "./internal-optics",
+        "./decryption",
+        "./catalog",
+        "./archive-loop",
+        "./viewport-layout",
+        "./archive-drag",
+        "./asset-url",
+        "./motion-preferences",
+        "./motion"
+      ],
+      "exportedFunctions": [],
+      "apiMethods": [],
+      "clientDirective": false,
+      "serverAction": false,
+      "nextFramework": false,
+      "serverImports": [],
+      "browserRecording": true,
+      "browserStorage": false,
+      "browserLifecycle": true
+    },
+    {
+      "file": "components/disc/rhine/shared-depth.ts",
+      "sha256": "db632847071c75c8516b6526187c891ff0c4bae7fe4fa5a988c98e297e50cd1d",
+      "imports": [
+        "three",
+        "three/addons/postprocessing/SSAOPass.js",
+        "three/addons/postprocessing/BokehPass.js",
+        "three/addons/postprocessing/Pass.js"
+      ],
+      "exportedFunctions": [],
+      "apiMethods": [],
+      "clientDirective": false,
+      "serverAction": false,
+      "nextFramework": false,
+      "serverImports": [],
+      "browserRecording": false,
+      "browserStorage": false,
+      "browserLifecycle": false
+    },
+    {
+      "file": "components/disc/rhine/theme-material.ts",
+      "sha256": "57572725e2c17f6fab09622cec06e330a5c95031185d2ba1da8a74c55fa5c84f",
+      "imports": [
+        "three"
+      ],
+      "exportedFunctions": [
+        "themeMaterial",
+        "themeEnvironment"
+      ],
+      "apiMethods": [],
+      "clientDirective": false,
+      "serverAction": false,
+      "nextFramework": false,
+      "serverImports": [],
+      "browserRecording": false,
+      "browserStorage": false,
+      "browserLifecycle": false
+    },
+    {
+      "file": "components/disc/rhine/theme-motion.ts",
+      "sha256": "6397544adbebdeb5d000c96925d68e0120a2bd67c0f905c5a8b74750d97d25d8",
+      "imports": [],
+      "exportedFunctions": [],
+      "apiMethods": [],
+      "clientDirective": false,
+      "serverAction": false,
+      "nextFramework": false,
+      "serverImports": [],
+      "browserRecording": false,
+      "browserStorage": false,
+      "browserLifecycle": false
+    },
+    {
+      "file": "components/disc/rhine/three-resources.ts",
+      "sha256": "94c19a88b0bf89d667d68be07a6a79f59e9470c02aaaf58c2fe9c5a78f81b486",
+      "imports": [
+        "three"
+      ],
+      "exportedFunctions": [
+        "disposeThreeTree"
+      ],
+      "apiMethods": [],
+      "clientDirective": false,
+      "serverAction": false,
+      "nextFramework": false,
+      "serverImports": [],
+      "browserRecording": false,
+      "browserStorage": false,
+      "browserLifecycle": false
+    },
+    {
+      "file": "components/disc/rhine/viewport-layout.ts",
+      "sha256": "7d01ecd909825b6362363c18a34ab0f8f68ba55e541086d5f762f60d87dc3bf3",
+      "imports": [],
+      "exportedFunctions": [
+        "openingLayout",
+        "viewportLayout",
+        "archiveFraming"
+      ],
+      "apiMethods": [],
+      "clientDirective": false,
+      "serverAction": false,
+      "nextFramework": false,
+      "serverImports": [],
+      "browserRecording": false,
+      "browserStorage": false,
+      "browserLifecycle": false
+    },
+    {
+      "file": "components/disc/scene-runtime.ts",
+      "sha256": "1f5ea8f0529f2af3e1407f1270ad8f974a4b5707c0ab5eb9bf059c0c006405bb",
+      "imports": [
+        "three",
+        "three/addons/loaders/GLTFLoader.js",
+        "three/addons/environments/RoomEnvironment.js",
+        "./disc-scene"
+      ],
+      "exportedFunctions": [
+        "createDiscStage"
+      ],
+      "apiMethods": [],
+      "clientDirective": false,
+      "serverAction": false,
+      "nextFramework": false,
+      "serverImports": [],
+      "browserRecording": false,
+      "browserStorage": true,
+      "browserLifecycle": true
+    },
+    {
+      "file": "components/growth-calendar.tsx",
+      "sha256": "c871e08504fadb6ade45a78080d51951376d3b05e63f975235523e4d7a9c1e25",
+      "imports": [
+        "react",
+        "next/link",
+        "lucide-react",
+        "@/lib/services/growth",
+        "@/lib/utils"
+      ],
+      "exportedFunctions": [
+        "GrowthCalendar"
+      ],
+      "apiMethods": [],
+      "clientDirective": true,
+      "serverAction": false,
+      "nextFramework": true,
+      "serverImports": [],
+      "browserRecording": false,
+      "browserStorage": false,
+      "browserLifecycle": false
+    },
+    {
+      "file": "components/interview/examiner-avatar.tsx",
+      "sha256": "024d0386d0b2902500fda6b99e9e0881ff69b8b59963d4bf4152d4e9e975bec7",
+      "imports": [
+        "lucide-react",
+        "@/lib/utils"
+      ],
+      "exportedFunctions": [
+        "ExaminerAvatar"
+      ],
+      "apiMethods": [],
+      "clientDirective": false,
+      "serverAction": false,
+      "nextFramework": false,
+      "serverImports": [],
+      "browserRecording": false,
+      "browserStorage": false,
+      "browserLifecycle": false
+    },
+    {
+      "file": "components/interview/interview-room.tsx",
+      "sha256": "ea791567bc060ec64a4865c039ed44d7561c3074e628d6785744eb43300f87e9",
+      "imports": [
+        "lucide-react",
+        "next/link",
+        "next/navigation",
+        "react",
+        "@/components/ui/badge",
+        "@/components/ui/button",
+        "@/components/ui/feedback",
+        "@/components/pending-uploads",
+        "@/components/start-session-button",
+        "@/lib/client/api",
+        "@/lib/client/examiner-audio",
+        "@/lib/client/idb",
+        "@/lib/client/session-pause",
+        "@/lib/sessions/lifecycle",
+        "@/lib/client/recorder",
+        "@/lib/client/uploader",
+        "@/lib/client/wake-lock",
+        "@/lib/client/private-session",
+        "@/lib/services/sessions",
+        "@/lib/sessions/plan",
+        "@/lib/timing",
+        "@/lib/utils",
+        "./examiner-avatar",
+        "./parts",
+        "./waveform",
+        "@/components/disc/disc-scene",
+        "@/components/disc/rhine-provider"
+      ],
+      "exportedFunctions": [
+        "InterviewRoom"
+      ],
+      "apiMethods": [],
+      "clientDirective": true,
+      "serverAction": false,
+      "nextFramework": true,
+      "serverImports": [],
+      "browserRecording": false,
+      "browserStorage": true,
+      "browserLifecycle": true
+    },
+    {
+      "file": "components/interview/parts.tsx",
+      "sha256": "03e6c615131f0f04738ef2faa7795748c69106d3327d804afd42430c2e84c832",
+      "imports": [
+        "lucide-react",
+        "@/lib/sessions/plan",
+        "@/lib/timing",
+        "@/lib/utils"
+      ],
+      "exportedFunctions": [
+        "CountdownDisplay",
+        "TaskCard",
+        "NotesPad",
+        "HintPanel"
+      ],
+      "apiMethods": [],
+      "clientDirective": true,
+      "serverAction": false,
+      "nextFramework": false,
+      "serverImports": [],
+      "browserRecording": false,
+      "browserStorage": false,
+      "browserLifecycle": false
+    },
+    {
+      "file": "components/interview/waveform.tsx",
+      "sha256": "ef9516950ee9b6d840f4f5c8cd01ab661f54333e6224bd66f981bb324bbceff5",
+      "imports": [
+        "react",
+        "@/lib/client/recorder"
+      ],
+      "exportedFunctions": [
+        "Waveform",
+        "LevelMeter"
+      ],
+      "apiMethods": [],
+      "clientDirective": true,
+      "serverAction": false,
+      "nextFramework": false,
+      "serverImports": [],
+      "browserRecording": false,
+      "browserStorage": false,
+      "browserLifecycle": false
+    },
+    {
+      "file": "components/nav.tsx",
+      "sha256": "0be1b4bb9f0c86268b9e64fc184819ae3d2d391ca0999212142275ba18d3d334",
+      "imports": [
+        "lucide-react",
+        "next/link",
+        "next/navigation",
+        "react",
+        "@/lib/utils",
+        "@/components/ambient-background"
+      ],
+      "exportedFunctions": [
+        "SpeakBrand",
+        "TopNav",
+        "BottomNav"
+      ],
+      "apiMethods": [],
+      "clientDirective": true,
+      "serverAction": false,
+      "nextFramework": true,
+      "serverImports": [],
+      "browserRecording": false,
+      "browserStorage": false,
+      "browserLifecycle": false
+    },
+    {
+      "file": "components/page-header.tsx",
+      "sha256": "c7d75595971929c93fc7ae0067401f35a1aeb6f67a4ed20fea205134af904acf",
+      "imports": [
+        "react"
+      ],
+      "exportedFunctions": [
+        "PageHeader"
+      ],
+      "apiMethods": [],
+      "clientDirective": false,
+      "serverAction": false,
+      "nextFramework": false,
+      "serverImports": [],
+      "browserRecording": false,
+      "browserStorage": false,
+      "browserLifecycle": false
+    },
+    {
+      "file": "components/pending-uploads.tsx",
+      "sha256": "5c7974363b45fa9bce1c59bf34731c69aaa172065c399c5cab38fa3ef0eeaa98",
+      "imports": [
+        "react",
+        "@/components/ui/button",
+        "@/components/ui/feedback",
+        "@/lib/client/idb",
+        "@/lib/client/recording-download",
+        "@/lib/client/private-session",
+        "@/lib/client/uploader",
+        "@/lib/client/upload-discard"
+      ],
+      "exportedFunctions": [
+        "PendingUploads"
+      ],
+      "apiMethods": [],
+      "clientDirective": true,
+      "serverAction": false,
+      "nextFramework": false,
+      "serverImports": [],
+      "browserRecording": false,
+      "browserStorage": false,
+      "browserLifecycle": false
+    },
+    {
+      "file": "components/quota-card.tsx",
+      "sha256": "d8114a9d33ae1f1eb5ae2bb1c2f93ad84dd61371b556719d35cdbd5ee14d7248",
+      "imports": [
+        "@/components/ui/card",
+        "@/components/ui/feedback",
+        "@/lib/quota",
+        "next/link"
+      ],
+      "exportedFunctions": [
+        "QuotaCard"
+      ],
+      "apiMethods": [],
+      "clientDirective": false,
+      "serverAction": false,
+      "nextFramework": true,
+      "serverImports": [],
+      "browserRecording": false,
+      "browserStorage": false,
+      "browserLifecycle": false
+    },
+    {
+      "file": "components/report/answer-card.tsx",
+      "sha256": "4a8c2418905ce9edb6a767ddcb318847e9dbecd7c72778c2b1fa0b052e3f8ebc",
+      "imports": [
+        "lucide-react",
+        "next/link",
+        "react",
+        "next/navigation",
+        "@/components/start-session-button",
+        "./reference-audio",
+        "@/lib/sessions/recording-source",
+        "./record-player",
+        "@/components/ui/badge",
+        "@/components/ui/button",
+        "@/components/ui/feedback",
+        "@/components/ui/form",
+        "@/lib/client/api",
+        "@/lib/feedback/schema",
+        "@/lib/utils"
+      ],
+      "exportedFunctions": [
+        "MetricsRow",
+        "FeedbackBlock",
+        "AnswerCard"
+      ],
+      "apiMethods": [],
+      "clientDirective": true,
+      "serverAction": false,
+      "nextFramework": true,
+      "serverImports": [],
+      "browserRecording": false,
+      "browserStorage": false,
+      "browserLifecycle": false
+    },
+    {
+      "file": "components/report/compare.tsx",
+      "sha256": "06ab611d8d04f65913c08d4e05727facf5c325bf6e5e1e8646b18c25ec39ea6c",
+      "imports": [
+        "react",
+        "@/components/ui/badge",
+        "@/components/ui/form",
+        "@/lib/utils",
+        "./answer-card"
+      ],
+      "exportedFunctions": [
+        "AttemptCompare"
+      ],
+      "apiMethods": [],
+      "clientDirective": true,
+      "serverAction": false,
+      "nextFramework": false,
+      "serverImports": [],
+      "browserRecording": false,
+      "browserStorage": false,
+      "browserLifecycle": false
+    },
+    {
+      "file": "components/report/processing-refresh.tsx",
+      "sha256": "92714e7ae1d406b44dca280618f0903d8b2bfcea8459ead48471ac977dfc147d",
+      "imports": [
+        "react",
+        "next/navigation"
+      ],
+      "exportedFunctions": [
+        "ProcessingRefresh"
+      ],
+      "apiMethods": [],
+      "clientDirective": true,
+      "serverAction": false,
+      "nextFramework": true,
+      "serverImports": [],
+      "browserRecording": false,
+      "browserStorage": false,
+      "browserLifecycle": false
+    },
+    {
+      "file": "components/report/record-player.tsx",
+      "sha256": "61b1aab7e7aeffdfc77c3f3f444aeff6f031d5ae07592eb65f91ac98a0b31c92",
+      "imports": [
+        "lucide-react",
+        "react"
+      ],
+      "exportedFunctions": [
+        "RecordPlayer"
+      ],
+      "apiMethods": [],
+      "clientDirective": true,
+      "serverAction": false,
+      "nextFramework": false,
+      "serverImports": [],
+      "browserRecording": false,
+      "browserStorage": false,
+      "browserLifecycle": false
+    },
+    {
+      "file": "components/report/reference-audio.tsx",
+      "sha256": "e9f3379b01f84d60725db0061a22d4c73955690d670b8c9f38b7e2a0b045b343",
+      "imports": [
+        "react",
+        "lucide-react",
+        "@/components/ui/button",
+        "@/lib/client/api",
+        "@/lib/client/examiner-audio"
+      ],
+      "exportedFunctions": [
+        "ReferenceAudio"
+      ],
+      "apiMethods": [],
+      "clientDirective": true,
+      "serverAction": false,
+      "nextFramework": false,
+      "serverImports": [],
+      "browserRecording": false,
+      "browserStorage": false,
+      "browserLifecycle": false
+    },
+    {
+      "file": "components/report/session-report.tsx",
+      "sha256": "1ab8d4520698d4a6102ff6d5780e77c3787f70c1839d98d5c6b470c5bf152cd9",
+      "imports": [
+        "lucide-react",
+        "next/navigation",
+        "react",
+        "@/components/start-session-button",
+        "@/components/ui/badge",
+        "@/components/ui/button",
+        "@/components/ui/card",
+        "@/components/ui/feedback",
+        "@/lib/client/api",
+        "@/lib/services/reports",
+        "@/lib/utils",
+        "./answer-card",
+        "@/lib/sessions/lifecycle",
+        "@/lib/sessions/replay-order"
+      ],
+      "exportedFunctions": [
+        "SessionReport"
+      ],
+      "apiMethods": [],
+      "clientDirective": true,
+      "serverAction": false,
+      "nextFramework": true,
+      "serverImports": [],
+      "browserRecording": false,
+      "browserStorage": false,
+      "browserLifecycle": false
+    },
+    {
+      "file": "components/rewards/admin-forms.tsx",
+      "sha256": "3e57782b80d5f5af7fe5190eec04bd3ca385f0ae3ddb3dd5979078d2d1a16019",
+      "imports": [
+        "react",
+        "@/app/actions/rewards",
+        "@/lib/settings",
+        "@/components/ui/button"
+      ],
+      "exportedFunctions": [
+        "RewardsAdminForms"
+      ],
+      "apiMethods": [],
+      "clientDirective": true,
+      "serverAction": false,
+      "nextFramework": false,
+      "serverImports": [],
+      "browserRecording": false,
+      "browserStorage": false,
+      "browserLifecycle": false
+    },
+    {
+      "file": "components/rewards/reward-controls.tsx",
+      "sha256": "1a580d45642dd930064d8efc6a89488e8f598d896aa8d73af563c18042f8e45e",
+      "imports": [
+        "react",
+        "next/navigation",
+        "lucide-react",
+        "@/components/ui/button",
+        "@/lib/client/api"
+      ],
+      "exportedFunctions": [
+        "RewardButton"
+      ],
+      "apiMethods": [],
+      "clientDirective": true,
+      "serverAction": false,
+      "nextFramework": true,
+      "serverImports": [],
+      "browserRecording": false,
+      "browserStorage": false,
+      "browserLifecycle": false
+    },
+    {
+      "file": "components/start-session-button.tsx",
+      "sha256": "116835abce9f5fe36309b1e3a3f5d9fbf90847916d864bb82d28b734df5077ae",
+      "imports": [
+        "next/navigation",
+        "react",
+        "@/components/ui/button",
+        "@/components/ui/feedback",
+        "@/lib/client/api",
+        "@/components/disc/rhine-provider"
+      ],
+      "exportedFunctions": [
+        "StartSessionButton"
+      ],
+      "apiMethods": [],
+      "clientDirective": true,
+      "serverAction": false,
+      "nextFramework": true,
+      "serverImports": [],
+      "browserRecording": false,
+      "browserStorage": false,
+      "browserLifecycle": false
+    },
+    {
+      "file": "components/terminal-shortcuts.tsx",
+      "sha256": "ada9d40e2280ac1587574732e6720903a59fc2092292a0da548370ed083f4128",
+      "imports": [
+        "next/link",
+        "lucide-react"
+      ],
+      "exportedFunctions": [
+        "TerminalShortcuts"
+      ],
+      "apiMethods": [],
+      "clientDirective": false,
+      "serverAction": false,
+      "nextFramework": true,
+      "serverImports": [],
+      "browserRecording": false,
+      "browserStorage": false,
+      "browserLifecycle": false
+    },
+    {
+      "file": "components/thoughts/local-recording.tsx",
+      "sha256": "f60cba1bf52236ab92a1728451f04f65fdb736ee8b9f55c89e544dd10aa39ee3",
+      "imports": [
+        "react",
+        "lucide-react",
+        "@/components/ui/button",
+        "@/lib/client/recorder",
+        "@/lib/client/private-session",
+        "@/lib/client/idb"
+      ],
+      "exportedFunctions": [
+        "LocalRecording"
+      ],
+      "apiMethods": [],
+      "clientDirective": true,
+      "serverAction": false,
+      "nextFramework": false,
+      "serverImports": [],
+      "browserRecording": true,
+      "browserStorage": false,
+      "browserLifecycle": true
+    },
+    {
+      "file": "components/thoughts/practice-panel.tsx",
+      "sha256": "a4b4e66ed43623de030723344328f7d6a43c31188b3172f420ca9b91ee3238a7",
+      "imports": [
+        "react",
+        "lucide-react",
+        "./local-recording",
+        "@/components/ui/button",
+        "@/components/ui/form",
+        "@/lib/client/api",
+        "@/lib/thoughts/schema",
+        "@/lib/thoughts/draft",
+        "@/lib/client/use-thought-draft",
+        "@/lib/client/idb"
+      ],
+      "exportedFunctions": [
+        "ThoughtPracticePanel"
+      ],
+      "apiMethods": [],
+      "clientDirective": true,
+      "serverAction": false,
+      "nextFramework": false,
+      "serverImports": [],
+      "browserRecording": false,
+      "browserStorage": false,
+      "browserLifecycle": false
+    },
+    {
+      "file": "components/thoughts/thought-lab.tsx",
+      "sha256": "726956b7b20637bc2326b96c9ccbfe90a19ae5edfa06916affc50ff290211264",
+      "imports": [
+        "next/link",
+        "react",
+        "lucide-react",
+        "@/components/ui/button",
+        "@/components/ui/form",
+        "@/lib/client/api",
+        "@/lib/client/use-navigation-guard",
+        "@/lib/thoughts/schema",
+        "@/lib/utils",
+        "./practice-panel",
+        "@/lib/client/idb",
+        "@/lib/client/use-thought-draft",
+        "@/lib/thoughts/draft"
+      ],
+      "exportedFunctions": [
+        "ThoughtLab"
+      ],
+      "apiMethods": [],
+      "clientDirective": true,
+      "serverAction": false,
+      "nextFramework": true,
+      "serverImports": [],
+      "browserRecording": false,
+      "browserStorage": true,
+      "browserLifecycle": false
+    },
+    {
+      "file": "components/thoughts/vocabulary-bank.tsx",
+      "sha256": "b28630f5ea0694d52f62a151a3091aac3b8c628733cb2dc096371a92078ec187",
+      "imports": [
+        "next/link",
+        "react",
+        "lucide-react",
+        "@/components/ui/button",
+        "@/components/ui/form",
+        "@/lib/client/api",
+        "@/lib/thoughts/schema",
+        "@/lib/utils"
+      ],
+      "exportedFunctions": [
+        "VocabularyBank"
+      ],
+      "apiMethods": [],
+      "clientDirective": true,
+      "serverAction": false,
+      "nextFramework": true,
+      "serverImports": [],
+      "browserRecording": false,
+      "browserStorage": false,
+      "browserLifecycle": false
+    },
+    {
+      "file": "components/ui/badge.tsx",
+      "sha256": "a48e107357f17939eb3d5ceef6fb77602e08c3cdc15e077b421462f66049cb8d",
+      "imports": [
+        "class-variance-authority",
+        "react",
+        "@/lib/utils"
+      ],
+      "exportedFunctions": [
+        "Badge",
+        "DraftBadge"
+      ],
+      "apiMethods": [],
+      "clientDirective": false,
+      "serverAction": false,
+      "nextFramework": false,
+      "serverImports": [],
+      "browserRecording": false,
+      "browserStorage": false,
+      "browserLifecycle": false
+    },
+    {
+      "file": "components/ui/button.tsx",
+      "sha256": "2b1d48486af00ad374623b492711792f2ee03ca4f792bfd58a23e889501ee6a1",
+      "imports": [
+        "class-variance-authority",
+        "next/link",
+        "react",
+        "@/lib/utils"
+      ],
+      "exportedFunctions": [
+        "LinkButton"
+      ],
+      "apiMethods": [],
+      "clientDirective": false,
+      "serverAction": false,
+      "nextFramework": true,
+      "serverImports": [],
+      "browserRecording": false,
+      "browserStorage": false,
+      "browserLifecycle": false
+    },
+    {
+      "file": "components/ui/card.tsx",
+      "sha256": "779892db75f1b37c55736f47ae91a23ffdb568eaec6477fe385942e09a944951",
+      "imports": [
+        "react",
+        "@/lib/utils"
+      ],
+      "exportedFunctions": [
+        "Card",
+        "CardHeader",
+        "CardTitle",
+        "CardDescription",
+        "CardContent",
+        "CardFooter"
+      ],
+      "apiMethods": [],
+      "clientDirective": false,
+      "serverAction": false,
+      "nextFramework": false,
+      "serverImports": [],
+      "browserRecording": false,
+      "browserStorage": false,
+      "browserLifecycle": false
+    },
+    {
+      "file": "components/ui/feedback.tsx",
+      "sha256": "b4a22340b5d27953ee849c3a4ac9c8e572aeb71592f038805e121e0b38ed814f",
+      "imports": [
+        "lucide-react",
+        "react",
+        "@/lib/utils"
+      ],
+      "exportedFunctions": [
+        "Alert",
+        "Spinner",
+        "Progress",
+        "EmptyState"
+      ],
+      "apiMethods": [],
+      "clientDirective": false,
+      "serverAction": false,
+      "nextFramework": false,
+      "serverImports": [],
+      "browserRecording": false,
+      "browserStorage": false,
+      "browserLifecycle": false
+    },
+    {
+      "file": "components/ui/form.tsx",
+      "sha256": "c5defe3fe7624794c1270a8249eb5b25f7cf029c6e854696dad78eb595e506a9",
+      "imports": [
+        "react",
+        "@/lib/utils"
+      ],
+      "exportedFunctions": [
+        "Label",
+        "Field",
+        "Checkbox"
+      ],
+      "apiMethods": [],
+      "clientDirective": false,
+      "serverAction": false,
+      "nextFramework": false,
+      "serverImports": [],
+      "browserRecording": false,
+      "browserStorage": false,
+      "browserLifecycle": false
+    },
+    {
+      "file": "db/schema.ts",
+      "sha256": "3ec184efc598e7142bf1ae87531d57ef4911c0211d8cfb385de64209b50c0ca5",
+      "imports": [
+        "drizzle-orm",
+        "@/lib/sessions/lifecycle",
+        "drizzle-orm/pg-core"
+      ],
+      "exportedFunctions": [],
+      "apiMethods": [],
+      "clientDirective": false,
+      "serverAction": false,
+      "nextFramework": false,
+      "serverImports": [],
+      "browserRecording": false,
+      "browserStorage": false,
+      "browserLifecycle": false
+    },
+    {
+      "file": "lib/ai/account.ts",
+      "sha256": "2a8d924fee2da5a8e59514bb0f83eddbd17b8597b4c28a60d348110816128dc5",
+      "imports": [
+        "drizzle-orm",
+        "@/db/schema",
+        "@/lib/db",
+        "@/lib/env",
+        "@/lib/errors",
+        "@/lib/quota",
+        "@/lib/providers",
+        "@/lib/providers/metered",
+        "@/lib/lock",
+        "@/lib/usage",
+        "./credentials"
+      ],
+      "exportedFunctions": [
+        "usageMonthRange",
+        "getAiAccount",
+        "testPersonalConnection"
+      ],
+      "apiMethods": [],
+      "clientDirective": false,
+      "serverAction": false,
+      "nextFramework": false,
+      "serverImports": [],
+      "browserRecording": false,
+      "browserStorage": false,
+      "browserLifecycle": false
+    },
+    {
+      "file": "lib/ai/catalog.ts",
+      "sha256": "b314764cf0bc32192fc5ac12c53d29e5cf533dd4faff47af8db94a9985898ad4",
+      "imports": [],
+      "exportedFunctions": [
+        "personalPrice"
+      ],
+      "apiMethods": [],
+      "clientDirective": false,
+      "serverAction": false,
+      "nextFramework": false,
+      "serverImports": [],
+      "browserRecording": false,
+      "browserStorage": false,
+      "browserLifecycle": false
+    },
+    {
+      "file": "lib/ai/credentials.ts",
+      "sha256": "7cad1937531510306eb0186ffa1fe5c58ee80ca3ad17f54cc31928f396b1e42c",
+      "imports": [
+        "node:crypto",
+        "drizzle-orm",
+        "zod",
+        "@/db/schema",
+        "@/lib/db",
+        "@/lib/env",
+        "@/lib/errors",
+        "@/lib/lock",
+        "./catalog"
+      ],
+      "exportedFunctions": [
+        "aiSettingsLock",
+        "encryptApiKey",
+        "decryptApiKey",
+        "getAiConfig",
+        "publicAiConfig",
+        "saveAiConfig",
+        "deleteApiKey"
+      ],
+      "apiMethods": [],
+      "clientDirective": false,
+      "serverAction": false,
+      "nextFramework": false,
+      "serverImports": [
+        "node:crypto"
+      ],
+      "browserRecording": false,
+      "browserStorage": false,
+      "browserLifecycle": false
+    },
+    {
+      "file": "lib/ai/runtime.ts",
+      "sha256": "4eadf9cbc84030357f762e6409272838b70561d9ddb2ee37460699fb49e12b5f",
+      "imports": [
+        "@/lib/env",
+        "drizzle-orm",
+        "@/db/schema",
+        "@/lib/db",
+        "@/lib/errors",
+        "@/lib/providers",
+        "@/lib/providers/dashscope",
+        "@/lib/settings",
+        "@/lib/usage",
+        "./catalog",
+        "./credentials"
+      ],
+      "exportedFunctions": [
+        "resolveUserAi",
+        "assertUserAiBudget"
+      ],
+      "apiMethods": [],
+      "clientDirective": false,
+      "serverAction": false,
+      "nextFramework": false,
+      "serverImports": [],
+      "browserRecording": false,
+      "browserStorage": false,
+      "browserLifecycle": false
+    },
+    {
+      "file": "lib/answer-quota.ts",
+      "sha256": "0252a4a96604ad431888291c1d0f6da12bd9e17cb20bd25c6656a8353c48fffe",
+      "imports": [
+        "drizzle-orm",
+        "@/db/schema"
+      ],
+      "exportedFunctions": [
+        "consumedRecordingMs",
+        "pendingRecordingMs",
+        "accountedRecordingMs"
+      ],
+      "apiMethods": [],
+      "clientDirective": false,
+      "serverAction": false,
+      "nextFramework": false,
+      "serverImports": [],
+      "browserRecording": false,
+      "browserStorage": false,
+      "browserLifecycle": false
+    },
+    {
+      "file": "lib/audio.ts",
+      "sha256": "2eef4f018250f70f5fcb5059aad545910dd6449fdb2f0bc1b771ed58c6bf0da3",
+      "imports": [
+        "node:child_process",
+        "node:fs/promises",
+        "node:os",
+        "node:path",
+        "@/lib/env"
+      ],
+      "exportedFunctions": [
+        "detectAudioType",
+        "runProcess",
+        "isFfmpegAvailable",
+        "makeTempDir",
+        "transcodeToWav",
+        "transcodeToMp3",
+        "toExaminerMp3",
+        "wavDurationSec",
+        "parseSilenceDetect",
+        "computeMetrics",
+        "analyzeWav",
+        "makeToneWav",
+        "wrapPcmWav"
+      ],
+      "apiMethods": [],
+      "clientDirective": false,
+      "serverAction": false,
+      "nextFramework": false,
+      "serverImports": [
+        "node:child_process",
+        "node:fs/promises",
+        "node:os",
+        "node:path"
+      ],
+      "browserRecording": false,
+      "browserStorage": false,
+      "browserLifecycle": false
+    },
+    {
+      "file": "lib/auth-client.ts",
+      "sha256": "29c18c027c270e9b83aa6c813ec75e181fefda28acffb895bcb756c5a86f6e2f",
+      "imports": [
+        "better-auth/client/plugins",
+        "better-auth/react"
+      ],
+      "exportedFunctions": [],
+      "apiMethods": [],
+      "clientDirective": true,
+      "serverAction": false,
+      "nextFramework": false,
+      "serverImports": [],
+      "browserRecording": false,
+      "browserStorage": false,
+      "browserLifecycle": false
+    },
+    {
+      "file": "lib/auth-server.ts",
+      "sha256": "e81bf88554c5ceb74164a3fb19a0d173d9c8484966989b3d08ca51b431399714",
+      "imports": [
+        "drizzle-orm",
+        "next/headers",
+        "next/navigation",
+        "next/server",
+        "@/db/schema",
+        "@/lib/auth",
+        "@/lib/db",
+        "@/lib/errors",
+        "@/lib/recovery-state",
+        "@/lib/request-origin"
+      ],
+      "exportedFunctions": [
+        "getCurrentUser",
+        "requireUser",
+        "requireAdmin",
+        "apiUser",
+        "serverTimeHeaders",
+        "json",
+        "handle",
+        "readJson"
+      ],
+      "apiMethods": [],
+      "clientDirective": false,
+      "serverAction": false,
+      "nextFramework": true,
+      "serverImports": [
+        "next/headers",
+        "next/server"
+      ],
+      "browserRecording": false,
+      "browserStorage": false,
+      "browserLifecycle": false
+    },
+    {
+      "file": "lib/auth.ts",
+      "sha256": "12cffa43d9637bc11ac85c15a9f1a87b8d6222dea3732ea2041ffb02168a1656",
+      "imports": [
+        "better-auth",
+        "better-auth/adapters/drizzle",
+        "better-auth/next-js",
+        "better-auth/plugins",
+        "@/db/schema",
+        "@/lib/db",
+        "@/lib/env",
+        "@/lib/request-origin"
+      ],
+      "exportedFunctions": [
+        "getAuth",
+        "createAccount",
+        "resetPassword",
+        "revokeAllSessions",
+        "verifyUserPassword"
+      ],
+      "apiMethods": [],
+      "clientDirective": false,
+      "serverAction": false,
+      "nextFramework": false,
+      "serverImports": [],
+      "browserRecording": false,
+      "browserStorage": false,
+      "browserLifecycle": false
+    },
+    {
+      "file": "lib/backup-maintenance.ts",
+      "sha256": "9bb490d95c722921114b9143f84083a6dc273103dd016dfda04927f0543bd79e",
+      "imports": [
+        "node:fs/promises",
+        "node:path",
+        "node:crypto",
+        "node:os",
+        "@/lib/backup",
+        "@/lib/deletion-log"
+      ],
+      "exportedFunctions": [
+        "withBackupMaintenanceLock",
+        "checkpointDeletionLog",
+        "pruneCompletedBackups",
+        "runBackupMaintenance"
+      ],
+      "apiMethods": [],
+      "clientDirective": false,
+      "serverAction": false,
+      "nextFramework": false,
+      "serverImports": [
+        "node:fs/promises",
+        "node:path",
+        "node:crypto",
+        "node:os"
+      ],
+      "browserRecording": false,
+      "browserStorage": false,
+      "browserLifecycle": false
+    },
+    {
+      "file": "lib/backup.ts",
+      "sha256": "2a9670fabadbf5248ae0549abee948a02f7988692d4a205fe510cc2f41fc2c08",
+      "imports": [
+        "node:fs/promises",
+        "node:fs",
+        "node:path",
+        "node:crypto",
+        "node:child_process",
+        "pg",
+        "zod",
+        "@/lib/deletion-log",
+        "@/lib/recovery-constants"
+      ],
+      "exportedFunctions": [
+        "resolvePgTool",
+        "createBackup",
+        "inspectBackup",
+        "restoreBackup"
+      ],
+      "apiMethods": [],
+      "clientDirective": false,
+      "serverAction": false,
+      "nextFramework": false,
+      "serverImports": [
+        "node:fs/promises",
+        "node:fs",
+        "node:path",
+        "node:crypto",
+        "node:child_process",
+        "pg"
+      ],
+      "browserRecording": false,
+      "browserStorage": false,
+      "browserLifecycle": false
+    },
+    {
+      "file": "lib/client/api.ts",
+      "sha256": "cc0679aa6c177eb4b42f12099b921d9263b2d24e234723b5276e63068e64e92b",
+      "imports": [
+        "@/lib/timing"
+      ],
+      "exportedFunctions": [
+        "clockOffset",
+        "serverNow",
+        "noteServerTime",
+        "api",
+        "randomId"
+      ],
+      "apiMethods": [],
+      "clientDirective": true,
+      "serverAction": false,
+      "nextFramework": false,
+      "serverImports": [],
+      "browserRecording": false,
+      "browserStorage": false,
+      "browserLifecycle": false
+    },
+    {
+      "file": "lib/client/examiner-audio.ts",
+      "sha256": "f1bb064925f0cf6bc2473ed914eeb7792dda8dcfcecf7f5f9f64ac698f80e626",
+      "imports": [],
+      "exportedFunctions": [],
+      "apiMethods": [],
+      "clientDirective": true,
+      "serverAction": false,
+      "nextFramework": false,
+      "serverImports": [],
+      "browserRecording": false,
+      "browserStorage": false,
+      "browserLifecycle": false
+    },
+    {
+      "file": "lib/client/idb.ts",
+      "sha256": "8e827f522788d1e2ed8c1a9772561227f438a1774d236bc7e9f06642dc76c5da",
+      "imports": [
+        "@/lib/thoughts/draft",
+        "@/lib/sessions/lifecycle",
+        "./recording-owner"
+      ],
+      "exportedFunctions": [
+        "isPersistent",
+        "localIdentity",
+        "recordingPermitted",
+        "invalidateLocalMemory",
+        "readLocalIdentity",
+        "activateLocalAccount",
+        "syncLocalRecordingConsent",
+        "endLocalAccount",
+        "saveMeta",
+        "updateMeta",
+        "getMeta",
+        "putChunk",
+        "assertRecordingSnapshotScope",
+        "readRecordingSnapshot",
+        "getBlob",
+        "copyRecordingSnapshot",
+        "listRecordings",
+        "deleteRecording",
+        "purgeExpired",
+        "recordingRecoveryState",
+        "recoverRecording",
+        "discardStoppedRecording",
+        "savePendingPause",
+        "listPendingPauses",
+        "deletePendingPause",
+        "stageRecordingDiscard",
+        "listPendingUploadDiscards",
+        "deletePendingUploadDiscard",
+        "saveThoughtDraft",
+        "isThoughtDeleted",
+        "removeThoughtDrafts",
+        "listThoughtDrafts",
+        "deleteThoughtDraft"
+      ],
+      "apiMethods": [],
+      "clientDirective": true,
+      "serverAction": false,
+      "nextFramework": false,
+      "serverImports": [],
+      "browserRecording": false,
+      "browserStorage": true,
+      "browserLifecycle": true
+    },
+    {
+      "file": "lib/client/practice-location.ts",
+      "sha256": "6078de1a5186647886f06e23be74406db9e1b1fe55dfd724d86ca52ccc95b771",
+      "imports": [],
+      "exportedFunctions": [
+        "practiceHref"
+      ],
+      "apiMethods": [],
+      "clientDirective": false,
+      "serverAction": false,
+      "nextFramework": false,
+      "serverImports": [],
+      "browserRecording": false,
+      "browserStorage": false,
+      "browserLifecycle": false
+    },
+    {
+      "file": "lib/client/private-session.ts",
+      "sha256": "3943895103ad3fc387c855cd77d9a4900c556252056e8425b6e26af5067e4064",
+      "imports": [
+        "./idb",
+        "./uploader"
+      ],
+      "exportedFunctions": [
+        "isSigningOut",
+        "announcePrivateSession",
+        "stopPrivateWork",
+        "stopRecordingWork",
+        "syncRecordingConsent",
+        "announceConsentWithdrawal",
+        "clearPrivateSession",
+        "signOutPrivateSession"
+      ],
+      "apiMethods": [],
+      "clientDirective": true,
+      "serverAction": false,
+      "nextFramework": false,
+      "serverImports": [],
+      "browserRecording": false,
+      "browserStorage": true,
+      "browserLifecycle": false
+    },
+    {
+      "file": "lib/client/recorder.ts",
+      "sha256": "146fa7eed495a039a91ebef37bfa5224ecc0fc4d76091262888916ed5b75247d",
+      "imports": [
+        "./idb",
+        "./private-session",
+        "./recording-owner"
+      ],
+      "exportedFunctions": [
+        "pickMimeType",
+        "mapMicError",
+        "savedDeviceId"
+      ],
+      "apiMethods": [],
+      "clientDirective": true,
+      "serverAction": false,
+      "nextFramework": false,
+      "serverImports": [],
+      "browserRecording": true,
+      "browserStorage": true,
+      "browserLifecycle": false
+    },
+    {
+      "file": "lib/client/recording-download.ts",
+      "sha256": "13bbfab95894fe791675a80e1fbeed4a01cf094092730175db0e328010fee29c",
+      "imports": [
+        "./idb",
+        "./private-session"
+      ],
+      "exportedFunctions": [
+        "downloadRecordingAudio",
+        "downloadRecordingBackup"
+      ],
+      "apiMethods": [],
+      "clientDirective": true,
+      "serverAction": false,
+      "nextFramework": false,
+      "serverImports": [],
+      "browserRecording": false,
+      "browserStorage": false,
+      "browserLifecycle": false
+    },
+    {
+      "file": "lib/client/recording-owner.ts",
+      "sha256": "55afd1ecb52d6ab66e396ec36b50eaf33ea18e83c1c91a0abd1da5c474a50aac",
+      "imports": [],
+      "exportedFunctions": [
+        "holdRecording",
+        "withStoppedRecording"
+      ],
+      "apiMethods": [],
+      "clientDirective": true,
+      "serverAction": false,
+      "nextFramework": false,
+      "serverImports": [],
+      "browserRecording": false,
+      "browserStorage": false,
+      "browserLifecycle": true
+    },
+    {
+      "file": "lib/client/retained-upload.ts",
+      "sha256": "2e41219278801d64665fc19af00689681b080f68ead36512bc06d972991d4f95",
+      "imports": [
+        "./api",
+        "./idb",
+        "./recording-owner",
+        "./session-pause",
+        "@/lib/sessions/lifecycle"
+      ],
+      "exportedFunctions": [
+        "prepareRetainedUpload"
+      ],
+      "apiMethods": [],
+      "clientDirective": true,
+      "serverAction": false,
+      "nextFramework": false,
+      "serverImports": [],
+      "browserRecording": false,
+      "browserStorage": false,
+      "browserLifecycle": false
+    },
+    {
+      "file": "lib/client/session-pause.ts",
+      "sha256": "b919dab92eb20012b2afc7353362046635747e621130a6740f18d065e12fe516",
+      "imports": [
+        "./api",
+        "./idb"
+      ],
+      "exportedFunctions": [
+        "announceSessionState",
+        "requestSessionPause",
+        "flushPendingPauses"
+      ],
+      "apiMethods": [],
+      "clientDirective": true,
+      "serverAction": false,
+      "nextFramework": false,
+      "serverImports": [],
+      "browserRecording": false,
+      "browserStorage": true,
+      "browserLifecycle": false
+    },
+    {
+      "file": "lib/client/terminal-entry-timing.ts",
+      "sha256": "ff5bb9f5a4bde2fa4bb5008d028974cd52accfc64e1ce0db5d8babfbabc50082",
+      "imports": [],
+      "exportedFunctions": [],
+      "apiMethods": [],
+      "clientDirective": false,
+      "serverAction": false,
+      "nextFramework": false,
+      "serverImports": [],
+      "browserRecording": false,
+      "browserStorage": false,
+      "browserLifecycle": false
+    },
+    {
+      "file": "lib/client/upload-discard.ts",
+      "sha256": "ef364d7116ed548d385cdc29c7645fdd8c201800954e49eec6ef18b1447febfa",
+      "imports": [
+        "./api",
+        "./idb",
+        "./private-session",
+        "./session-pause"
+      ],
+      "exportedFunctions": [
+        "requestUploadDiscard",
+        "flushPendingUploadDiscards"
+      ],
+      "apiMethods": [],
+      "clientDirective": true,
+      "serverAction": false,
+      "nextFramework": false,
+      "serverImports": [],
+      "browserRecording": false,
+      "browserStorage": false,
+      "browserLifecycle": false
+    },
+    {
+      "file": "lib/client/uploader.ts",
+      "sha256": "9d40fdac4cb2032308aaaeecc6b0f9a736f7eac02792b2bc651c499ab07e4f9c",
+      "imports": [
+        "./api",
+        "./idb",
+        "./retained-upload"
+      ],
+      "exportedFunctions": [],
+      "apiMethods": [],
+      "clientDirective": true,
+      "serverAction": false,
+      "nextFramework": false,
+      "serverImports": [],
+      "browserRecording": false,
+      "browserStorage": false,
+      "browserLifecycle": false
+    },
+    {
+      "file": "lib/client/use-navigation-guard.ts",
+      "sha256": "cbfccdf03d53a64aece46cf344a52a3bcdc2bad50ed1f5496766011000e9100e",
+      "imports": [
+        "react",
+        "./private-session"
+      ],
+      "exportedFunctions": [
+        "useNavigationGuard"
+      ],
+      "apiMethods": [],
+      "clientDirective": true,
+      "serverAction": false,
+      "nextFramework": false,
+      "serverImports": [],
+      "browserRecording": false,
+      "browserStorage": false,
+      "browserLifecycle": true
+    },
+    {
+      "file": "lib/client/use-thought-draft.ts",
+      "sha256": "1455db3efdec418ef30521a4c594c68ae22876bf903ffbdbb7f5d4e8f7adbcfc",
+      "imports": [
+        "react",
+        "./idb",
+        "@/lib/thoughts/draft"
+      ],
+      "exportedFunctions": [
+        "useThoughtDraft"
+      ],
+      "apiMethods": [],
+      "clientDirective": true,
+      "serverAction": false,
+      "nextFramework": false,
+      "serverImports": [],
+      "browserRecording": false,
+      "browserStorage": false,
+      "browserLifecycle": false
+    },
+    {
+      "file": "lib/client/wake-lock.ts",
+      "sha256": "3c64cba4d08cec623a4a5346f96b51cabd3f96d1abe6c738aa09b11e29c7025d",
+      "imports": [],
+      "exportedFunctions": [],
+      "apiMethods": [],
+      "clientDirective": true,
+      "serverAction": false,
+      "nextFramework": false,
+      "serverImports": [],
+      "browserRecording": false,
+      "browserStorage": false,
+      "browserLifecycle": true
+    },
+    {
+      "file": "lib/content/load.ts",
+      "sha256": "e121bcbe471cde3674c0bb06e7a36ccf5a8deced44845ce46d3aeb0f8b49ed1a",
+      "imports": [
+        "node:fs",
+        "node:path",
+        "./types",
+        "zod"
+      ],
+      "exportedFunctions": [
+        "normalizeContent",
+        "loadContent",
+        "getChapter",
+        "getPhrases"
+      ],
+      "apiMethods": [],
+      "clientDirective": false,
+      "serverAction": false,
+      "nextFramework": false,
+      "serverImports": [
+        "node:fs",
+        "node:path"
+      ],
+      "browserRecording": false,
+      "browserStorage": false,
+      "browserLifecycle": false
+    },
+    {
+      "file": "lib/content/types.ts",
+      "sha256": "9f607e92a25a71d5750b86d6181235f2968e555ad9a7f2cd5f9aa153e57af665",
+      "imports": [
+        "zod"
+      ],
+      "exportedFunctions": [],
+      "apiMethods": [],
+      "clientDirective": false,
+      "serverAction": false,
+      "nextFramework": false,
+      "serverImports": [],
+      "browserRecording": false,
+      "browserStorage": false,
+      "browserLifecycle": false
+    },
+    {
+      "file": "lib/content/validate.ts",
+      "sha256": "b5f0226bb673e0c3c966f6a8058cd1d337adab0f04daf0ca017e4368592a5352",
+      "imports": [
+        "./load",
+        "./types"
+      ],
+      "exportedFunctions": [
+        "checkIntegrity"
+      ],
+      "apiMethods": [],
+      "clientDirective": false,
+      "serverAction": false,
+      "nextFramework": false,
+      "serverImports": [],
+      "browserRecording": false,
+      "browserStorage": false,
+      "browserLifecycle": false
+    },
+    {
+      "file": "lib/db.ts",
+      "sha256": "73f7fef132f14590a370d0f1617e784b987217cb91a37a298f25542bed35cf19",
+      "imports": [
+        "drizzle-orm/node-postgres",
+        "pg",
+        "@/db/schema",
+        "@/lib/env",
+        "@/lib/task-context"
+      ],
+      "exportedFunctions": [
+        "getPool",
+        "getDb",
+        "closeDb"
+      ],
+      "apiMethods": [],
+      "clientDirective": false,
+      "serverAction": false,
+      "nextFramework": false,
+      "serverImports": [
+        "pg"
+      ],
+      "browserRecording": false,
+      "browserStorage": false,
+      "browserLifecycle": false
+    },
+    {
+      "file": "lib/deletion-log.ts",
+      "sha256": "0f45464c50ca8bdb94bb6ab85c11f65c6b52cd60a39a8fb51f48f0fd9618d205",
+      "imports": [
+        "zod"
+      ],
+      "exportedFunctions": [
+        "parseDeletionLog",
+        "mergeDeletionLogs"
+      ],
+      "apiMethods": [],
+      "clientDirective": false,
+      "serverAction": false,
+      "nextFramework": false,
+      "serverImports": [],
+      "browserRecording": false,
+      "browserStorage": false,
+      "browserLifecycle": false
+    },
+    {
+      "file": "lib/env.ts",
+      "sha256": "10c6aaea53e508e775ee9ea9e6cf20e3538a8888f4b700f797aed475a1850d65",
+      "imports": [
+        "node:path",
+        "node:fs",
+        "zod",
+        "@/lib/errors"
+      ],
+      "exportedFunctions": [
+        "env",
+        "resetEnvCache",
+        "isMockProvider",
+        "timeScale",
+        "dataDir",
+        "authSecret"
+      ],
+      "apiMethods": [],
+      "clientDirective": false,
+      "serverAction": false,
+      "nextFramework": false,
+      "serverImports": [
+        "node:path",
+        "node:fs"
+      ],
+      "browserRecording": false,
+      "browserStorage": false,
+      "browserLifecycle": false
+    },
+    {
+      "file": "lib/errors.ts",
+      "sha256": "b7f31932accc1844c893cd4436a9e12ab8ccb68f080460e5fba58c765ba0f0a3",
+      "imports": [],
+      "exportedFunctions": [],
+      "apiMethods": [],
+      "clientDirective": false,
+      "serverAction": false,
+      "nextFramework": false,
+      "serverImports": [],
+      "browserRecording": false,
+      "browserStorage": false,
+      "browserLifecycle": false
+    },
+    {
+      "file": "lib/evaluation/asr.ts",
+      "sha256": "71349609979c544247809c381535fa11452141477b5558dca898c2b091f813d8",
+      "imports": [],
+      "exportedFunctions": [
+        "words",
+        "wordErrorRate"
+      ],
+      "apiMethods": [],
+      "clientDirective": false,
+      "serverAction": false,
+      "nextFramework": false,
+      "serverImports": [],
+      "browserRecording": false,
+      "browserStorage": false,
+      "browserLifecycle": false
+    },
+    {
+      "file": "lib/feedback/prompt.ts",
+      "sha256": "a32fd74a12c6052622e74a38f0d317bd76c0edf8aa0fabcfbd50bf8cda6afb8f",
+      "imports": [],
+      "exportedFunctions": [
+        "wrapAnswer",
+        "buildFeedbackMessages",
+        "buildFollowUpMessages"
+      ],
+      "apiMethods": [],
+      "clientDirective": false,
+      "serverAction": false,
+      "nextFramework": false,
+      "serverImports": [],
+      "browserRecording": false,
+      "browserStorage": false,
+      "browserLifecycle": false
+    },
+    {
+      "file": "lib/feedback/schema.ts",
+      "sha256": "c9f8a996bc6c4a79ed9de6e80af3cd7dc43806aef6c8b6d1a6a89804d1aa3fa9",
+      "imports": [
+        "zod"
+      ],
+      "exportedFunctions": [],
+      "apiMethods": [],
+      "clientDirective": false,
+      "serverAction": false,
+      "nextFramework": false,
+      "serverImports": [],
+      "browserRecording": false,
+      "browserStorage": false,
+      "browserLifecycle": false
+    },
+    {
+      "file": "lib/feedback/validate.ts",
+      "sha256": "4738d6a231824e61153999621da336c81a5185c03499288d4bd50b06aea37c62",
+      "imports": [
+        "./schema"
+      ],
+      "exportedFunctions": [
+        "normalizeForEvidence",
+        "isEvidenceInTranscript",
+        "countWords",
+        "validateFeedback",
+        "validateFollowUpChoice"
+      ],
+      "apiMethods": [],
+      "clientDirective": false,
+      "serverAction": false,
+      "nextFramework": false,
+      "serverImports": [],
+      "browserRecording": false,
+      "browserStorage": false,
+      "browserLifecycle": false
+    },
+    {
+      "file": "lib/ios/ports.ts",
+      "sha256": "cd0a0a08f0e5977ca74053c167da95c5d6976212f5ce6d0fb8c5fc42a30bcd0c",
+      "imports": [],
+      "exportedFunctions": [],
+      "apiMethods": [],
+      "clientDirective": false,
+      "serverAction": false,
+      "nextFramework": false,
+      "serverImports": [],
+      "browserRecording": false,
+      "browserStorage": false,
+      "browserLifecycle": false
+    },
+    {
+      "file": "lib/jobs/maintenance.ts",
+      "sha256": "6c5c355372f63b25b7dc95064938f294e35cbfb97ea3239c7bdfa8bb91be3730",
+      "imports": [
+        "drizzle-orm",
+        "@/db/schema",
+        "@/lib/db",
+        "@/lib/ops",
+        "@/lib/queue",
+        "@/lib/services/deletion",
+        "@/lib/services/sessions",
+        "@/lib/settings"
+      ],
+      "exportedFunctions": [
+        "hourlyMaintenance",
+        "dailyMaintenance"
+      ],
+      "apiMethods": [],
+      "clientDirective": false,
+      "serverAction": false,
+      "nextFramework": false,
+      "serverImports": [],
+      "browserRecording": false,
+      "browserStorage": false,
+      "browserLifecycle": false
+    },
+    {
+      "file": "lib/jobs/process-answer.ts",
+      "sha256": "4636b1d586c0b73a140536e6f1fccc10cbc79ad3cd4198e8b9b602cbabdc3fd9",
+      "imports": [
+        "node:fs/promises",
+        "node:path",
+        "drizzle-orm",
+        "@/db/schema",
+        "@/lib/audio",
+        "@/lib/content/types",
+        "@/lib/db",
+        "@/lib/env",
+        "@/lib/feedback/prompt",
+        "@/lib/feedback/validate",
+        "@/lib/ops",
+        "@/lib/providers",
+        "@/lib/services/outcome",
+        "@/lib/sessions/plan",
+        "@/lib/storage",
+        "@/lib/timing",
+        "@/lib/providers/metered",
+        "@/lib/errors",
+        "@/lib/ai/credentials",
+        "@/lib/ai/runtime",
+        "@/lib/services/recording-consent",
+        "@/lib/quota"
+      ],
+      "exportedFunctions": [
+        "processAnswer"
+      ],
+      "apiMethods": [],
+      "clientDirective": false,
+      "serverAction": false,
+      "nextFramework": false,
+      "serverImports": [
+        "node:fs/promises",
+        "node:path"
+      ],
+      "browserRecording": false,
+      "browserStorage": false,
+      "browserLifecycle": false
+    },
+    {
+      "file": "lib/lock.ts",
+      "sha256": "e598761c74ae0b8fb895608aceb9abb6cd721b99de064112bc427c532346edc1",
+      "imports": [
+        "pg",
+        "node:async_hooks",
+        "@/lib/env"
+      ],
+      "exportedFunctions": [
+        "withLock",
+        "withLocks"
+      ],
+      "apiMethods": [],
+      "clientDirective": false,
+      "serverAction": false,
+      "nextFramework": false,
+      "serverImports": [
+        "pg",
+        "node:async_hooks"
+      ],
+      "browserRecording": false,
+      "browserStorage": false,
+      "browserLifecycle": false
+    },
+    {
+      "file": "lib/ops.ts",
+      "sha256": "49b6d836f95386e73afb098cf850383f74b7a8380d2ed06c8518b7f886c97746",
+      "imports": [
+        "@/db/schema",
+        "@/lib/db"
+      ],
+      "exportedFunctions": [
+        "logOps"
+      ],
+      "apiMethods": [],
+      "clientDirective": false,
+      "serverAction": false,
+      "nextFramework": false,
+      "serverImports": [],
+      "browserRecording": false,
+      "browserStorage": false,
+      "browserLifecycle": false
+    },
+    {
+      "file": "lib/providers/dashscope.ts",
+      "sha256": "78517558b149dd8c4b240a489223bed7a6245e702923fc155d054a1f446abcfd",
+      "imports": [
+        "@/lib/env",
+        "./types",
+        "./types"
+      ],
+      "exportedFunctions": [
+        "createDashscopeProviders"
+      ],
+      "apiMethods": [],
+      "clientDirective": false,
+      "serverAction": false,
+      "nextFramework": false,
+      "serverImports": [],
+      "browserRecording": false,
+      "browserStorage": false,
+      "browserLifecycle": false
+    },
+    {
+      "file": "lib/providers/index.ts",
+      "sha256": "c889511a862a4ccefaaa49d334db7a5d70d899d4ba9bc1811df1e0328a61a9f3",
+      "imports": [
+        "@/lib/env",
+        "./dashscope",
+        "./mock",
+        "./natural-tts",
+        "./types"
+      ],
+      "exportedFunctions": [
+        "providers",
+        "setProvidersForTest"
+      ],
+      "apiMethods": [],
+      "clientDirective": false,
+      "serverAction": false,
+      "nextFramework": false,
+      "serverImports": [],
+      "browserRecording": false,
+      "browserStorage": false,
+      "browserLifecycle": false
+    },
+    {
+      "file": "lib/providers/metered.ts",
+      "sha256": "43058e06fce6995359a5d85fb5496eb40327f392e05c793b8f060f27e6e2535b",
+      "imports": [
+        "@/lib/env",
+        "@/lib/usage",
+        "./index",
+        "./types",
+        "@/lib/ai/runtime"
+      ],
+      "exportedFunctions": [
+        "metered"
+      ],
+      "apiMethods": [],
+      "clientDirective": false,
+      "serverAction": false,
+      "nextFramework": false,
+      "serverImports": [],
+      "browserRecording": false,
+      "browserStorage": false,
+      "browserLifecycle": false
+    },
+    {
+      "file": "lib/providers/mock.ts",
+      "sha256": "ce2cf01b831cedb5f32707eceb7b1d4d672b29fbb77021dd6f552f5f27677e1e",
+      "imports": [
+        "node:fs/promises",
+        "node:path",
+        "@/lib/audio",
+        "@/lib/env",
+        "@/lib/feedback/validate",
+        "@/lib/thoughts/prompt",
+        "./types"
+      ],
+      "exportedFunctions": [
+        "mockTranscript",
+        "mockFeedbackJson",
+        "createMockProviders"
+      ],
+      "apiMethods": [],
+      "clientDirective": false,
+      "serverAction": false,
+      "nextFramework": false,
+      "serverImports": [
+        "node:fs/promises",
+        "node:path"
+      ],
+      "browserRecording": false,
+      "browserStorage": false,
+      "browserLifecycle": false
+    },
+    {
+      "file": "lib/providers/natural-tts.ts",
+      "sha256": "5621f8d1ff2125e70e0cc001e92a01ac2784969216fbf8a7632d9ed631165ab0",
+      "imports": [
+        "node:path",
+        "kokoro-js",
+        "@/lib/env",
+        "./types",
+        "./natural-voice-cache"
+      ],
+      "exportedFunctions": [
+        "naturalVoiceIdentity",
+        "prepareNaturalVoice",
+        "speechChunks",
+        "naturalTts",
+        "disposeNaturalVoice"
+      ],
+      "apiMethods": [],
+      "clientDirective": false,
+      "serverAction": false,
+      "nextFramework": false,
+      "serverImports": [
+        "node:path"
+      ],
+      "browserRecording": false,
+      "browserStorage": false,
+      "browserLifecycle": false
+    },
+    {
+      "file": "lib/providers/natural-voice-cache.ts",
+      "sha256": "d7565b5f835e758ecbd9031652c6601e4133e45728c69f713eb404f28924fe1d",
+      "imports": [
+        "node:fs/promises",
+        "node:path",
+        "node:fs",
+        "node:crypto"
+      ],
+      "exportedFunctions": [
+        "ensureNaturalVoiceCache"
+      ],
+      "apiMethods": [],
+      "clientDirective": false,
+      "serverAction": false,
+      "nextFramework": false,
+      "serverImports": [
+        "node:fs/promises",
+        "node:path",
+        "node:fs",
+        "node:crypto"
+      ],
+      "browserRecording": false,
+      "browserStorage": false,
+      "browserLifecycle": false
+    },
+    {
+      "file": "lib/providers/types.ts",
+      "sha256": "e4ca92d86ef3176982c1263cceb8783dc6af4da228859ccd81ba5247fa5d92f6",
+      "imports": [],
+      "exportedFunctions": [],
+      "apiMethods": [],
+      "clientDirective": false,
+      "serverAction": false,
+      "nextFramework": false,
+      "serverImports": [],
+      "browserRecording": false,
+      "browserStorage": false,
+      "browserLifecycle": false
+    },
+    {
+      "file": "lib/queue.ts",
+      "sha256": "e8efcb3850e16e9e3e9dffe5a818821eaf42d7c0adeba5c837ac012679546957",
+      "imports": [
+        "pg-boss",
+        "@/lib/env",
+        "@/lib/task-runtime",
+        "@/lib/task-schema"
+      ],
+      "exportedFunctions": [
+        "taskQueueName",
+        "getBoss",
+        "enqueue",
+        "stopBoss"
+      ],
+      "apiMethods": [],
+      "clientDirective": false,
+      "serverAction": false,
+      "nextFramework": false,
+      "serverImports": [
+        "pg-boss"
+      ],
+      "browserRecording": false,
+      "browserStorage": false,
+      "browserLifecycle": false
+    },
+    {
+      "file": "lib/quota.ts",
+      "sha256": "a5e332362032e4980ec079b5cb387f7db500696cfdacf9fc24e1252dc2d34e0f",
+      "imports": [
+        "drizzle-orm",
+        "@/db/schema",
+        "@/lib/db",
+        "@/lib/services/rewards",
+        "@/lib/errors",
+        "@/lib/settings",
+        "@/lib/timing",
+        "@/lib/ai/runtime",
+        "@/lib/answer-quota"
+      ],
+      "exportedFunctions": [
+        "computeDailyUsage",
+        "quotaFrom",
+        "dailyUsageSeconds",
+        "userDailyLimitSeconds",
+        "getQuotaStatus",
+        "settleQuotaHolds",
+        "reconcileAnswerQuota",
+        "assertCoveredQuota",
+        "reserveSessionQuota",
+        "activeSessionCount",
+        "assertCanStartSession"
+      ],
+      "apiMethods": [],
+      "clientDirective": false,
+      "serverAction": false,
+      "nextFramework": false,
+      "serverImports": [],
+      "browserRecording": false,
+      "browserStorage": false,
+      "browserLifecycle": false
+    },
+    {
+      "file": "lib/recovery-constants.ts",
+      "sha256": "bdb2ce51f8dc93af6c231721aaa09f74052964f1e1328d5a5a9022d4e14cf51e",
+      "imports": [],
+      "exportedFunctions": [],
+      "apiMethods": [],
+      "clientDirective": false,
+      "serverAction": false,
+      "nextFramework": false,
+      "serverImports": [],
+      "browserRecording": false,
+      "browserStorage": false,
+      "browserLifecycle": false
+    },
+    {
+      "file": "lib/recovery-state.ts",
+      "sha256": "2d65339cc63990cc3c112ec3a62fe403e063cdee9fdcc86b555aed3e2ecb6394",
+      "imports": [
+        "drizzle-orm",
+        "@/db/schema",
+        "@/lib/db",
+        "@/lib/env",
+        "@/lib/errors",
+        "@/lib/recovery-constants"
+      ],
+      "exportedFunctions": [
+        "assertRecoveryReady"
+      ],
+      "apiMethods": [],
+      "clientDirective": false,
+      "serverAction": false,
+      "nextFramework": false,
+      "serverImports": [],
+      "browserRecording": false,
+      "browserStorage": false,
+      "browserLifecycle": false
+    },
+    {
+      "file": "lib/request-origin.ts",
+      "sha256": "e1b23f30a1c3829d382544c20cd361aceb04b21dc542061fa0e96715ea5eac25",
+      "imports": [
+        "@/lib/errors",
+        "@/lib/env"
+      ],
+      "exportedFunctions": [
+        "trustedRequestOrigins",
+        "assertRequestOrigin"
+      ],
+      "apiMethods": [],
+      "clientDirective": false,
+      "serverAction": false,
+      "nextFramework": false,
+      "serverImports": [],
+      "browserRecording": false,
+      "browserStorage": false,
+      "browserLifecycle": false
+    },
+    {
+      "file": "lib/restore-review.ts",
+      "sha256": "2127ac7a759579211fde8c2e4c1d297670a44cf6cdd3df7fcacdff273d0847e7",
+      "imports": [
+        "node:fs/promises",
+        "node:path",
+        "node:crypto",
+        "pg",
+        "better-auth/crypto",
+        "zod",
+        "@/lib/recovery-constants"
+      ],
+      "exportedFunctions": [
+        "initializeRestoreReview",
+        "exportRecoveryLedger",
+        "prepareRestoreReview",
+        "approveRestoreReview"
+      ],
+      "apiMethods": [],
+      "clientDirective": false,
+      "serverAction": false,
+      "nextFramework": false,
+      "serverImports": [
+        "node:fs/promises",
+        "node:path",
+        "node:crypto",
+        "pg"
+      ],
+      "browserRecording": false,
+      "browserStorage": false,
+      "browserLifecycle": false
+    },
+    {
+      "file": "lib/services/admin.ts",
+      "sha256": "71e703027fa5bf41871d3651e56bf5d81d59063602893c1f2bbe381c06dca556",
+      "imports": [
+        "drizzle-orm",
+        "@/db/schema",
+        "@/lib/db",
+        "@/lib/env",
+        "@/lib/providers",
+        "@/lib/queue",
+        "@/lib/quota",
+        "@/lib/settings",
+        "@/lib/timing",
+        "@/lib/usage",
+        "@/lib/worker-health"
+      ],
+      "exportedFunctions": [
+        "serviceStatus",
+        "usageOverview",
+        "trialMetrics",
+        "listUsers",
+        "userAnswersForAdmin",
+        "listQuestionVersions"
+      ],
+      "apiMethods": [],
+      "clientDirective": false,
+      "serverAction": false,
+      "nextFramework": false,
+      "serverImports": [],
+      "browserRecording": false,
+      "browserStorage": false,
+      "browserLifecycle": false
+    },
+    {
+      "file": "lib/services/answers.ts",
+      "sha256": "fd83df0b96f2615d1d68764053566bbadb66376783434822bc8d4075537be355",
+      "imports": [
+        "node:crypto",
+        "drizzle-orm",
+        "@/db/schema",
+        "@/lib/audio",
+        "@/lib/content/types",
+        "@/lib/db",
+        "@/lib/env",
+        "@/lib/errors",
+        "@/lib/queue",
+        "@/lib/services/sessions",
+        "@/lib/sessions/plan",
+        "@/lib/storage",
+        "@/lib/timing",
+        "@/db/schema",
+        "@/lib/quota",
+        "@/lib/timing",
+        "@/lib/ai/runtime",
+        "@/lib/services/recording-consent",
+        "@/lib/answer-quota",
+        "@/lib/services/rewards",
+        "@/lib/lock",
+        "@/lib/sessions/recording-source"
+      ],
+      "exportedFunctions": [
+        "signUploadTicket",
+        "verifyUploadTicket",
+        "createUploadTicket",
+        "discardPendingUpload",
+        "receiveAudio",
+        "submitAnswer",
+        "getAnswerDetail",
+        "publicAnswer",
+        "submitCorrection",
+        "retryProcessing",
+        "getAnswerAudio",
+        "addRetryItem",
+        "removeRetryItem",
+        "answerHistory"
+      ],
+      "apiMethods": [],
+      "clientDirective": false,
+      "serverAction": false,
+      "nextFramework": false,
+      "serverImports": [
+        "node:crypto"
+      ],
+      "browserRecording": false,
+      "browserStorage": false,
+      "browserLifecycle": false
+    },
+    {
+      "file": "lib/services/content.ts",
+      "sha256": "24cf53a7f70141df5e82f55569ba722cc3a366e13434263eee2164759ccc75a2",
+      "imports": [
+        "node:crypto",
+        "drizzle-orm",
+        "zod",
+        "@/db/schema",
+        "@/lib/content/load",
+        "@/lib/content/types",
+        "@/lib/db",
+        "@/lib/env",
+        "@/lib/errors",
+        "@/lib/sessions/plan"
+      ],
+      "exportedFunctions": [
+        "contentHash",
+        "publishedVersions",
+        "requirePublished",
+        "upsertQuestions",
+        "parseImportPayload",
+        "setReviewStatus",
+        "setPublished",
+        "syncLevelsAndMocks",
+        "listLevels",
+        "levelAvailability",
+        "listPublishedQuestions",
+        "questionStats"
+      ],
+      "apiMethods": [],
+      "clientDirective": false,
+      "serverAction": false,
+      "nextFramework": false,
+      "serverImports": [
+        "node:crypto"
+      ],
+      "browserRecording": false,
+      "browserStorage": false,
+      "browserLifecycle": false
+    },
+    {
+      "file": "lib/services/deletion.ts",
+      "sha256": "e50b3404b3354fa794e72ca8bf2027b685544c3e0eb5fa8d67efa1c81448b5d4",
+      "imports": [
+        "node:fs/promises",
+        "node:path",
+        "node:crypto",
+        "drizzle-orm",
+        "@/db/schema",
+        "@/lib/db",
+        "@/lib/env",
+        "@/lib/errors",
+        "@/lib/ops",
+        "@/lib/queue",
+        "@/lib/auth",
+        "@/lib/storage",
+        "@/lib/quota",
+        "@/lib/services/rewards",
+        "@/lib/deletion-log",
+        "@/lib/answer-quota",
+        "@/lib/lock"
+      ],
+      "exportedFunctions": [
+        "appendDeletionLog",
+        "readDeletionLog",
+        "deleteSession",
+        "purgeSession",
+        "deleteUserAccount",
+        "purgeUser",
+        "replayDeletions",
+        "dailyCleanup"
+      ],
+      "apiMethods": [],
+      "clientDirective": false,
+      "serverAction": false,
+      "nextFramework": false,
+      "serverImports": [
+        "node:fs/promises",
+        "node:path",
+        "node:crypto"
+      ],
+      "browserRecording": false,
+      "browserStorage": false,
+      "browserLifecycle": false
+    },
+    {
+      "file": "lib/services/growth.ts",
+      "sha256": "2179fe8597bd6ee595e129c70da90f4e0181d3f684d7fb11616b4abdf2525acc",
+      "imports": [
+        "drizzle-orm",
+        "@/db/schema",
+        "@/lib/db",
+        "@/lib/services/rewards",
+        "@/lib/sessions/plan"
+      ],
+      "exportedFunctions": [
+        "getGrowth"
+      ],
+      "apiMethods": [],
+      "clientDirective": false,
+      "serverAction": false,
+      "nextFramework": false,
+      "serverImports": [],
+      "browserRecording": false,
+      "browserStorage": false,
+      "browserLifecycle": false
+    },
+    {
+      "file": "lib/services/invites.ts",
+      "sha256": "9ec437514b1d15ade2bdd4ae267a8d0eb2f444172bb372e57cbc553b567f9abb",
+      "imports": [
+        "node:crypto",
+        "drizzle-orm",
+        "@/db/schema",
+        "@/lib/auth",
+        "@/lib/db",
+        "@/lib/errors"
+      ],
+      "exportedFunctions": [
+        "createInvite",
+        "listInvites",
+        "revokeInvite",
+        "limitSignup",
+        "registerWithInvite"
+      ],
+      "apiMethods": [],
+      "clientDirective": false,
+      "serverAction": false,
+      "nextFramework": false,
+      "serverImports": [
+        "node:crypto"
+      ],
+      "browserRecording": false,
+      "browserStorage": false,
+      "browserLifecycle": false
+    },
+    {
+      "file": "lib/services/mock-selection.ts",
+      "sha256": "e600271ca1c759d5c3bc8d680122bd5c7f459bd42066414991251d9ee602b031",
+      "imports": [
+        "drizzle-orm",
+        "@/db/schema",
+        "@/lib/db",
+        "./content"
+      ],
+      "exportedFunctions": [
+        "getMockCatalog"
+      ],
+      "apiMethods": [],
+      "clientDirective": false,
+      "serverAction": false,
+      "nextFramework": false,
+      "serverImports": [],
+      "browserRecording": false,
+      "browserStorage": false,
+      "browserLifecycle": false
+    },
+    {
+      "file": "lib/services/outcome.ts",
+      "sha256": "24f925014a869bfd0b0a431ff24a30487360ce0178a872150f2b81fb9e01a876",
+      "imports": [
+        "drizzle-orm",
+        "@/db/schema",
+        "@/lib/db",
+        "@/lib/sessions/plan",
+        "@/lib/services/rewards",
+        "@/lib/services/reviews"
+      ],
+      "exportedFunctions": [
+        "summarize",
+        "recomputeSessionOutcome"
+      ],
+      "apiMethods": [],
+      "clientDirective": false,
+      "serverAction": false,
+      "nextFramework": false,
+      "serverImports": [],
+      "browserRecording": false,
+      "browserStorage": false,
+      "browserLifecycle": false
+    },
+    {
+      "file": "lib/services/recording-consent.ts",
+      "sha256": "541227b757e776e363c3d1a119c622a301d21840a9f1cb39130b43ba2d246266",
+      "imports": [
+        "drizzle-orm",
+        "@/db/schema",
+        "@/lib/db",
+        "@/lib/errors",
+        "@/lib/lock",
+        "@/lib/quota"
+      ],
+      "exportedFunctions": [
+        "recordingConsent",
+        "assertRecordingConsent",
+        "withRecordingConsent",
+        "grantRecordingConsent",
+        "withdrawRecordingConsent"
+      ],
+      "apiMethods": [],
+      "clientDirective": false,
+      "serverAction": false,
+      "nextFramework": false,
+      "serverImports": [],
+      "browserRecording": false,
+      "browserStorage": false,
+      "browserLifecycle": false
+    },
+    {
+      "file": "lib/services/reports.ts",
+      "sha256": "c38bdb4e885f732f31825a0bac0a3654eec02056c5eeee4f8351fe732f313ef5",
+      "imports": [
+        "drizzle-orm",
+        "@/db/schema",
+        "@/lib/db",
+        "@/lib/feedback/schema",
+        "@/lib/quota",
+        "@/lib/services/answers",
+        "@/lib/services/content",
+        "@/lib/services/outcome",
+        "@/lib/services/sessions",
+        "@/lib/sessions/plan"
+      ],
+      "exportedFunctions": [
+        "getSessionReport",
+        "getHomeData",
+        "getLevelMap",
+        "getLevelDetail"
+      ],
+      "apiMethods": [],
+      "clientDirective": false,
+      "serverAction": false,
+      "nextFramework": false,
+      "serverImports": [],
+      "browserRecording": false,
+      "browserStorage": false,
+      "browserLifecycle": false
+    },
+    {
+      "file": "lib/services/review-intervals.ts",
+      "sha256": "d931acbd9cdcfcd4869bc4960c4896d2637099dc13ee883a84cdcd8126ebb776",
+      "imports": [],
+      "exportedFunctions": [],
+      "apiMethods": [],
+      "clientDirective": false,
+      "serverAction": false,
+      "nextFramework": false,
+      "serverImports": [],
+      "browserRecording": false,
+      "browserStorage": false,
+      "browserLifecycle": false
+    },
+    {
+      "file": "lib/services/reviews.ts",
+      "sha256": "f289c3438f9eb87341349f1f52af0a18ba9674916b19f3458620d130d728f906",
+      "imports": [
+        "drizzle-orm",
+        "@/db/schema",
+        "@/lib/db",
+        "@/lib/services/content",
+        "@/lib/services/thoughts",
+        "./review-intervals"
+      ],
+      "exportedFunctions": [
+        "scheduleCompletedReview",
+        "getReviewQueue"
+      ],
+      "apiMethods": [],
+      "clientDirective": false,
+      "serverAction": false,
+      "nextFramework": false,
+      "serverImports": [],
+      "browserRecording": false,
+      "browserStorage": false,
+      "browserLifecycle": false
+    },
+    {
+      "file": "lib/services/rewards.ts",
+      "sha256": "fde3d426d1e4273130bd4b1cb590b0510b785e4ed107d07c4e4fa7c93dac29de",
+      "imports": [
+        "drizzle-orm",
+        "@/db/schema",
+        "@/lib/db",
+        "@/lib/errors",
+        "@/lib/settings",
+        "@/lib/usage"
+      ],
+      "exportedFunctions": [
+        "walletLock",
+        "balance",
+        "checkIn",
+        "redeemMinutes",
+        "rewardCompletedPractice",
+        "markReviewed",
+        "adjustPoints",
+        "getRewards"
+      ],
+      "apiMethods": [],
+      "clientDirective": false,
+      "serverAction": false,
+      "nextFramework": false,
+      "serverImports": [],
+      "browserRecording": false,
+      "browserStorage": false,
+      "browserLifecycle": false
+    },
+    {
+      "file": "lib/services/sessions.ts",
+      "sha256": "5d6c0518ce0a67d6c17a1a92ba27f2099ffddf3fbb3e67f60b81b7e889ea2f03",
+      "imports": [
+        "drizzle-orm",
+        "@/db/schema",
+        "@/lib/content/load",
+        "@/lib/content/types",
+        "@/lib/db",
+        "@/lib/env",
+        "@/lib/errors",
+        "@/lib/feedback/prompt",
+        "@/lib/feedback/validate",
+        "@/lib/ops",
+        "@/lib/lock",
+        "@/lib/providers",
+        "@/lib/quota",
+        "@/lib/services/content",
+        "@/lib/services/outcome",
+        "@/lib/services/tts",
+        "@/lib/sessions/plan",
+        "@/lib/timing",
+        "@/lib/providers/metered",
+        "@/lib/services/recording-consent",
+        "@/lib/sessions/lifecycle",
+        "@/lib/answer-quota",
+        "@/lib/sessions/plan"
+      ],
+      "exportedFunctions": [
+        "createSession",
+        "getOwnedSession",
+        "getSessionState",
+        "getSessionView",
+        "recordEvent",
+        "afterSessionClosed",
+        "selectFollowUp",
+        "listSessions",
+        "totalTrainingSeconds",
+        "abandonStaleSessions",
+        "slotKey",
+        "getUserBasic"
+      ],
+      "apiMethods": [],
+      "clientDirective": false,
+      "serverAction": false,
+      "nextFramework": false,
+      "serverImports": [],
+      "browserRecording": false,
+      "browserStorage": false,
+      "browserLifecycle": false
+    },
+    {
+      "file": "lib/services/thoughts.ts",
+      "sha256": "038362772225980b10fd360be1a815a2a0d481dbafc66372ceed3a01681a6b67",
+      "imports": [
+        "node:crypto",
+        "drizzle-orm",
+        "@/db/schema",
+        "@/lib/db",
+        "@/lib/errors",
+        "@/lib/providers/metered",
+        "@/lib/services/review-intervals",
+        "@/lib/services/deletion",
+        "@/lib/thoughts/prompt",
+        "@/lib/thoughts/schema"
+      ],
+      "exportedFunctions": [
+        "listThoughts",
+        "getThought",
+        "generateThought",
+        "editThought",
+        "deleteThought",
+        "enrollThought",
+        "recordThoughtPractice",
+        "getThoughtReviewQueue",
+        "listVocabulary",
+        "saveThoughtVocabulary",
+        "editVocabulary",
+        "deleteVocabulary"
+      ],
+      "apiMethods": [],
+      "clientDirective": false,
+      "serverAction": false,
+      "nextFramework": false,
+      "serverImports": [
+        "node:crypto"
+      ],
+      "browserRecording": false,
+      "browserStorage": false,
+      "browserLifecycle": false
+    },
+    {
+      "file": "lib/services/tts.ts",
+      "sha256": "57b6fcbad8faae2e8ab6bf9340a165b44642cbbdde55403ac442657bae5073ca",
+      "imports": [
+        "node:crypto",
+        "node:fs/promises",
+        "node:path",
+        "drizzle-orm",
+        "@/db/schema",
+        "@/lib/audio",
+        "@/lib/content/load",
+        "@/lib/content/types",
+        "@/lib/db",
+        "@/lib/ops",
+        "@/lib/providers",
+        "@/lib/queue",
+        "@/lib/storage",
+        "@/lib/providers/metered",
+        "@/lib/errors",
+        "@/lib/task-runtime"
+      ],
+      "exportedFunctions": [
+        "ttsHash",
+        "getTtsAssetForViewer",
+        "ensureTtsAssets",
+        "generateTtsAsset",
+        "questionTexts",
+        "pregenerateAll",
+        "ttsStatusCounts",
+        "retryFailedTts"
+      ],
+      "apiMethods": [],
+      "clientDirective": false,
+      "serverAction": false,
+      "nextFramework": false,
+      "serverImports": [
+        "node:crypto",
+        "node:fs/promises",
+        "node:path"
+      ],
+      "browserRecording": false,
+      "browserStorage": false,
+      "browserLifecycle": false
+    },
+    {
+      "file": "lib/services/voice-readiness.ts",
+      "sha256": "7dd5ea9b1d9c099483b2c7e23df021f8c440179fca2ce58983848b39441f2f78",
+      "imports": [
+        "node:path",
+        "@/lib/env",
+        "@/lib/providers",
+        "@/lib/providers/natural-voice-cache",
+        "@/lib/voice/status"
+      ],
+      "exportedFunctions": [
+        "checkVoiceReadiness"
+      ],
+      "apiMethods": [],
+      "clientDirective": false,
+      "serverAction": false,
+      "nextFramework": false,
+      "serverImports": [
+        "node:path"
+      ],
+      "browserRecording": false,
+      "browserStorage": false,
+      "browserLifecycle": false
+    },
+    {
+      "file": "lib/sessions/lifecycle.ts",
+      "sha256": "e7ce7d252c87dd04a65cda2ffee7404282cce5b6b653db021ee6aa327b6c8696",
+      "imports": [
+        "./plan"
+      ],
+      "exportedFunctions": [
+        "canResumeSession"
+      ],
+      "apiMethods": [],
+      "clientDirective": false,
+      "serverAction": false,
+      "nextFramework": false,
+      "serverImports": [],
+      "browserRecording": false,
+      "browserStorage": false,
+      "browserLifecycle": false
+    },
+    {
+      "file": "lib/sessions/plan.ts",
+      "sha256": "660429c9033f0295f0e9177e80f34d584a80a92fc4d434a180bbc079a0009b3e",
+      "imports": [
+        "@/lib/content/types",
+        "@/lib/timing"
+      ],
+      "exportedFunctions": [
+        "buildLevelPlan",
+        "buildMockPlan",
+        "buildSingleQuestionPlan",
+        "collectPromptTexts",
+        "attachTtsIds",
+        "requiredSlots",
+        "slotLimitSeconds"
+      ],
+      "apiMethods": [],
+      "clientDirective": false,
+      "serverAction": false,
+      "nextFramework": false,
+      "serverImports": [],
+      "browserRecording": false,
+      "browserStorage": false,
+      "browserLifecycle": false
+    },
+    {
+      "file": "lib/sessions/recording-source.ts",
+      "sha256": "61305400a6af72bb6d5938162aed9ed0429e86f8f29f6a72fddcaa189bb6ec11",
+      "imports": [],
+      "exportedFunctions": [
+        "recordingSource",
+        "recordingSourceNote"
+      ],
+      "apiMethods": [],
+      "clientDirective": false,
+      "serverAction": false,
+      "nextFramework": false,
+      "serverImports": [],
+      "browserRecording": false,
+      "browserStorage": false,
+      "browserLifecycle": false
+    },
+    {
+      "file": "lib/sessions/replay-order.ts",
+      "sha256": "f9a78ee881429e978f9adda88040e35683b2edc4711786ae9c59fd16324f16b5",
+      "imports": [],
+      "exportedFunctions": [
+        "replayAttempts"
+      ],
+      "apiMethods": [],
+      "clientDirective": false,
+      "serverAction": false,
+      "nextFramework": false,
+      "serverImports": [],
+      "browserRecording": false,
+      "browserStorage": false,
+      "browserLifecycle": false
+    },
+    {
+      "file": "lib/settings.ts",
+      "sha256": "dd8f633896a43233b7d55ff7b8e57918513128c70aed75e11853298b4b724528",
+      "imports": [
+        "drizzle-orm",
+        "zod",
+        "@/db/schema",
+        "@/lib/db"
+      ],
+      "exportedFunctions": [
+        "getSettings",
+        "setSetting",
+        "ensureDefaultSettings",
+        "getSettingRaw"
+      ],
+      "apiMethods": [],
+      "clientDirective": false,
+      "serverAction": false,
+      "nextFramework": false,
+      "serverImports": [],
+      "browserRecording": false,
+      "browserStorage": false,
+      "browserLifecycle": false
+    },
+    {
+      "file": "lib/storage.ts",
+      "sha256": "5111da03a95156fd51b6a4472493ae407ce40d11f96a732c1293135e5811318c",
+      "imports": [
+        "node:fs",
+        "node:fs/promises",
+        "node:path",
+        "@/lib/env"
+      ],
+      "exportedFunctions": [
+        "storage",
+        "recordingKey",
+        "ttsKey"
+      ],
+      "apiMethods": [],
+      "clientDirective": false,
+      "serverAction": false,
+      "nextFramework": false,
+      "serverImports": [
+        "node:fs",
+        "node:fs/promises",
+        "node:path"
+      ],
+      "browserRecording": false,
+      "browserStorage": false,
+      "browserLifecycle": false
+    },
+    {
+      "file": "lib/task-context.ts",
+      "sha256": "ef0b46624ebe9b152312987a046570a660c932ae850bdf6d244f7fa2345b4e2c",
+      "imports": [
+        "node:async_hooks",
+        "pg"
+      ],
+      "exportedFunctions": [
+        "currentTaskContext"
+      ],
+      "apiMethods": [],
+      "clientDirective": false,
+      "serverAction": false,
+      "nextFramework": false,
+      "serverImports": [
+        "node:async_hooks",
+        "pg"
+      ],
+      "browserRecording": false,
+      "browserStorage": false,
+      "browserLifecycle": false
+    },
+    {
+      "file": "lib/task-recovery.ts",
+      "sha256": "e7b2035d9d0ed5fb83c6581340124ad94c1e7f75f1a4db7f6d7a61de88968975",
+      "imports": [
+        "drizzle-orm",
+        "@/db/schema",
+        "@/lib/db",
+        "@/lib/settings",
+        "@/lib/queue",
+        "@/lib/task-runtime",
+        "@/lib/task-schema",
+        "@/lib/task-context",
+        "@/lib/providers",
+        "@/lib/errors"
+      ],
+      "exportedFunctions": [
+        "recoverLegacyTasks"
+      ],
+      "apiMethods": [],
+      "clientDirective": false,
+      "serverAction": false,
+      "nextFramework": false,
+      "serverImports": [],
+      "browserRecording": false,
+      "browserStorage": false,
+      "browserLifecycle": false
+    },
+    {
+      "file": "lib/task-runtime.ts",
+      "sha256": "cea199da698e1384fef821e02bb06d14253892db6fa0fe69e25f16e4877295cc",
+      "imports": [
+        "pg",
+        "drizzle-orm/node-postgres",
+        "@/lib/env",
+        "@/db/schema",
+        "@/lib/worker-runtime",
+        "@/lib/task-context",
+        "@/lib/errors",
+        "@/lib/recovery-state",
+        "@/lib/task-schema"
+      ],
+      "exportedFunctions": [
+        "taskRuntimeId",
+        "taskRuntimeStatus",
+        "taskRuntimeRecord",
+        "ensureTaskRuntime",
+        "withTaskRuntime",
+        "activateTaskRuntime",
+        "closeTaskRuntime",
+        "taskEnvelope",
+        "taskPayload"
+      ],
+      "apiMethods": [],
+      "clientDirective": false,
+      "serverAction": false,
+      "nextFramework": false,
+      "serverImports": [
+        "pg"
+      ],
+      "browserRecording": false,
+      "browserStorage": false,
+      "browserLifecycle": false
+    },
+    {
+      "file": "lib/task-schema.ts",
+      "sha256": "43b072305c1cff0df89cc97f28f3a5240ddf54e53ba37da679d49c9930ba7343",
+      "imports": [
+        "zod"
+      ],
+      "exportedFunctions": [
+        "checkedTaskPayload"
+      ],
+      "apiMethods": [],
+      "clientDirective": false,
+      "serverAction": false,
+      "nextFramework": false,
+      "serverImports": [],
+      "browserRecording": false,
+      "browserStorage": false,
+      "browserLifecycle": false
+    },
+    {
+      "file": "lib/thoughts/draft.ts",
+      "sha256": "dddb36d249aaa3c3e46eeeb3681f441bb2adf7f4fea86a1e1ca929313e5298f6",
+      "imports": [
+        "zod",
+        "./schema"
+      ],
+      "exportedFunctions": [
+        "validDraft",
+        "draftTitle"
+      ],
+      "apiMethods": [],
+      "clientDirective": false,
+      "serverAction": false,
+      "nextFramework": false,
+      "serverImports": [],
+      "browserRecording": false,
+      "browserStorage": false,
+      "browserLifecycle": false
+    },
+    {
+      "file": "lib/thoughts/prompt.ts",
+      "sha256": "28916c03360db082e0c4e0647dd7a2e11ea274d45dcd51b82ddfdc2baf8b285c",
+      "imports": [
+        "./schema"
+      ],
+      "exportedFunctions": [
+        "mockThought"
+      ],
+      "apiMethods": [],
+      "clientDirective": false,
+      "serverAction": false,
+      "nextFramework": false,
+      "serverImports": [],
+      "browserRecording": false,
+      "browserStorage": false,
+      "browserLifecycle": false
+    },
+    {
+      "file": "lib/thoughts/schema.ts",
+      "sha256": "711821f96512cab9144b521586255b8cbd66b0297f7116c3dd948beaf5f168e7",
+      "imports": [
+        "zod",
+        "@/lib/errors"
+      ],
+      "exportedFunctions": [
+        "thoughtListParams",
+        "normalizeTerm",
+        "containsTerm"
+      ],
+      "apiMethods": [],
+      "clientDirective": false,
+      "serverAction": false,
+      "nextFramework": false,
+      "serverImports": [],
+      "browserRecording": false,
+      "browserStorage": false,
+      "browserLifecycle": false
+    },
+    {
+      "file": "lib/timing.ts",
+      "sha256": "065253f3046199b6ab87a49ea2fe3ee0eb0350c48ab81efd02e2ed62e0190e76",
+      "imports": [],
+      "exportedFunctions": [
+        "scaled",
+        "mockPartDurationMs",
+        "computeClockOffset",
+        "remainingMs",
+        "canAskNewQuestion",
+        "canAskRounding",
+        "p2SpeakLimitMs",
+        "p2PrepLimitMs",
+        "isDurationWithinLimit",
+        "nextMockStep",
+        "nextP2Phase",
+        "formatClock",
+        "startOfDayShanghai",
+        "startOfMonthShanghai"
+      ],
+      "apiMethods": [],
+      "clientDirective": false,
+      "serverAction": false,
+      "nextFramework": false,
+      "serverImports": [],
+      "browserRecording": false,
+      "browserStorage": false,
+      "browserLifecycle": false
+    },
+    {
+      "file": "lib/usage.ts",
+      "sha256": "a082b8ade2a6d1766c93459549762ac7ee96170f6fccedbe01d133ad7c272dbc",
+      "imports": [
+        "drizzle-orm",
+        "@/db/schema",
+        "@/lib/db",
+        "@/lib/settings",
+        "@/lib/timing",
+        "@/lib/lock",
+        "@/lib/errors",
+        "@/lib/ai/catalog",
+        "@/lib/recovery-state"
+      ],
+      "exportedFunctions": [
+        "billableCall",
+        "estimateCost",
+        "recordUsage",
+        "monthCostYuan"
+      ],
+      "apiMethods": [],
+      "clientDirective": false,
+      "serverAction": false,
+      "nextFramework": false,
+      "serverImports": [],
+      "browserRecording": false,
+      "browserStorage": false,
+      "browserLifecycle": false
+    },
+    {
+      "file": "lib/utils.ts",
+      "sha256": "da3f7a80964ec7f66ca34376309f13554014bcd38feca509d7cf78c50b3838fe",
+      "imports": [
+        "clsx",
+        "tailwind-merge"
+      ],
+      "exportedFunctions": [
+        "cn",
+        "formatDuration",
+        "formatDateTime",
+        "formatDate"
+      ],
+      "apiMethods": [],
+      "clientDirective": false,
+      "serverAction": false,
+      "nextFramework": false,
+      "serverImports": [],
+      "browserRecording": false,
+      "browserStorage": false,
+      "browserLifecycle": false
+    },
+    {
+      "file": "lib/voice/status.ts",
+      "sha256": "405e22bc14ee45b19d27419101792e684ea92a79f0763eb5c2019e08efe7c265",
+      "imports": [],
+      "exportedFunctions": [],
+      "apiMethods": [],
+      "clientDirective": false,
+      "serverAction": false,
+      "nextFramework": false,
+      "serverImports": [],
+      "browserRecording": false,
+      "browserStorage": false,
+      "browserLifecycle": false
+    },
+    {
+      "file": "lib/worker-health.ts",
+      "sha256": "8210c5872a1d30a036fd1395e0f63abcb2b426bbed1e3d99f9f09fc9ee43ac5e",
+      "imports": [
+        "drizzle-orm",
+        "@/db/schema",
+        "@/lib/db",
+        "@/lib/env",
+        "@/lib/worker-runtime",
+        "@/lib/task-runtime"
+      ],
+      "exportedFunctions": [
+        "workerConfigId",
+        "getWorkerHealth",
+        "startWorkerHeartbeat"
+      ],
+      "apiMethods": [],
+      "clientDirective": false,
+      "serverAction": false,
+      "nextFramework": false,
+      "serverImports": [],
+      "browserRecording": false,
+      "browserStorage": false,
+      "browserLifecycle": false
+    },
+    {
+      "file": "lib/worker-runtime.ts",
+      "sha256": "d04a21bb59e33628d257ad20c04d97a29c82c6e11b1064d7a6c5a50bc27eff8b",
+      "imports": [
+        "node:fs",
+        "node:path",
+        "node:crypto",
+        "@/lib/env",
+        "@/lib/providers/natural-voice-cache"
+      ],
+      "exportedFunctions": [
+        "runtimeConfigId",
+        "evaluateWorkerHealth",
+        "workerStateMessage"
+      ],
+      "apiMethods": [],
+      "clientDirective": false,
+      "serverAction": false,
+      "nextFramework": false,
+      "serverImports": [
+        "node:fs",
+        "node:path",
+        "node:crypto"
+      ],
+      "browserRecording": false,
+      "browserStorage": false,
+      "browserLifecycle": false
+    },
+    {
+      "file": "worker/index.ts",
+      "sha256": "c4ff9246c0613cbf052178c0ccd13d7e66dc3a0d9470873265d83c4aa6650f66",
+      "imports": [
+        "../scripts/_env",
+        "pg-boss",
+        "@/lib/db",
+        "@/lib/env",
+        "@/lib/jobs/process-answer",
+        "@/lib/jobs/maintenance",
+        "@/lib/ops",
+        "@/lib/queue",
+        "@/lib/task-runtime",
+        "@/lib/services/deletion",
+        "@/lib/services/tts",
+        "@/lib/worker-health",
+        "@/lib/recovery-state"
+      ],
+      "exportedFunctions": [],
+      "apiMethods": [],
+      "clientDirective": false,
+      "serverAction": false,
+      "nextFramework": false,
+      "serverImports": [
+        "pg-boss"
+      ],
+      "browserRecording": false,
+      "browserStorage": false,
+      "browserLifecycle": false
+    }
+  ]
+}

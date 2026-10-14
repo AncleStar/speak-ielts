@@ -2,8 +2,8 @@
 
 项目自有源码按根目录 `LICENSE` 的 MIT 许可证分发。以下内容仍适用各自原始许可，根目录许可证不替代第三方声明。
 
-- **RhineLabUI**：基于 [LBEILC/RhineLabUI](https://github.com/LBEILC/RhineLabUI)，参考提交 `ee5779741c6c0c916e416705fa634c7abf905c73`。适配代码位于 `components/disc/rhine/`，模型位于 `public/models/rhine/`。保留 `public/licenses/rhine-lab-ui.txt` 的版权与 MIT 全文。SPEAK 标签和业务交互是本项目适配，不代表上游作者参与或背书。
-- **MiSans 字体**：遵循 `public/fonts/MiSans-license.pdf` 及 `public/fonts/misans-webfont-4.3.1/UPSTREAM-README.md`。字体不因本项目 MIT 许可而重新授权。
+- **RhineLabUI**：基于 [LBEILC/RhineLabUI](https://github.com/LBEILC/RhineLabUI)，参考提交 `ee5779741c6c0c916e416705fa634c7abf905c73`。适配代码位于 `components/disc/rhine/`，模型位于 `public/models/rhine/`。保留 `public/licenses/rhine-lab-ui.txt` 的版权与 MIT 全文。上游当前说明将许可限定于作者有权授权的原创部分，不涵盖原作名称、标志、视觉设计或音频采样等第三方权利；不以 MIT 声明推定所有素材都已获授权。SPEAK 标签和业务交互是本项目适配，不代表上游作者参与或背书。iOS 打包前的逐项审查见 [素材准备表](docs/ios/隐私与素材审核.md)。
+- **MiSans 字体**：遵循 `public/fonts/MiSans-license.pdf` 及 `public/fonts/misans-webfont-4.3.1/UPSTREAM-README.md`。字体不因本项目 MIT 许可而重新授权。原协议包含软件署名和禁止改编条款，当前第三方分包 WOFF2 的授权适配仍待核实；iOS 原生小样优先使用系统字体，尚未批准将这些字体随原生客户端打包。
 - **Kokoro 模型与音色**：运行 `npm run setup:voice` 后从 [模型仓库](https://huggingface.co/onnx-community/Kokoro-82M-v1.0-ONNX) 下载；权重缓存不随源码分发。使用及再分发权重时核对模型仓库对应版本的许可。
 - **Emma 头像**：AI 生成的虚构成年人物，经处理用于虚拟考官窗口，不是用户照片或真人视频。素材说明见 `docs/design/rhine-disc-v1/avatar-prompt.md`。
 - **npm 依赖**：由 `package-lock.json` 固定版本，保留各软件包附带的许可证；`node_modules/` 不随源码包分发。

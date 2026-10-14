@@ -1,0 +1,84 @@
+{
+  "format": "speak-ios-material-evidence-v1",
+  "allMaterialsApproved": false,
+  "note": "Evidence inventory, not a legal clearance. No licensed font or voice weights are copied to a native package.",
+  "files": [
+    {
+      "file": "LICENSE",
+      "category": "own code",
+      "status": "retain license",
+      "bytes": 1075,
+      "sha256": "3ab4b0c67880496febc5bc696fa640c485028c347b3c2628a7a502435e1df0df"
+    },
+    {
+      "file": "THIRD_PARTY_NOTICES.md",
+      "category": "third-party register",
+      "status": "final iOS packaging review pending",
+      "bytes": 1992,
+      "sha256": "fb98e34fe09f2f079ce47451be6ecfdfa14c90139a7f12624e35775aeaf12c85"
+    },
+    {
+      "file": "public/licenses/rhine-lab-ui.txt",
+      "category": "RhineLabUI original portions",
+      "status": "third-party visual rights excluded; final use review pending",
+      "bytes": 1084,
+      "sha256": "9129c293e2a6f989d6e648fffc551a3ec914419295e67942b991f7f0f4576163"
+    },
+    {
+      "file": "public/models/rhine/archive-assembly.glb",
+      "category": "referenced assembly",
+      "status": "final visual rights review pending",
+      "bytes": 3343744,
+      "sha256": "d411170676f55a327c286e67e462f98b446667811c725318bab85657eaee06ec"
+    },
+    {
+      "file": "public/models/rhine/archive-cassette.glb",
+      "category": "referenced cassette",
+      "status": "final visual rights review pending",
+      "bytes": 3565116,
+      "sha256": "dda42b9b3b471d11c69820a64084d254a64b27761287ab0e35dd8387ec0a0bed"
+    },
+    {
+      "file": "public/models/speak-disc/v1/training-disc.glb",
+      "category": "SPEAK model",
+      "status": "provenance and final review pending",
+      "bytes": 841904,
+      "sha256": "d85cf6497ed82d5cbf0ef5562ac8cf36da85851c047c89669e1ecc994f063d50"
+    },
+    {
+      "file": "public/models/speak-disc/v1/playback-deck.glb",
+      "category": "SPEAK playback model",
+      "status": "provenance and final review pending",
+      "bytes": 185256,
+      "sha256": "f28d00a89fb4c75ba7b0491928a0197c69b41284094d07cb250ec705b5e2c731"
+    },
+    {
+      "file": "public/fonts/MiSans-license.pdf",
+      "category": "original font terms",
+      "status": "read; split-font adaptation compatibility pending; native prototype uses system font",
+      "bytes": 79535,
+      "sha256": "4a93a27cd2bd81b3b5ecfd0a853144a876fa26938a93a68443c67d74172fcb86"
+    },
+    {
+      "file": "public/fonts/NOTICE.txt",
+      "category": "font notice",
+      "status": "retain if used",
+      "bytes": 943,
+      "sha256": "70e73fad111dd2c6de6bf101c900f3efa6ed59b98bbfe6508fca0308c2e87ec7"
+    },
+    {
+      "file": "public/fonts/misans-webfont-4.3.1/source.json",
+      "category": "split-font provenance",
+      "status": "final native use not approved",
+      "bytes": 118234,
+      "sha256": "4fac5e72df871dbedceb7ab83a38878f50015fadcd04ba96154a61eee84e794a"
+    },
+    {
+      "file": "docs/design/rhine-disc-v1/avatar-prompt.md",
+      "category": "fictional AI examiner provenance",
+      "status": "final image and representation review pending",
+      "bytes": 1746,
+      "sha256": "76876e96fa1c51f701a918b8e61cb3174759a3638474f46189ef568ea66617c0"
+    }
+  ]
+}

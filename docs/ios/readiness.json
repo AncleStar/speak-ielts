@@ -1,0 +1,19 @@
+{
+  "format": "speak-ios-readiness-v1",
+  "updated": "2026-10-14",
+  "scope": "Windows preparation; native implementation and validation pending",
+  "devices": {
+    "mac": { "available": false, "cloudBuildAllowed": false, "configured": false },
+    "iphone": { "model": "iPhone 14 Pro", "reportedIOS": "26.6.2", "source": "user-reported", "inspected": false, "nativeValidated": false }
+  },
+  "domain": { "purchaseAllowedIfNeeded": true, "selected": false, "registered": false, "backendSelected": false, "publicServiceOpened": false },
+  "stages": {
+    "P0": "windows-deliverables-prepared",
+    "P1": "contracts-and-isolated-auth-experiment-prepared-native-integration-pending",
+    "P2": "specifications-and-review-workbooks-prepared-human-and-final-rights-review-pending",
+    "P3": "awaiting-owned-mac",
+    "P4": "awaiting-G1-evidence"
+  },
+  "gates": { "G1": false, "G2": false, "G3": false },
+  "evidenceLimits": { "nativeImplemented": false, "humanTeachingApproved": false, "allMaterialsApproved": false, "publicBackendValidated": false, "storeSubmissionReady": false }
+}
